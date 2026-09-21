@@ -148,3 +148,28 @@ ile bütün satırı değiştirebilir.
 Runtime satır yazma yolları kaynak taramasında `services/mutations.py` içindedir; admin ürün/knowledge
 yazar, teklif kalemi yazmaz. Seed yalnız eksik kimlik ekler ve kullanıcı satırlarını üzerine yazmaz.
 Yeni toplu koşu sonrası F08 kapısı tekrar değerlendirilecek; 179 eski tam koşu bu patch'i içermez.
+
+## Claude takip P2'leri — 2026-09-21
+
+Üç bulgu gerçek PostgreSQL/HTTP regresyonlarında doğrulandı. Önce 10 failed / 9 passed
+(`f08_p2_before.txt`), sonra 19 passed (`f08_p2_after.txt`), exit 0.
+İlk düzeltme koşusu 1 failed / 18 passed (`f08_p2_after_initial.txt`) olarak korundu.
+Runtime commit: `53b99488bdd8427ed8a8b3a06c9e8ca6dba106d6`.
+
+| Gereksinim | Exact test / kanıt |
+|---|---|
+| P2-1 katalog tam adı/Plus alias ve SKU | `test_plus_alias_selects_exact_catalog_product` (BC110, KIT610, ACC710 tam adları + ACC710 SKU); ürün/miktar, sürüm2, receipt1 |
+| Plus model belirsizliği ve gerçek negasyon | `test_review_unsupported_or_unmatched_intent_clarifies_without_mutation`; notice, tam DTO aynı, receipt0, mutation tool yok |
+| P2-2 amaç ve aciliyet bağlamı | `test_review_context_words_preserve_explicit_mutation[descriptor_context-purpose]` ve `[descriptor_context-urgent]`; qty3 veya removed geçmişi, sürüm2, receipt1 |
+| P2-3 zaman ifadesi | `test_review_context_words_preserve_explicit_mutation[kadar-time]`; qty2, sürüm2, receipt1 |
+| P2-3 istemiş olumlu geçmiş zaman | `test_review_context_words_preserve_explicit_mutation[istemis]`; qty3, sürüm2, receipt1 |
+| Fiyat niyeti zaman/tutar ayrımı | `test_kadar_price_intent_distinguishes_time_and_amount`, `test_kadar_currency_ceiling_is_parsed`; rakamlı/rakamsız zaman, gerçek tutar, bütçe, karma zaman/fiyat |
+| Gerçek tavan korunması | `test_review_price_expression_never_silently_drops_ceiling`, `test_every_supported_ceiling_marker_has_matching_intent_detection` |
+
+Önerilen patch iki noktada yetersizdi: cümlede herhangi bir rakam aramak “şimdiye kadar
+1 tane” hatasını korur; zaman öbekleri fiyat niyeti aramasından çıkarıldı. “Acil” yalnız
+tag değil, hizmet adı başlangıcıdır; “acil olarak” zarfı referans çözümlemeden çıkarıldı.
+Kategori içi endüstriyel/özellik filtreleri ve mutasyon anı guard'ları korunur.
+Mevcut ceiling marker testi zaten rakam içeriyordu; assertion/girdi değiştirilmedi.
+Tam koşu: `f08_release_backend.txt`, **225 passed / 46.89s**, exit 0; 22 golden passed.
+Bu Codex doğrulamasıdır; yeni Claude onayı veya fiziksel iPhone testi değildir.

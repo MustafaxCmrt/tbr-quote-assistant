@@ -3,7 +3,7 @@
 Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
 **21 Eylül 2026: F00–F07 ana akışları doğrulandı; F08 kabul kapısı geçti; F09 temiz kurulum/teslim açık.**
 Altı gerçek araç, transaction/receipt, kaynaklı deterministik sohbet, SSE, web admin ve Expo
-uygulaması çalışıyor. Son tam backend koşusu **204 passed** (22 golden dahil):
+uygulaması çalışıyor. Son tam backend koşusu **225 passed** (22 golden dahil):
 [komut/çıktı](reports/f08_release_backend.txt), [golden sonuçları](reports/golden_results.json).
 Mustafa fiziksel iPhone'da stream, ürün ekleme, web ile ortak teklif, aynı isteğin tekrarı,
 klavye ve kaynak aç/kapat akışlarını doğruladı. Kullanıcı bildirimi: iPhone 16e / iOS 26.6.2; Expo Go Client Version 57.0.9, Supported SDK 57.0.0.

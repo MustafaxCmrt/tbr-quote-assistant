@@ -8,7 +8,7 @@
   Uygulama yerel demo içindir. PostgreSQL host portu kapalıdır; API runtime DB rolü şema değiştiremez.
 - Compose web servisi Vite geliştirme sunucusudur. Production bundle derlenmiştir; production
   hosting doğrulanmamıştır.
-- Türkçe deterministik intent/slot çözümleme sınırlı bir dilbilgisine dayanır. Harici LLM adapter'ı,
+- Türkçe deterministik intent/slot çözümleme sınırlı bir dilbilgisine dayanır. Plus için katalog tam adı/Plus alias’ı, kısa model+Plus veya ID/SKU gerekir; genel “Plus model” netleştirilir. Referans betimleyicileri kategori içi tag’lerle sınırlıdır; “X için” ve “acil olarak” bağlamı ayrılır. “Şimdiye/bugüne kadar” zaman ifadesidir; rakamsız bütçe/limit/tavan netleştirme ister. Harici LLM adapter'ı,
   ücretli API çağrısı ve provider timeout/fallback geçiş testi yoktur. Gerçek altı tool ve kaynaklı
   anahtarsız fallback vardır; bu uygulama LLM tool calling diye sunulmaz.
 - Hazır deterministik yanıt SSE üzerinden 50 ms aralıkla, en fazla 80 metin parçasında aktarılır.
