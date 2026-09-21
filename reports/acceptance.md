@@ -4,7 +4,7 @@
 ayrıca açık. F08 için golden JSON ve Git geçmişi taraması hazır; bağımsız Claude review ve
 F09 son temiz kurulum/video/erişim kapısı açık. Aşağıdaki sonuçlar kendi raporlarındaki commit ve kapsama aittir.
 
-Son tam backend koşusu: [151 passed](f08_full_backend.txt), 22 golden dahil.
+Son tam backend koşusu: [179 passed](f08_review_full_backend.txt), 22 golden dahil.
 [36 negatif hedef eşlemesi](negative_acceptance.md); NEG-10 opsiyonel provider adapter olmadığı için not_run.
 
 | Gereksinim | Durum / doğrudan kanıt |
@@ -14,7 +14,7 @@ Son tam backend koşusu: [151 passed](f08_full_backend.txt), 22 golden dahil.
 | Gerçek kısa transaction, rollback, tek aktif kalem, snapshot, replace geçmişi | **passed:** [F03 test eşlemesi](f03_acceptance.md), [tam backend koşusu](f06_backend_final.txt) |
 | Kalıcı receipt; aynı mesaj gerçek wrapper replay; restart | **passed:** [restart replay](f03_restart_replay.txt), [son SSE testleri](f07_reading_stream_tests.txt), [fiziksel mobil retry](f07_native_retry.txt) |
 | Fiyat/stok/özellik/backorder guard; eşzamanlı değişim | **passed:** F03 eşlemesindeki guard/concurrency testleri; [tam backend koşusu](f06_backend_final.txt). Bu, bütün olası güvenlik saldırılarının denetlendiği iddiası değildir. |
-| Altı tool sözleşmesi, gerçek çağrı sırası/input/kaynak/DB etkisi | **passed:** [22 golden gerçek JSON](golden_results.json), [komut ve çıktı](f08_golden_evidence_run.txt). Her senaryo ayrı PostgreSQL DB; assertion'lar kaynak fixture'dan ayrı. |
+| Altı tool sözleşmesi, gerçek çağrı sırası/input/kaynak/DB etkisi | **passed:** [22 golden gerçek JSON](golden_results.json), [son komut ve çıktı](f08_review_full_backend.txt). Her senaryo ayrı PostgreSQL DB; assertion'lar kaynak fixture'dan ayrı. |
 | Kaynaklı retrieval ve anahtarsız fallback | **passed:** golden kaynak kökeni, mode/provider_calls=0 assertion'ları; [F04](f04_acceptance.md). Opsiyonel LLM adapter/provider timeout **uygulanmadı**, test edilmiş sayılmaz. |
 | Yeni ürün/bilgi CRUD sonrası retrieval | **passed:** [F06](f06_acceptance.md), [gerçek web eklemesi/API kontrolü](f06_demo_api.txt); demo DB'deki eklemeler korunur. |
 | Gerçek kademeli SSE; commit öncesi başarılı mutation eventi yok | **passed:** [curl-N API ve web proxy zamanlaması](f07_reading_live_stream.txt), [6 SSE testi](f07_reading_stream_tests.txt). Deterministik şablon aktarımıdır, LLM token üretimi değildir. |
@@ -31,3 +31,5 @@ Son tam backend koşusu: [151 passed](f08_full_backend.txt), 22 golden dahil.
 
 `test_output.txt` yeni bir test koşusu değildir; mevcut gerçek koşuların komut/sonuç indeksidir.
 Başarısız ilk denemeler raporlarda korunur. `skipped`, `not_run`, `not_verified` başarı değildir.
+
+F08 son tam koşu: commit313a486, `docker compose --profile test run --build --rm -e GOLDEN_REPORT_PATH=/evidence/golden_results.json -e EVIDENCE_COMMIT_SHA=313a4865dd2bcf15dec7fefd01d0c57f984eb01b -v /Users/comert/Desktop/tbr-quote-assistant/reports:/evidence test pytest -v`: exit0,179passed40.92s. reports/f08_review_full_backend.txt ve golden_results.json yenilendi. Opus5/xhigh odaklı takip review session6425 çalışıyor; verdict bekleniyor.
