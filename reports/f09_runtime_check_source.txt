@@ -50,3 +50,27 @@ assert call(18001,'/api/quotes/Q-1001')==after
 assert call(15173,'/api/quotes/Q-1001')==after
 assert call(8001,'/api/quotes/Q-1001')==original
 print('PASS API/DB restart persistence; reseed preserves quantity/version; persisted receipt replay; original demo unchanged')
+
+# Separate demo replacement rehearsal, run after the initial smoke
+import json
+from urllib.request import Request, urlopen
+from uuid import uuid4
+def call(port,path,payload=None):
+ data=None if payload is None else json.dumps(payload).encode()
+ with urlopen(Request(f'http://127.0.0.1:{port}'+path,data=data,headers={'Content-Type':'application/json'}),timeout=20) as r:return json.load(r)
+main=call(8001,'/api/quotes/Q-1004')
+before=call(18001,'/api/quotes/Q-1004')
+assert before['version']==1 and before['items'][0]['product_id']=='PRD-BC-120'
+s=call(18001,'/api/chat/sessions',{'customer_id':'CUST-IST-001','quote_id':'Q-1004','channel':'web'})
+body={'session_id':s['session_id'],'quote_id':'Q-1004','message_id':uuid4().hex,'message':'Pahalı okuyucuyu 9.000 TL altında bir alternatifle değiştir.'}
+result=call(18001,'/api/chat',body)
+after=call(18001,'/api/quotes/Q-1004')
+print('Demo message:',body['message'])
+print('After:',json.dumps(after,ensure_ascii=False))
+assert after['version']==2 and len(after['items'])==1
+assert after['items'][0]['product_id']=='PRD-BC-110' and after['items'][0]['quantity']==1
+assert after['net_total_try']=='7990.00'
+assert len(after['history'])==1 and after['history'][0]['product_id']=='PRD-BC-120' and after['history'][0]['status']=='replaced'
+assert call(15173,'/api/quotes/Q-1004')==after
+assert call(8001,'/api/quotes/Q-1004')==main
+print('PASS demo replace: price ceiling, preserved history, shared quote; original demo unchanged')

@@ -32,3 +32,5 @@ SSE, hazırlanmış fallback cevabının parçalanmasıdır; LLM token akışı 
 2. Türkçe2–4 dakikalık videoyu oluştur ve paylaşım bağlantısını belirle.
 3. Repo/video erişimini değerlendiricinin hesabı/oturumu üzerinden kontrol et; kendi oturumunda açılması yeterli değildir.
 4. Alıcı ve somut teslim metnini kontrol edip gönderimi onayla veya kendin gönder. Görünürlük otomatik değiştirilmez.
+
+Replace cümlesi ayrı temiz kurulumda gerçek API üzerinden doğrulandı: Q1004 BC120/12.950 TL → BC110/7.990 TL, eski satır replaced, adet1/sürüm2. Kanıt: reports/f09_demo_replace.txt. Ana demo Q1004 prova sırasında değiştirilmedi.

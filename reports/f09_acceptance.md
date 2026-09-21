@@ -36,3 +36,5 @@ bu audit bildirimlerinin giderildiği anlamına gelmez (KNOWN_LIMITATIONS).
 `gh repo view --json nameWithOwner,url,visibility,viewerPermission` exit0:
 MustafaxCmrt/tbr-quote-assistant **PRIVATE**, mevcut kullanıcı ADMIN. Bu okuma
 firma hesabının erişimini kanıtlamaz; görünürlük/izin değişmedi.
+
+Demo replace rehearsal: [f09_demo_replace.txt](f09_demo_replace.txt), exit0. README/demo sentence on isolated Q1004 changed BC120/12950 to BC110/7990, version1→2, quantity1 retained, old row replaced/history preserved, web proxy same DTO. Main demo Q1004 remained unchanged.
