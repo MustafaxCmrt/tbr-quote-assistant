@@ -1,0 +1,21 @@
+UTC: 2026-09-21T17:42:01.008025+00:00
+Base commit (working tree may contain pending changes): f0febc4d1f536cec6e74a567537367665552e91d
+Command: python3 .git/f09-runtime.py
+Exit code: 0
+
+Command: docker compose exec -T db psql -U tbr_owner -d tbr_quotes -At -c SELECT (SELECT count(*) FROM products), (SELECT count(*) FROM knowledge_entries), (SELECT count(*) FROM customers), (SELECT count(*) FROM quotes), (SELECT count(*) FROM quote_items), (SELECT count(*) FROM price_rules)
+48|22|6|10|8|6
+  Exit code: 0
+PASS original seed counts; real add; direct API and web proxy same quote; replay one effect; sourced keyless policy without mutation
+Command: docker compose restart db api
+  Container tbr-f09-clean-db-1 Restarting
+ Container tbr-f09-clean-api-1 Restarting
+ Container tbr-f09-clean-db-1 Started
+ Container tbr-f09-clean-api-1 Started
+ Exit code: 0
+Command: docker compose run --rm --no-deps migrate-seed
+{"products": 0, "knowledge_entries": 0, "customers": 0, "quotes": 0, "quote_items": 0, "price_rules": 0}
+  Container tbr-f09-clean-migrate-seed-run-9bc8c58231c9 Creating
+ Container tbr-f09-clean-migrate-seed-run-9bc8c58231c9 Created
+ Exit code: 0
+PASS API/DB restart persistence; reseed preserves quantity/version; persisted receipt replay; original demo unchanged

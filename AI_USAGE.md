@@ -65,3 +65,5 @@ okunur kontrolle korunduğu doğrulandı. Yeni fiziksel cihaz gözlemi yapıldı
 F08 final: takip review da eski sürümde üç yorumlama sınıfını açık buldu. Codex ek regresyonlarla
 bunları ve kısmi replace belirsizliğini düzeltti; e84b2a6 üzerinde204test/22golden passed.
 Son F08 kapı kararı Codex'in rapor/test değerlendirmesidir; Claude son sürüme onay verdi denmez.
+
+F09: remote fresh clone f0febc4; separate Compose volume. README setup exit0; 204 PostgreSQL tests passed (41.65s), clients/build/Expo check exit0. reports/f09_acceptance.md maps actual evidence. Native fresh-clone/video/access/send remain not_verified.

@@ -34,6 +34,26 @@ Seed yalnız eksik ID'leri ekler, mevcut kullanıcı düzenlemelerini değiştir
 Tüm seed ve başarı işareti tek transaction içindedir. Named volume veriyi restart'ta korur.
 Kaynak `seed.sql` otomatik çalıştırılmaz. Kanıt: [F01b kabul raporu](reports/f01b_acceptance.md).
 
+## Mevcut demoyu koruyarak ikinci kurulum
+
+Yeni clone klasöründe aşağıdaki değişkenleri aynı terminalde ayarla; sonra yukarıdaki
+kurulum ve test komutlarını çalıştır. Compose proje adı ayrı volume/network oluşturur.
+Portların boş olması gerekir. Mevcut `.env` veya veritabanını kopyalama/sıfırlama.
+
+```sh
+export COMPOSE_PROJECT_NAME=tbr-f09-clean
+export API_BIND_HOST=127.0.0.1
+export API_PORT=18001
+export WEB_PORT=15173
+python3 scripts/init_env.py
+docker compose up --build -d --wait
+```
+
+Bu ortam API `http://localhost:18001`, web `http://localhost:15173` kullanır.
+Aynı terminalde `docker compose stop` servisleri durdurur ve volume'ları korur.
+`down -v` kullanma. Fiziksel telefon demosu için ana kurulumun aşağıdaki LAN adımlarını izle.
+[F09 temiz kurulum kanıtı](reports/f09_acceptance.md) ve [3:30 demo akışı](docs/DEMO.md).
+
 ## Kurulum ve iPhone testi
 
 Gerekenler: uv 0.12.17, Python 3.12.14, Node 24.21.0, npm 11.19.0.

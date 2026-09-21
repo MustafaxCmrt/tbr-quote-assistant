@@ -1,0 +1,7 @@
+UTC: 2026-09-21T17:40:01.854262+00:00
+Command: git clone --branch demo-candidate-20260921-v1 --single-branch <origin> <fresh-directory>
+Exit code: 0
+Commit: f0febc4d1f536cec6e74a567537367665552e91d
+Fresh directory: /var/folders/qp/25bz40_x17x19kmh5g5rjb7m0000gn/T/tbr-f09-x14ijzwy/repo
+Ports 18001 and 15173 available. New Compose project: tbr-f09-clean.
+No local ignored files copied. Docker image/package caches remain available on this host.

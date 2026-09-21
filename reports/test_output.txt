@@ -54,3 +54,5 @@ Exit code: 0
 ============================= 151 passed in 30.76s =============================
 
 F08 son tam koşu: commit313a486, `docker compose --profile test run --build --rm -e GOLDEN_REPORT_PATH=/evidence/golden_results.json -e EVIDENCE_COMMIT_SHA=313a4865dd2bcf15dec7fefd01d0c57f984eb01b -v /Users/comert/Desktop/tbr-quote-assistant/reports:/evidence test pytest -v`: exit0,179passed40.92s. reports/f08_review_full_backend.txt ve golden_results.json yenilendi. Opus5/xhigh odaklı takip review session6425 çalışıyor; verdict bekleniyor.
+
+F09: remote fresh clone f0febc4; separate Compose volume. README setup exit0; 204 PostgreSQL tests passed (41.65s), clients/build/Expo check exit0. reports/f09_acceptance.md maps actual evidence. Native fresh-clone/video/access/send remain not_verified.

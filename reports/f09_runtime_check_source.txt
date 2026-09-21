@@ -1,0 +1,52 @@
+import json, subprocess, os, time
+from pathlib import Path
+from urllib.request import Request, urlopen
+from uuid import uuid4
+root=Path.cwd(); dest=Path((root/'.git/f09-clone-path').read_text())
+env=dict(os.environ,COMPOSE_PROJECT_NAME='tbr-f09-clean',API_BIND_HOST='127.0.0.1',API_PORT='18001',WEB_PORT='15173')
+def call(port,path,payload=None):
+ data=None if payload is None else json.dumps(payload).encode()
+ with urlopen(Request(f'http://127.0.0.1:{port}'+path,data=data,headers={'Content-Type':'application/json'}),timeout=15) as response:return json.load(response)
+def compose(*args):
+ command=['docker','compose',*args]
+ print('Command:', ' '.join(command),flush=True)
+ result=subprocess.run(command,cwd=dest,env=env,capture_output=True,text=True)
+ print(result.stdout,result.stderr,'Exit code:',result.returncode,flush=True)
+ assert result.returncode==0
+ return result.stdout
+original=call(8001,'/api/quotes/Q-1001')
+counts=compose('exec','-T','db','psql','-U','tbr_owner','-d','tbr_quotes','-At','-c',"SELECT (SELECT count(*) FROM products), (SELECT count(*) FROM knowledge_entries), (SELECT count(*) FROM customers), (SELECT count(*) FROM quotes), (SELECT count(*) FROM quote_items), (SELECT count(*) FROM price_rules)")
+assert counts.strip()=='48|22|6|10|8|6',counts
+before=call(18001,'/api/quotes/Q-1001');assert before['version']==1 and before['items'][0]['quantity']==1
+session=call(18001,'/api/chat/sessions',{'customer_id':'CUST-IST-001','quote_id':'Q-1001','channel':'web'})
+body={'session_id':session['session_id'],'quote_id':'Q-1001','message_id':uuid4().hex,'message':'BlueScan Air 1 adet daha ekle.'}
+call(18001,'/api/chat',body)
+after=call(18001,'/api/quotes/Q-1001')
+assert after['version']==2 and after['items'][0]['quantity']==2 and after['net_total_try']=='15980.00'
+assert call(15173,'/api/quotes/Q-1001')==after
+call(18001,'/api/chat',body)
+assert call(18001,'/api/quotes/Q-1001')==after
+logs=call(18001,'/api/tool-calls?session_id='+session['session_id'])
+mutations=[x for x in logs if x['tool_name']=='add_to_quote']
+assert len(mutations)==2 and sum(x['replayed'] for x in mutations)==1 and sum(x['mutation_applied'] for x in mutations)==1
+policy=call(18001,'/api/chat',dict(body,message_id=uuid4().hex,message='İade süresi nedir?'))
+assert policy['mode']=='fallback' and policy['provider_calls']==0
+assert {'KNE-RET-001','KNE-FALL-001'}<={s['source_id'] for s in policy['sources']}
+assert call(18001,'/api/quotes/Q-1001')==after
+print('PASS original seed counts; real add; direct API and web proxy same quote; replay one effect; sourced keyless policy without mutation')
+compose('restart','db','api')
+for attempt in range(40):
+ try:
+  assert call(18001,'/health/ready')=={'status':'ready'}
+  break
+ except Exception:
+  if attempt==39:raise
+  time.sleep(1)
+assert call(18001,'/api/quotes/Q-1001')==after
+compose('run','--rm','--no-deps','migrate-seed')
+assert call(18001,'/api/quotes/Q-1001')==after
+call(18001,'/api/chat',body)
+assert call(18001,'/api/quotes/Q-1001')==after
+assert call(15173,'/api/quotes/Q-1001')==after
+assert call(8001,'/api/quotes/Q-1001')==original
+print('PASS API/DB restart persistence; reseed preserves quantity/version; persisted receipt replay; original demo unchanged')

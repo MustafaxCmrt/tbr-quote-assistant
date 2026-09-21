@@ -1,0 +1,111 @@
+UTC: 2026-09-21T17:40:34.902820+00:00
+Commit: f0febc4d1f536cec6e74a567537367665552e91d
+Cwd: fresh clone
+Command: npm ci
+npm warn deprecated uuid@7.0.3: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+
+added 559 packages, and audited 562 packages in 4s
+
+71 packages are looking for funding
+  run `npm fund` for details
+
+10 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm warn install-scripts 2 packages have install scripts not yet covered by allowScripts:
+npm warn install-scripts   esbuild@0.28.2 (postinstall: node install.js)
+npm warn install-scripts   fsevents@2.3.3 (install: (install scripts present))
+npm warn install-scripts
+npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+Exit code: 0
+Command: npm test
+
+> tbr-quote-assistant@0.1.0 test
+> tsx --test packages/contracts/tests/*.test.ts apps/mobile/tests/*.test.ts apps/web/tests/*.test.ts
+
+✔ native transport posts identity and decodes every UTF-8 byte before terminal done (19.498583ms)
+✔ EOF without terminal rejects and preserves delivered partial text (0.499042ms)
+✔ controlled error is terminal, malformed content and native hostname never escape (0.777208ms)
+✔ retry preserves previous text and citations through reconnect and early error (0.788458ms)
+✔ retry replaces rather than duplicates text and uses new citations; successful empty answer clears old content (0.107708ms)
+✔ mobile canonical quote ignores stale versions and responses from another selection (0.407958ms)
+✔ late poll cannot replace new version or changed quote context (0.82675ms)
+✔ actual envelope survives every UTF-8 split and reducer completes once (18.815875ms)
+✔ replayed delta is never applied locally and duplicate event is ignored (0.139042ms)
+✔ error preserves partial text and signals committed-state refetch (0.290875ms)
+✔ unknown schema, mismatched type, impossible receipt flags and broken order rejected (0.208542ms)
+✔ utf8_multibyte_split (0.90975ms)
+✔ crlf_across_chunks (0.117458ms)
+✔ multiple_events_in_one_chunk (0.094667ms)
+✔ unfinished_final_event_is_discarded (0.257417ms)
+✔ all_byte_boundaries_preserve_frames (2.155583ms)
+✔ comments_multiline_data_and_persistent_id (0.099166ms)
+✔ empty_stream_and_bare_cr (0.070125ms)
+✔ truncated_utf8_is_rejected (0.077708ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 174.740167
+Exit code: 0
+Command: npm run typecheck
+
+> tbr-quote-assistant@0.1.0 typecheck
+> npm run typecheck --workspaces
+
+
+> @tbr/mobile@0.1.0 typecheck
+> tsc --noEmit && tsc -p tsconfig.tests.json --noEmit
+
+
+> @tbr/contracts@0.1.0 typecheck
+> tsc --noEmit
+
+Exit code: 0
+Command: npm run lint
+
+> tbr-quote-assistant@0.1.0 lint
+> eslint apps/mobile packages/contracts
+
+Exit code: 0
+Command: npm --prefix apps/web ci
+
+added 23 packages, and audited 24 packages in 695ms
+
+8 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm warn install-scripts 1 package has install scripts not yet covered by allowScripts:
+npm warn install-scripts   fsevents@2.3.3 (install: (install scripts present))
+npm warn install-scripts
+npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+Exit code: 0
+Command: npm --prefix apps/web run build
+
+> @tbr/web@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.0 building client environment for production...
+transforming...
+✓ 24 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.37 kB │ gzip:  0.28 kB
+dist/assets/index-iOZ3khJf.css    8.77 kB │ gzip:  2.69 kB
+dist/assets/index-DblzcSJQ.js   216.41 kB │ gzip: 68.19 kB
+
+✓ built in 271ms
+Exit code: 0
+Command: npm exec --workspace @tbr/mobile -- expo install --check
+Dependencies are up to date
+Exit code: 0
+Command: python3 scripts/sync_web_contracts.py --check
+PASS shared contract copies match
+Exit code: 0

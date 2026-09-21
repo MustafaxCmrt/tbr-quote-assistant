@@ -1,0 +1,220 @@
+UTC: 2026-09-21T17:40:14.645701+00:00
+Commit: f0febc4d1f536cec6e74a567537367665552e91d
+Cwd: /var/folders/qp/25bz40_x17x19kmh5g5rjb7m0000gn/T/tbr-f09-x14ijzwy/repo
+Environment overrides: COMPOSE_PROJECT_NAME=tbr-f09-clean API_BIND_HOST=127.0.0.1 API_PORT=18001 WEB_PORT=15173
+Command: python3 scripts/init_env.py
+Created ignored .env with generated local credentials. Values not printed.
+Exit code: 0
+Command: docker compose up --build -d --wait
+ Image tbr-f09-clean-migrate-seed Building 
+ Image tbr-f09-clean-api Building 
+ Image tbr-f09-clean-web Building 
+ Image tbr-postgres:16.15 Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 2.33kB done
+#1 DONE 0.0s
+
+#2 [web internal] load build definition from Dockerfile
+#2 transferring dockerfile: 374B done
+#2 DONE 0.0s
+
+#3 [db internal] load build definition from Dockerfile
+#3 transferring dockerfile: 212B done
+#3 DONE 0.0s
+
+#4 [migrate-seed internal] load build definition from Dockerfile
+#4 transferring dockerfile: 1.01kB done
+#4 DONE 0.0s
+
+#5 [migrate-seed internal] load metadata for docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+#5 DONE 0.1s
+
+#6 [db internal] load metadata for docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6
+#6 DONE 0.1s
+
+#7 [web internal] load metadata for docker.io/library/node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#7 DONE 0.1s
+
+#8 [db internal] load .dockerignore
+#8 transferring context: 2B done
+#8 DONE 0.0s
+
+#9 [web internal] load .dockerignore
+#9 transferring context: 90B done
+#9 DONE 0.0s
+
+#10 [api internal] load .dockerignore
+#10 transferring context: 198B done
+#10 DONE 0.0s
+
+#11 [db internal] load build context
+#11 transferring context: 399B done
+#11 DONE 0.0s
+
+#12 [db 1/2] FROM docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6
+#12 resolve docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6 0.0s done
+#12 DONE 0.0s
+
+#13 [web 1/7] FROM docker.io/library/node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#13 resolve docker.io/library/node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 0.0s done
+#13 DONE 0.0s
+
+#14 [migrate-seed base  1/10] FROM docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+#14 resolve docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e 0.0s done
+#14 DONE 0.0s
+
+#15 [db 2/2] COPY --chmod=0644 01-runtime-role.sh /docker-entrypoint-initdb.d/01-runtime-role.sh
+#15 CACHED
+
+#16 [web internal] load build context
+#16 transferring context: 89.62kB done
+#16 DONE 0.0s
+
+#17 [web 2/7] WORKDIR /app
+#17 CACHED
+
+#18 [web 6/7] COPY src ./src
+#18 CACHED
+
+#19 [web 3/7] COPY package.json package-lock.json ./
+#19 CACHED
+
+#20 [web 5/7] COPY index.html tsconfig.json vite.config.ts ./
+#20 CACHED
+
+#21 [web 4/7] RUN npm ci --ignore-scripts
+#21 CACHED
+
+#22 [web 7/7] RUN npm run build && chown -R node:node /app
+#22 CACHED
+
+#23 [web] exporting to image
+#23 exporting layers
+#23 ...
+
+#24 [migrate-seed internal] load build context
+#24 transferring context: 231.24kB done
+#24 DONE 0.0s
+
+#25 [migrate-seed base  6/10] COPY apps/api/app ./app
+#25 CACHED
+
+#26 [migrate-seed base  4/10] COPY apps/api/pyproject.toml apps/api/uv.lock ./
+#26 CACHED
+
+#27 [migrate-seed base  7/10] COPY apps/api/alembic.ini ./
+#27 CACHED
+
+#28 [migrate-seed base  2/10] RUN pip install --no-cache-dir uv==0.12.17
+#28 CACHED
+
+#29 [migrate-seed base  9/10] COPY data/source/products.json data/source/knowledge_entries.json data/source/customers.json data/source/quotes.json data/source/quote_items.json data/source/price_rules.json /app/data/source/
+#29 CACHED
+
+#30 [migrate-seed base  5/10] RUN uv sync --locked --no-dev
+#30 CACHED
+
+#31 [migrate-seed base  8/10] COPY apps/api/migrations ./migrations
+#31 CACHED
+
+#32 [migrate-seed base  3/10] WORKDIR /app/apps/api
+#32 CACHED
+
+#33 [migrate-seed base 10/10] RUN useradd --uid 10001 --create-home appuser
+#33 CACHED
+
+#23 [web] exporting to image
+#23 exporting layers done
+#23 exporting manifest sha256:a6880e360c4f9e773cfec9f201839a288e9db830de063c450375e019284575d4 0.0s done
+#23 exporting config sha256:eb15bce95f2418343c8b1ffefc10000bcc252f2a8f1ecbfbdf1c9adf9b282ef6 0.0s done
+#23 exporting attestation manifest sha256:d4e4a4d56d7487c80cfe15ccb72a2e132a6c18befe52bb5f101be39a4bcb1e4d
+#23 exporting attestation manifest sha256:d4e4a4d56d7487c80cfe15ccb72a2e132a6c18befe52bb5f101be39a4bcb1e4d 0.0s done
+#23 exporting manifest list sha256:fcec7139a2564433da483e49d67bdaa566f5c0c865d505c92ee2d90a4b8833f7 0.0s done
+#23 naming to docker.io/library/tbr-f09-clean-web:latest 0.0s done
+#23 unpacking to docker.io/library/tbr-f09-clean-web:latest 0.0s done
+#23 DONE 0.2s
+
+#34 [db] exporting to image
+#34 exporting layers 0.0s done
+#34 exporting manifest sha256:073e50a12ba766d8a1ffb694bcfd2e221b633378257cb5d49c2240c227eebaee 0.0s done
+#34 exporting config sha256:b0b9f250ef36a4b76bc0b5c271535a3a6fb4bb887f06f5e1320cb1089cb21ab5 0.0s done
+#34 exporting attestation manifest sha256:cf339de965362960134feb9cd46ba2e4f8dbebc711a23508636d0479955d52b1 0.0s done
+#34 exporting manifest list sha256:96e0ee16a9f0a4d46e6106ded454526c0cd8b8ff4282d3405514aa4c4bf90235 0.0s done
+#34 naming to docker.io/library/tbr-postgres:16.15 done
+#34 unpacking to docker.io/library/tbr-postgres:16.15 0.0s done
+#34 DONE 0.2s
+
+#35 [migrate-seed] exporting to image
+#35 exporting layers done
+#35 exporting manifest sha256:25fd18fe2afa4f84707adbe874c284fffaf88153f7a6617a634d11b9e5ccef3e 0.0s done
+#35 exporting config sha256:e47efc8e79103126f3c5e41e156908a3da3f0abb7b3c9f66a4405cd5799a7a59 0.0s done
+#35 exporting attestation manifest sha256:ec5cdb47001d2736de3ad5ab31db5e7ecc07efc1657963222cbe60f9d6d6e616 0.0s done
+#35 exporting manifest list sha256:86a19bf0de555f349f89bd296cabb9bbd0e4baa1a82230a264eca478a0ae7d87 0.0s done
+#35 naming to docker.io/library/tbr-f09-clean-migrate-seed:latest done
+#35 unpacking to docker.io/library/tbr-f09-clean-migrate-seed:latest 0.0s done
+#35 DONE 0.2s
+
+#36 [api] exporting to image
+#36 exporting layers done
+#36 exporting manifest sha256:57159f8a98e6163da7976f357a2ff334471ed4eaf5de918f2beb79e90c6622a9 0.0s done
+#36 exporting config sha256:4e408809e14de1435426561a65157a5aa94ff5c3cfb29376f4e95afa99041059 0.0s done
+#36 exporting attestation manifest sha256:0ab673c65ae809c8b5a413dc1ee2db6954b36715c55432d2c4e455d68158b45b 0.0s done
+#36 exporting manifest list sha256:86728d00cb8dcae19437829dd137604710501a47467c296ea0b8a60da1a72571 0.0s done
+#36 naming to docker.io/library/tbr-f09-clean-api:latest done
+#36 unpacking to docker.io/library/tbr-f09-clean-api:latest 0.0s done
+#36 DONE 0.2s
+
+#37 [db] resolving provenance for metadata file
+#37 DONE 0.1s
+
+#38 [web] resolving provenance for metadata file
+#38 DONE 0.1s
+
+#39 [migrate-seed] resolving provenance for metadata file
+#39 DONE 0.0s
+
+#40 [api] resolving provenance for metadata file
+#40 DONE 0.0s
+ Image tbr-postgres:16.15 Built 
+ Image tbr-f09-clean-migrate-seed Built 
+ Image tbr-f09-clean-api Built 
+ Image tbr-f09-clean-web Built 
+ Volume tbr-f09-clean_pgdata Creating 
+ Network tbr-f09-clean_default Creating 
+ Volume tbr-f09-clean_pgdata Creating 
+ Network tbr-f09-clean_default Creating 
+ Volume tbr-f09-clean_pgdata Created 
+ Volume tbr-f09-clean_pgdata Created 
+ Network tbr-f09-clean_default Created 
+ Network tbr-f09-clean_default Created 
+ Container tbr-f09-clean-db-1 Creating 
+ Container tbr-f09-clean-db-1 Created 
+ Container tbr-f09-clean-migrate-seed-1 Creating 
+ Container tbr-f09-clean-migrate-seed-1 Created 
+ Container tbr-f09-clean-api-1 Creating 
+ Container tbr-f09-clean-api-1 Created 
+ Container tbr-f09-clean-web-1 Creating 
+ Container tbr-f09-clean-web-1 Created 
+ Container tbr-f09-clean-db-1 Starting 
+ Container tbr-f09-clean-db-1 Started 
+ Container tbr-f09-clean-db-1 Waiting 
+ Container tbr-f09-clean-db-1 Healthy 
+ Container tbr-f09-clean-migrate-seed-1 Starting 
+ Container tbr-f09-clean-migrate-seed-1 Started 
+ Container tbr-f09-clean-migrate-seed-1 Waiting 
+ Container tbr-f09-clean-migrate-seed-1 Exited 
+ Container tbr-f09-clean-api-1 Starting 
+ Container tbr-f09-clean-api-1 Started 
+ Container tbr-f09-clean-api-1 Waiting 
+ Container tbr-f09-clean-api-1 Healthy 
+ Container tbr-f09-clean-web-1 Starting 
+ Container tbr-f09-clean-web-1 Started 
+ Container tbr-f09-clean-api-1 Waiting 
+ Container tbr-f09-clean-web-1 Waiting 
+ Container tbr-f09-clean-db-1 Waiting 
+ Container tbr-f09-clean-migrate-seed-1 Waiting 
+ Container tbr-f09-clean-migrate-seed-1 Exited 
+ Container tbr-f09-clean-api-1 Healthy 
+ Container tbr-f09-clean-db-1 Healthy 
+ Container tbr-f09-clean-web-1 Healthy 
+Exit code: 0
