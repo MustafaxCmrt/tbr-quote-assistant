@@ -200,12 +200,13 @@ function Workspace() {
         }}
       >
         <View style={ui.flex}>
-          <Button primary={tab === "chat"} onPress={() => setTab("chat")}>
+          <Button selected={tab === "chat"} primary={tab === "chat"} onPress={() => setTab("chat")}>
             Sohbet
           </Button>
         </View>
         <View style={ui.flex}>
           <Button
+            selected={tab === "quote"}
             primary={tab === "quote"}
             onPress={() => {
               setTab("quote");

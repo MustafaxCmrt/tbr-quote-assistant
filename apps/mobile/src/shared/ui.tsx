@@ -35,17 +35,19 @@ export function Button({
   onPress,
   disabled = false,
   primary = false,
+  selected,
 }: {
   children: ReactNode;
   onPress: () => void;
   disabled?: boolean;
   primary?: boolean;
+  selected?: boolean;
 }) {
   const c = usePalette();
   return (
     <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled }}
+      accessibilityRole={selected === undefined ? "button" : "tab"}
+      accessibilityState={{ disabled, ...(selected === undefined ? {} : { selected }) }}
       disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [

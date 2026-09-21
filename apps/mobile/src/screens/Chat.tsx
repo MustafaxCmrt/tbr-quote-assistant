@@ -17,6 +17,7 @@ import {
   type ToolName,
 } from "@tbr/contracts";
 import { api } from "../api";
+import { visibleAttemptContent } from "../api/retry";
 import { Button, Label, ui, usePalette } from "../shared/ui";
 
 interface Message {
@@ -79,10 +80,9 @@ export function Chat({
     onBusy(true);
     setDraft("");
     followBottom.current = true;
-    setMessages((prev) => [
-      ...prev.filter((m) => m.id !== id),
-      { id, user, text: "", sources: [], tools: [], status: "connecting" },
-    ]);
+    setMessages((prev) => prev.some((m) => m.id === id)
+      ? prev.map((m) => m.id === id ? { ...m, status: "connecting", error: undefined, tools: [] } : m)
+      : [...prev, { id, user, text: "", sources: [], tools: [], status: "connecting" }]);
     try {
       if (!session.current) {
         const created = await api.request<{ session_id: string }>(
@@ -115,8 +115,7 @@ export function Chat({
                   : "Kaynak okundu.",
             );
           update(id, {
-            text: state.text,
-            sources: state.sources,
+            ...visibleAttemptContent(state),
             status: state.status,
             error: state.error,
             tools: [...tools],
