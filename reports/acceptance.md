@@ -41,4 +41,4 @@ Teslim öncesi mimari/güvenlik sertleştirmesi: [çözüm kaydı](hardening_res
 anahtarı ister, gövde 256 KiB ile sınırlı, SSE terminal hatası DB erişilemezken de gelir;
 [tam backend 229 passed](hardening_full_backend.txt), [çalışan stack kontrolü](hardening_runtime_after.txt)
 (önce: [anahtarsız LAN yazması doğrulamaya ulaşıyordu](hardening_runtime_before.txt)). Bu koşu için yeni
-fiziksel iPhone gözlemi not_verified.
+fiziksel iPhone add + aynı istek tekrarı Mustafa tarafından doğrulandı; DB'de tek etki: [kayıt](hardening_native_smoke_db.txt).

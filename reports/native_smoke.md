@@ -106,3 +106,7 @@ Yeni mesaj kimliği ea204128-43f4-456c-a509-6f66a3495678, önceki add/retry mesa
 politika mesajında gerçek loglar yalnız read tools/mutation_applied0 gösterdi (önceki salt okunur kontrol).
 F07 done; F08 in_progress. Sonraki zorunlular: negatif hedef kanıt eşlemesi, bağımsız Claude review,
 son temiz kurulum/demo/erişim kapıları. Kullanıcı gözlemine process exit code uygulanmaz.
+
+## v3 sertleştirme sonrası (22 Eylül)
+
+22 Eylül 00:17–00:21 (TR): Mustafa eski Expo sürecini kapattırıp yeni bundle ile fiziksel iPhone'da Q-1001'e "BlueScan Air 1 adet daha ekle." gönderdi, sonra "Aynı isteği tekrar gönder"e bastı. Ekranda 15.980 → 23.970 TL, tekrarda değişiklik yok. DB kanıtı ([kayıt](hardening_native_smoke_db.txt)): yeni **mobil** oturum, aynı mesaj kimliğinde iki deneme — ilk `add_to_quote` mutation_applied, ikinci replayed; 1 receipt, Q-1001 sürüm 3 / 3 adet. Kullanıcı gözlemine process exit code uygulanmaz.

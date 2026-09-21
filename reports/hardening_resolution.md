@@ -64,4 +64,8 @@ Admin kontrolü için tag'deki script shell port değişkenlerini okumadığınd
 dosya olarak kopyalandı (`check_admin_runtime_current.py`); tag'deki izlenen dosyalar değiştirilmedi.
 
 Uygulanmayanlar: mikroservis/Redis/kuyruk, tam RBAC, rate limiter, production hosting,
-`data/source/` değişikliği. Fiziksel iPhone ile yeni doğrulama bu kayıtta yoktur: **not_verified**.
+`data/source/` değişikliği.
+
+## Fiziksel iPhone (v3 ana demo)
+
+**passed.** 22 Eylül 00:17–00:21 (TR): Mustafa eski Expo sürecini kapattırıp yeni bundle ile fiziksel iPhone'da Q-1001'e "BlueScan Air 1 adet daha ekle." gönderdi, sonra "Aynı isteği tekrar gönder"e bastı. Ekranda 15.980 → 23.970 TL, tekrarda değişiklik yok. DB kanıtı ([kayıt](hardening_native_smoke_db.txt)): yeni **mobil** oturum, aynı mesaj kimliğinde iki deneme — ilk `add_to_quote` mutation_applied, ikinci replayed; 1 receipt, Q-1001 sürüm 3 / 3 adet. Kullanıcı gözlemine process exit code uygulanmaz.
