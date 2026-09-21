@@ -1,0 +1,623 @@
+{
+  "$defs": {
+    "Done": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "message_id": {
+          "title": "Message Id",
+          "type": "string"
+        },
+        "attempt_id": {
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "event_seq": {
+          "minimum": 1,
+          "title": "Event Seq",
+          "type": "integer"
+        },
+        "type": {
+          "const": "done",
+          "title": "Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/DonePayload"
+        }
+      },
+      "required": [
+        "session_id",
+        "message_id",
+        "attempt_id",
+        "event_seq",
+        "type",
+        "payload"
+      ],
+      "title": "Done",
+      "type": "object"
+    },
+    "DonePayload": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "const": true,
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "quote_id": {
+          "title": "Quote Id",
+          "type": "string"
+        },
+        "quote_version": {
+          "title": "Quote Version",
+          "type": "integer"
+        },
+        "mode": {
+          "enum": [
+            "fallback",
+            "deterministic"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "quote_id",
+        "quote_version",
+        "mode",
+        "source_ids"
+      ],
+      "title": "DonePayload",
+      "type": "object"
+    },
+    "Error": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "message_id": {
+          "title": "Message Id",
+          "type": "string"
+        },
+        "attempt_id": {
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "event_seq": {
+          "minimum": 1,
+          "title": "Event Seq",
+          "type": "integer"
+        },
+        "type": {
+          "const": "error",
+          "title": "Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ErrorPayload"
+        }
+      },
+      "required": [
+        "session_id",
+        "message_id",
+        "attempt_id",
+        "event_seq",
+        "type",
+        "payload"
+      ],
+      "title": "Error",
+      "type": "object"
+    },
+    "ErrorPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "committed": {
+          "title": "Committed",
+          "type": "boolean"
+        },
+        "quote_id": {
+          "title": "Quote Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "detail",
+        "retryable",
+        "committed",
+        "quote_id"
+      ],
+      "title": "ErrorPayload",
+      "type": "object"
+    },
+    "MessageStart": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "message_id": {
+          "title": "Message Id",
+          "type": "string"
+        },
+        "attempt_id": {
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "event_seq": {
+          "minimum": 1,
+          "title": "Event Seq",
+          "type": "integer"
+        },
+        "type": {
+          "const": "message_start",
+          "title": "Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/StartPayload"
+        }
+      },
+      "required": [
+        "session_id",
+        "message_id",
+        "attempt_id",
+        "event_seq",
+        "type",
+        "payload"
+      ],
+      "title": "MessageStart",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "product",
+            "knowledge",
+            "price_rule"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "excerpt": {
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "source_id",
+        "title",
+        "excerpt",
+        "source"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "Sources": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "message_id": {
+          "title": "Message Id",
+          "type": "string"
+        },
+        "attempt_id": {
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "event_seq": {
+          "minimum": 1,
+          "title": "Event Seq",
+          "type": "integer"
+        },
+        "type": {
+          "const": "sources",
+          "title": "Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/SourcesPayload"
+        }
+      },
+      "required": [
+        "session_id",
+        "message_id",
+        "attempt_id",
+        "event_seq",
+        "type",
+        "payload"
+      ],
+      "title": "Sources",
+      "type": "object"
+    },
+    "SourcesPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/Source"
+          },
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "sources"
+      ],
+      "title": "SourcesPayload",
+      "type": "object"
+    },
+    "StartPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "fallback",
+            "deterministic"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "title": "StartPayload",
+      "type": "object"
+    },
+    "Text": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "message_id": {
+          "title": "Message Id",
+          "type": "string"
+        },
+        "attempt_id": {
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "event_seq": {
+          "minimum": 1,
+          "title": "Event Seq",
+          "type": "integer"
+        },
+        "type": {
+          "const": "text_delta",
+          "title": "Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/TextPayload"
+        }
+      },
+      "required": [
+        "session_id",
+        "message_id",
+        "attempt_id",
+        "event_seq",
+        "type",
+        "payload"
+      ],
+      "title": "Text",
+      "type": "object"
+    },
+    "TextPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "TextPayload",
+      "type": "object"
+    },
+    "ToolResult": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "message_id": {
+          "title": "Message Id",
+          "type": "string"
+        },
+        "attempt_id": {
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "event_seq": {
+          "minimum": 1,
+          "title": "Event Seq",
+          "type": "integer"
+        },
+        "type": {
+          "const": "tool_call_result",
+          "title": "Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ToolResultPayload"
+        }
+      },
+      "required": [
+        "session_id",
+        "message_id",
+        "attempt_id",
+        "event_seq",
+        "type",
+        "payload"
+      ],
+      "title": "ToolResult",
+      "type": "object"
+    },
+    "ToolResultPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "enum": [
+            "search_products",
+            "get_knowledge_entries",
+            "get_quote",
+            "add_to_quote",
+            "update_quote_item",
+            "replace_with_alternative"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "tool_sequence": {
+          "minimum": 1,
+          "title": "Tool Sequence",
+          "type": "integer"
+        },
+        "success": {
+          "title": "Success",
+          "type": "boolean"
+        },
+        "output": {
+          "additionalProperties": true,
+          "title": "Output",
+          "type": "object"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/Source"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "replayed": {
+          "title": "Replayed",
+          "type": "boolean"
+        },
+        "mutation_applied": {
+          "title": "Mutation Applied",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "tool_sequence",
+        "success",
+        "output",
+        "sources",
+        "replayed",
+        "mutation_applied"
+      ],
+      "title": "ToolResultPayload",
+      "type": "object"
+    },
+    "ToolStart": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "message_id": {
+          "title": "Message Id",
+          "type": "string"
+        },
+        "attempt_id": {
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "event_seq": {
+          "minimum": 1,
+          "title": "Event Seq",
+          "type": "integer"
+        },
+        "type": {
+          "const": "tool_call_start",
+          "title": "Type",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ToolStartPayload"
+        }
+      },
+      "required": [
+        "session_id",
+        "message_id",
+        "attempt_id",
+        "event_seq",
+        "type",
+        "payload"
+      ],
+      "title": "ToolStart",
+      "type": "object"
+    },
+    "ToolStartPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "enum": [
+            "search_products",
+            "get_knowledge_entries",
+            "get_quote",
+            "add_to_quote",
+            "update_quote_item",
+            "replace_with_alternative"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "input": {
+          "additionalProperties": true,
+          "title": "Input",
+          "type": "object"
+        },
+        "tool_sequence": {
+          "minimum": 1,
+          "title": "Tool Sequence",
+          "type": "integer"
+        },
+        "action_index": {
+          "minimum": 0,
+          "title": "Action Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "input",
+        "tool_sequence",
+        "action_index"
+      ],
+      "title": "ToolStartPayload",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "done": "#/$defs/Done",
+      "error": "#/$defs/Error",
+      "message_start": "#/$defs/MessageStart",
+      "sources": "#/$defs/Sources",
+      "text_delta": "#/$defs/Text",
+      "tool_call_result": "#/$defs/ToolResult",
+      "tool_call_start": "#/$defs/ToolStart"
+    },
+    "propertyName": "type"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/MessageStart"
+    },
+    {
+      "$ref": "#/$defs/ToolStart"
+    },
+    {
+      "$ref": "#/$defs/ToolResult"
+    },
+    {
+      "$ref": "#/$defs/Sources"
+    },
+    {
+      "$ref": "#/$defs/Text"
+    },
+    {
+      "$ref": "#/$defs/Done"
+    },
+    {
+      "$ref": "#/$defs/Error"
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

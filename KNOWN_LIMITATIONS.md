@@ -20,3 +20,7 @@ F04 güncellemesi: altı araç artık gerçek HTTP sohbet üzerinden çağrılı
 Türkçe parser sınırlı niyet/slot grameridir; açık olmayan miktar/ürün referansında netleştirme ister.
 Genel LLM dil anlama veya provider tool calling yoktur. SSE, istemci chat ve native ortak quote
 kabulü henüz tamamlanmadı; final teslim olarak yorumlanmamalıdır.
+
+F05 güncellemesi: gerçek SSE, denetim logları ve message retry uygulanıp doğrulandı. Her token'ı
+Last-Event-ID ile kalıcı replay kapsam dışıdır. İstemci iptali kabul edilmiş sonlu işi durdurmaz;
+kanonik teklifi yenilemek gerekir. Tam web/mobil sohbet ekranları F06/F07 kapsamında devam ediyor.

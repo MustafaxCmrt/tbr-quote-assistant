@@ -1,0 +1,9 @@
+UTC: 2026-09-21T15:48:03.139854+00:00
+Base commit (working tree may contain pending changes): 3ee3e0db6e114e150f44730700bbd2b9a5305d8a
+Command: env PYTHONPATH=apps/api uv run --directory apps/api --locked python ../../scripts/export_stream_schemas.py
+Exit code: 1
+
+Traceback (most recent call last):
+  File "/Users/comert/Desktop/tbr-quote-assistant/apps/api/../../scripts/export_stream_schemas.py", line 4, in <module>
+    from app.schemas.stream import stream_adapter
+ModuleNotFoundError: No module named 'app'

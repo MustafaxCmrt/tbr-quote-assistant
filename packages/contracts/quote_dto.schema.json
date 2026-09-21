@@ -1,0 +1,221 @@
+{
+  "$defs": {
+    "QuoteLine": {
+      "additionalProperties": false,
+      "properties": {
+        "quote_item_id": {
+          "title": "Quote Item Id",
+          "type": "string"
+        },
+        "product_id": {
+          "title": "Product Id",
+          "type": "string"
+        },
+        "sku": {
+          "title": "Sku",
+          "type": "string"
+        },
+        "name_tr": {
+          "title": "Name Tr",
+          "type": "string"
+        },
+        "quantity": {
+          "title": "Quantity",
+          "type": "integer"
+        },
+        "unit_price_try": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            }
+          ],
+          "title": "Unit Price Try"
+        },
+        "gross_total_try": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            }
+          ],
+          "title": "Gross Total Try"
+        },
+        "discount_total_try": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            }
+          ],
+          "title": "Discount Total Try"
+        },
+        "net_total_try": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+              "type": "string"
+            }
+          ],
+          "title": "Net Total Try"
+        },
+        "rule_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rule Ids",
+          "type": "array"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "fulfillment_status": {
+          "title": "Fulfillment Status",
+          "type": "string"
+        },
+        "replaced_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Replaced By"
+        }
+      },
+      "required": [
+        "quote_item_id",
+        "product_id",
+        "sku",
+        "name_tr",
+        "quantity",
+        "unit_price_try",
+        "gross_total_try",
+        "discount_total_try",
+        "net_total_try",
+        "rule_ids",
+        "status",
+        "fulfillment_status",
+        "replaced_by"
+      ],
+      "title": "QuoteLine",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "quote_id": {
+      "title": "Quote Id",
+      "type": "string"
+    },
+    "customer_id": {
+      "title": "Customer Id",
+      "type": "string"
+    },
+    "customer_name": {
+      "title": "Customer Name",
+      "type": "string"
+    },
+    "status": {
+      "title": "Status",
+      "type": "string"
+    },
+    "currency": {
+      "title": "Currency",
+      "type": "string"
+    },
+    "version": {
+      "title": "Version",
+      "type": "integer"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/QuoteLine"
+      },
+      "title": "Items",
+      "type": "array"
+    },
+    "history": {
+      "items": {
+        "$ref": "#/$defs/QuoteLine"
+      },
+      "title": "History",
+      "type": "array"
+    },
+    "gross_total_try": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+          "type": "string"
+        }
+      ],
+      "title": "Gross Total Try"
+    },
+    "discount_total_try": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+          "type": "string"
+        }
+      ],
+      "title": "Discount Total Try"
+    },
+    "net_total_try": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+          "type": "string"
+        }
+      ],
+      "title": "Net Total Try"
+    },
+    "rule_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Rule Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "quote_id",
+    "customer_id",
+    "customer_name",
+    "status",
+    "currency",
+    "version",
+    "items",
+    "history",
+    "gross_total_try",
+    "discount_total_try",
+    "net_total_try",
+    "rule_ids"
+  ],
+  "title": "QuoteDTO",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

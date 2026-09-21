@@ -44,7 +44,7 @@ SCHEMAS = {
 }
 
 
-async def execute_plan(engine, session_id, message_id, *, attempt_id=None):
+async def execute_plan(engine, session_id, message_id, *, attempt_id=None, on_event=None):
     attempt_id = attempt_id or uuid4().hex
     async with engine.begin() as conn:
         session = (
@@ -143,6 +143,7 @@ async def execute_plan(engine, session_id, message_id, *, attempt_id=None):
             sa.select(price_rules).order_by(price_rules.c.rule_id).with_for_update(read=True)
         )
         outputs = []
+        committed_events = []
         for index, (name, args) in enumerate(parsed):
             started = perf_counter()
             context = ExecutionContext(
@@ -163,22 +164,41 @@ async def execute_plan(engine, session_id, message_id, *, attempt_id=None):
                 customer,
                 catalog,
             )
-            if name in MUTATIONS:
-                # Always invoke the actual wrapper, including receipt replay attempts.
-                output = await MUTATIONS[name][1](conn, args, context)
-                evidence = EvidenceBundle.from_results(await get_quote(conn, quote["quote_id"]))
-            elif name == "search_products":
-                result = await search_products(conn, args)
-                output = result.model_dump(mode="json")
-                evidence = EvidenceBundle.from_results(result)
-            elif name == "get_knowledge_entries":
-                result = await get_knowledge_entries(conn, args)
-                output = result.model_dump(mode="json")
-                evidence = EvidenceBundle.from_results(result)
-            else:
-                result = await get_quote(conn, args.quote_id)
-                output = result.model_dump(mode="json")
-                evidence = EvidenceBundle.from_results(result)
+            if on_event:
+                on_event(
+                    "tool_call_start",
+                    {
+                        "name": name,
+                        "input": args.model_dump(mode="json"),
+                        "tool_sequence": index + 1,
+                        "action_index": index,
+                    },
+                )
+            try:
+                if name in MUTATIONS:
+                    # Always invoke the actual wrapper, including receipt replay attempts.
+                    output = await MUTATIONS[name][1](conn, args, context)
+                    evidence = EvidenceBundle.from_results(await get_quote(conn, quote["quote_id"]))
+                elif name == "search_products":
+                    result = await search_products(conn, args)
+                    output = result.model_dump(mode="json")
+                    evidence = EvidenceBundle.from_results(result)
+                elif name == "get_knowledge_entries":
+                    result = await get_knowledge_entries(conn, args)
+                    output = result.model_dump(mode="json")
+                    evidence = EvidenceBundle.from_results(result)
+                else:
+                    result = await get_quote(conn, args.quote_id)
+                    output = result.model_dump(mode="json")
+                    evidence = EvidenceBundle.from_results(result)
+            except Exception as exc:
+                exc.tool_failure = {
+                    "tool_name": name,
+                    "input": args.model_dump(mode="json"),
+                    "tool_sequence": index + 1,
+                    "duration_ms": int((perf_counter() - started) * 1000),
+                }
+                raise
             await conn.execute(
                 tool_call_logs.insert().values(
                     session_id=session_id,
@@ -196,5 +216,19 @@ async def execute_plan(engine, session_id, message_id, *, attempt_id=None):
                 )
             )
             outputs.append(output)
+            committed_events.append(
+                {
+                    "name": name,
+                    "tool_sequence": index + 1,
+                    "success": True,
+                    "output": output,
+                    "sources": evidence.model_dump(mode="json")["sources"],
+                    "replayed": output.get("replayed", False),
+                    "mutation_applied": output.get("mutation_applied", False),
+                }
+            )
     # No successful result leaves this function before the enclosing transaction commits.
+    if on_event:
+        for event in committed_events:
+            on_event("tool_call_result", event)
     return outputs

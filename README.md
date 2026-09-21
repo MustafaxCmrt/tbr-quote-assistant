@@ -144,3 +144,11 @@ Aynı gönderimin tekrarında aynı `message_id`, yeni mesajda yeni kimlik kulla
 kalıcıdır; istemci guard veya idempotency anahtarı veremez. Anahtarsız Türkçe fallback gerçek
 araçları çalıştırır; şu anda ücretli/harici model adaptörü yoktur. 22 golden senaryo HTTP sohbet
 kapısından geçti; kanıt `reports/f04_acceptance.md`. SSE ve istemci chat entegrasyonu sonraki fazdır.
+
+F05: `POST /api/chat/stream` aynı chat gövdesiyle gerçek SSE döndürür. `message_start`, gerçek
+`tool_call_start/result`, `sources`, `text_delta`, `done/error` olayları version 1 envelope kullanır.
+Başarılı araç sonuçları transaction commit'inden sonra yayınlanır. Bağlantıyı kesmek kabul edilmiş
+işlemi geri almaz; aynı mesaj kimliğiyle tekrar dene ve `GET /api/quotes/{id}` ile yenile.
+`GET /api/chat/sessions/{id}/messages` toparlanma, `GET /api/tool-calls?session_id=...` denetim içindir.
+Kalıcı token/Last-Event-ID replay yoktur; işlem tekrarsızlığı receipt ile sağlanır. Fallback metni
+parçalar halinde gönderilir; LLM token akışı diye sunulmaz. Kanıt `reports/f05_acceptance.md`.

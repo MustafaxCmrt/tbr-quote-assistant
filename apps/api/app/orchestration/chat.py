@@ -28,8 +28,8 @@ async def create_session(engine, request):
     return values
 
 
-async def process_chat(engine, request):
-    attempt_id = uuid4().hex
+async def process_chat(engine, request, *, attempt_id=None, on_event=None):
+    attempt_id = attempt_id or uuid4().hex
     mode = (
         "fallback"
         if os.getenv("LLM_MODE", "off") == "off" or not os.getenv("OPENAI_API_KEY", "").strip()
@@ -105,7 +105,9 @@ async def process_chat(engine, request):
                 )
             )
     try:
-        await execute_plan(engine, request.session_id, request.message_id, attempt_id=attempt_id)
+        await execute_plan(
+            engine, request.session_id, request.message_id, attempt_id=attempt_id, on_event=on_event
+        )
         async with engine.begin() as conn:
             logs = (
                 (
@@ -137,8 +139,24 @@ async def process_chat(engine, request):
                 .values(status="completed", lease_until=None, final_response=response)
             )
         return response
-    except Exception:
+    except Exception as exc:
         async with engine.begin() as conn:
+            failed = getattr(exc, "tool_failure", None)
+            if failed:
+                code = exc.code if isinstance(exc, DomainError) else "INTERNAL_ERROR"
+                await conn.execute(
+                    tool_call_logs.insert().values(
+                        session_id=request.session_id,
+                        message_id=request.message_id,
+                        attempt_id=attempt_id,
+                        **failed,
+                        output={"error": {"code": code}},
+                        sources=[],
+                        success=False,
+                        replayed=False,
+                        mutation_applied=False,
+                    )
+                )
             await conn.execute(
                 chat_messages.update()
                 .where(*message_filter)

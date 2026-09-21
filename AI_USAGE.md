@@ -28,3 +28,8 @@ HTTP golden runner yazdı. Bağımsız salt-okunur AI incelemesinin dört somut 
 regresyonlarla düzeltildi; ilk negatif testlerdeki sayı ayrıştırma hataları da giderildi.
 Son gerçek koşu 136 passed (22 golden dahil); gerçek HTTP smoke/lint/delivery exit0.
 Sistem LLM tool calling yaptığını iddia etmez; provider adaptörü ve API harcaması yoktur.
+
+F05: Codex gerçek executor eventleri, SSE envelope, güvenli hata/başarısız log, geçmiş, disconnect
+sonrası devam ve ortak TS reducer ekledi. 142 backend testi, 12 parser/reducer testi; API ve proxy
+üstünden curl -N kademeli aktarım gözlemi passed. Commit sonrası render hatası ve disconnect
+regresyonları gerçek DB üstünde koşuldu. Native tam chat henüz insan tarafından denenmedi.
