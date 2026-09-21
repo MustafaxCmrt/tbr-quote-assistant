@@ -17,3 +17,8 @@ Durum: **not_verified**. Expo sohbet, kaynak sheet, müşteri/teklif seçimi ve 
 iOS export/Doctor/typecheck ve Node transport testleri ayrı raporlanır; fiziksel cihaz sonucu sayılmaz.
 Mustafa'ya Q-1001 mevcut adet → “BlueScan Air 1 adet daha ekle.” → aynı isteği retry → web aynı
 adet/sürüm kontrolü gönderildi. Klavye, kaynak açma, kaydırma, karanlık mod ve cihaz sürüm bilgisi bekleniyor.
+
+Mustafa 19:25 ekran görüntüsünde gerçek uygulamanın iPhone'da açıldığını gösterdi:
+[Karanlık mod başlangıcı](images/f07/native-launch-dark.png). Mavi Kırmızı Market A.Ş. / Q-1001
+bağlamı yüklenmiş, mesaj kutusu ve Sohbet/Teklif sekmeleri görünür. Bu görüntü **native açılış**
+kanıtıdır; henüz mesaj gönderimi, mutation/retry veya klavye açıkken kullanım kanıtı değildir.
