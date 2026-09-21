@@ -466,6 +466,9 @@ async def test_software_bundle_discount_removed_after_chat_removes_paired_item(d
         "5 bin TL altında QR ve kablosuz okuyucu ekle.",
         "5.000 ₺ altında QR ve kablosuz okuyucu ekle.",
         "5.000 TL'yi aşmayan QR ve kablosuz okuyucu ekle.",
+        "5.000 liraya kadar QR ve kablosuz okuyucu ekle.",
+        "En fazla 5.000 lira olan QR ve kablosuz okuyucu ekle.",
+        "5.000 üstüne çıkmadan QR ve kablosuz okuyucu ekle.",
     ],
 )
 async def test_review_price_expression_never_silently_drops_ceiling(db, text):
@@ -485,6 +488,12 @@ async def test_review_price_expression_never_silently_drops_ceiling(db, text):
     [
         "BlueScan Air ekle, Plus olmasın.",
         "Plus'sız BlueScan Air ekle.",
+        "BlueScan Air ekle, Plus olmadan.",
+        "Plus istemiyorum, BlueScan Air ekle.",
+        "Plus'suz BlueScan Air ekle.",
+        "Okuyucunun teslim tarihini değiştir.",
+        "Okuyucu indirimini kaldır.",
+        "Endüstriyel okuyucuyu kaldır.",
         "Kablosuz olmayan okuyucu ekle.",
         "İndirimi kaldır.",
         "Daha ucuz bir okuyucu ekle.",

@@ -8,7 +8,7 @@ import sqlalchemy as sa
 from app.persistence.models import customers, products
 from app.schemas.tools import ProductFilters, ProductSearchInput
 from app.services.execution_context import Constraints, action_key
-from app.services.normalization import normalize, numeric_slots
+from app.services.normalization import has_price_intent, normalize, numeric_slots
 from app.services.quotes import get_quote
 from app.services.retrieval import FEATURES, search_products, tokens
 
@@ -46,6 +46,10 @@ def reference(text, quote, catalog):
     # A mentioned catalog brand/model cannot resolve to an unrelated lone line.
     brands = {normalize(row["name_tr"]).split()[0] for row in catalog.values()}
     named_brands = words & brands
+    # All live catalog tags are descriptors, including ones outside the core
+    # hard-filter vocabulary (e.g. endustriyel). Never discard a stated descriptor.
+    catalog_tags = {normalize(tag) for row in catalog.values() for tag in row["tags"]}
+    descriptors = words & catalog_tags
     model_ids = {
         row["product_id"]
         for row in catalog.values()
@@ -54,6 +58,15 @@ def reference(text, quote, catalog):
     scored = []
     for item in quote.items:
         row = catalog[item.product_id]
+        descriptive_words = tokens(
+            row["name_tr"]
+            + " "
+            + " ".join(row["aliases"].get("tr", []))
+            + " "
+            + " ".join(row["tags"])
+        )
+        if not descriptors <= descriptive_words:
+            continue
         if named_brands and normalize(row["name_tr"]).split()[0] not in named_brands:
             continue
         if model_ids and item.product_id not in model_ids:
@@ -199,24 +212,45 @@ async def build_plan(conn, session, message_id, text, mode):
         notice = "Miktar veya fiyat biçimini kesinleştiremedim. Ürün başına miktarı ve TL limitini açık yazar mısın?"
         return finish()
     # Do not silently discard a constraint that the bounded parser cannot represent.
-    money_intent = bool(re.search(r"\btl\b|₺", text, re.IGNORECASE)) or any(
-        marker in normalized
-        for marker in ("butce", "limit", "tavan", "altinda", "asmayan", "gecmeyen")
-    )
-    if mutating and money_intent and slots["max_price_try"] is None:
+    if mutating and has_price_intent(text) and slots["max_price_try"] is None:
         notice = "Fiyat sınırını kesinleştiremedim. Örneğin 5.000 TL altında şeklinde yazar mısın? Teklifi değiştirmedim."
         return finish()
     # Stock absence describes the source of a supported substitution, not a negated feature.
     attribute_text = re.sub(r"\bstokta olmayan\b", "", normalized)
-    if mutating and re.search(r"\b(olmasin|olmayan|degil)\b|\bplus[ -]?siz\b", attribute_text):
+    if mutating and re.search(
+        r"\b(olmasin|olmayan|olmadan|degil\w*|iste(?:mi|me)\w*|haric\w*|disinda)\b|\bplus[ -]?s[iu]z\b",
+        attribute_text,
+    ):
         notice = "Olumsuzlanan ürün veya özelliği kesinleştiremedim. İstediğin ürün kodunu belirtir misin? Teklifi değiştirmedim."
+        return finish()
+    # A product category somewhere in the sentence does not make a delivery,
+    # price or discount noun the product itself. Those writes are unsupported.
+    if (remove or replace or update) and re.search(
+        r"\b(?:indirim\w*|fiyat\w*|teslim\w*|tarih\w*|garanti\w*|vade\w*)\s+(?:de\s+)?(?:kaldir|sil|degistir|guncelle)\b",
+        normalized,
+    ):
+        notice = "Ürün miktarı veya ürün değişimi dışında bu alanı değiştiremiyorum. Hangi teklif kalemini ve işlemi istediğini belirtir misin? Teklifi değiştirmedim."
         return finish()
     if mutating and re.search(r"\bdaha\s+(ucuz|pahali)\b", normalized):
         notice = "Karşılaştırma için ürün kodunu ve fiyat sınırını belirtir misin? Teklifi değiştirmedim."
         return finish()
+    plus_mentioned = "plus" in tokens(text) or any(t.endswith("-plus") for t in tokens(text))
+    explicit_plus = any(
+        token.startswith(("prd-", "tbr-")) and token.endswith("-plus") for token in tokens(text)
+    ) or any(
+        row["sku"].endswith("PLUS")
+        and re.search(
+            r"\b" + re.escape(" ".join(normalize(row["name_tr"]).split()[:2])) + r" plus\b",
+            normalized,
+        )
+        for row in catalog.values()
+    )
+    if mutating and plus_mentioned and not explicit_plus:
+        notice = "Plus seçimini kesinleştirmek için tam model adını veya ürün kodunu belirtir misin? Teklifi değiştirmedim."
+        return finish()
     constraints = Constraints(
         max_price_try=slots["max_price_try"],
-        explicit_plus="plus" in tokens(text) or any(t.endswith("-plus") for t in tokens(text)),
+        explicit_plus=bool(explicit_plus),
         explicit_backorder_consent=bool(
             re.search(
                 r"\b(bekleyebilirim|beklemeyi kabul ediyorum|backorder kabul ediyorum)\b",

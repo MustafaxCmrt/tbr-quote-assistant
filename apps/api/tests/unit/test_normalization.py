@@ -49,3 +49,32 @@ def test_signed_or_fractional_quantities_rejected(value):
 
 def test_apostrophe_target_quantity():
     assert numeric_slots("Miktarı 3'e çıkar.")["quantity"] == 3
+
+
+@pytest.mark.parametrize(
+    "marker",
+    [
+        "altında",
+        "üstüne çıkmadan",
+        "en fazla",
+        "bütçe",
+        "limit",
+        "tavan",
+        "kadar",
+        "aşmayan",
+        "geçmeyen",
+    ],
+)
+def test_every_supported_ceiling_marker_has_matching_intent_detection(marker):
+    from app.services.normalization import has_price_intent
+
+    assert has_price_intent(f"5.000 {marker}") is True
+    assert numeric_slots(f"5.000 TL {marker}")["max_price_try"] == Decimal(5000)
+
+
+@pytest.mark.parametrize("currency", ["TL", "₺", "lira", "liraya", "TRY"])
+def test_currency_without_supported_amount_requests_clarification(currency):
+    from app.services.normalization import has_price_intent
+
+    assert has_price_intent(f"beş bin {currency}") is True
+    assert numeric_slots(f"beş bin {currency}")["max_price_try"] is None

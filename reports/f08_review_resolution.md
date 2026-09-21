@@ -102,3 +102,32 @@ Auth yokluğu, rule registry seçimi, session dahil olmayan key'in fail-closed c
 belgelenmiş tasarım sınırlarıdır; üretim yetkilendirmesi iddia edilmez.
 
 F08 son tam koşu: commit313a486, `docker compose --profile test run --build --rm -e GOLDEN_REPORT_PATH=/evidence/golden_results.json -e EVIDENCE_COMMIT_SHA=313a4865dd2bcf15dec7fefd01d0c57f984eb01b -v /Users/comert/Desktop/tbr-quote-assistant/reports:/evidence test pytest -v`: exit0,179passed40.92s. reports/f08_review_full_backend.txt ve golden_results.json yenilendi. Opus5/xhigh odaklı takip review session6425 çalışıyor; verdict bekleniyor.
+
+## Opus 5 takip bulguları — 9 ek ifade ve ortak tespit
+
+`f08_claude_followup.md` kabul vermedi: üç yorumlama sınıfının kısmen açık kaldığını gösterdi.
+Reviewer yalnız kaynak okudu; CLI exit0/is_error=false/modelclaude-opus-5,397.4sn.
+Codex yeni örnekleri gerçek HTTP/PostgreSQL testine ekledi: önce9failed/11passed
+(`f08_followup_regressions_before.txt`); düzeltme sonrası chat+golden+numeric
+**109passed19.93s/exit0** (`f08_followup_regressions_final.txt`).
+
+- Para niyeti ve sayı çözümleme aynı `PRICE_CEILING_MARKERS` listesini kullanır; TL/₺/lira/TRY
+  tanınır. Ayrıştırılamayan tutar netleştirme ister. Sınırlı parser'ın tüm dil ifadelerini
+  anladığı iddia edilmez; önceki genel ifade bunun yerine okunmalıdır.
+- Plus olumsuzlukları kontrol edilir; pozitif Plus seçimi tam model+Plus ya da açık ID/SKU ister.
+- Ürün kategorisinin geçmesi teslim tarihi/indirim/fiyat alanını yazma yetkisi vermez.
+- Canlı katalogdaki ek betimleyiciler de referans seçerken korunur. Örneğin endüstriyel ürün
+  isteği standart BlueScan Air satırına çözülmez. Eşleşme tag kadar ad/alias içinde de olabilir;
+  ilk fazla geniş tag filtresinin iki golden hatası f08_followup_regressions_after.txt'de saklandı.
+
+| Requirement | Evidence |
+|---|---|
+| "Açık max_price … kesin filtre" | `test_review_price_expression_never_silently_drops_ceiling`: lira/en fazla/üstüne çıkmadan yeni örnekleri, aynı quote ve receipt0. |
+| "belirsiz niyette soru sor" | `test_review_unsupported_or_unmatched_intent_clarifies_without_mutation`: Plus olmadan/istemiyorum/Plus'suz; okuyucu teslim tarihi/indirim; endüstriyel ürün örneklerinde aynı quote, notice, receipt0 ve mutation tool yok. |
+| Tek para belirteci sözleşmesi | `test_every_supported_ceiling_marker_has_matching_intent_detection`:9marker, tespitTrue ve Decimal5000; `test_currency_without_supported_amount_requests_clarification`:5currency, tespitTrue ama çözümlenmiş tutarNone. |
+| Gerçek koşu | 109-test birleşik komut yukarıda; numeric unit33passed; son lint/delivery exit0: f08_followup_lint_final.txt/f08_followup_delivery.txt. |
+
+Kalan reviewer hipotezlerinin sözleşme kontrolü: replace quantity dış sözleşmede `integer > 0|null`;
+önceki satır tamamen replaced olur. Bu tam satır değişimidir, kısmi split işlemi değildir.
+Doğal dilde kısmi değişim niyeti ayrıca netleştirilmelidir; kapsamlı semantik kabul henüz kapanmadı.
+Kaynak quote JSON'da validity alanı yok; var olmayan expiry kuralı uydurulmaz.

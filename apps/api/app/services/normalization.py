@@ -4,6 +4,25 @@ import re
 import unicodedata
 from decimal import Decimal
 
+PRICE_CEILING_MARKERS = (
+    "altinda",
+    "ustune cikmadan",
+    "en fazla",
+    "butce",
+    "limit",
+    "tavan",
+    "kadar",
+    "asmayan",
+    "gecmeyen",
+)
+
+
+def has_price_intent(value: str) -> bool:
+    normalized = normalize(value)
+    return bool(re.search(r"\b(?:tl|try|lira\w*)\b|₺", value, re.IGNORECASE)) or any(
+        marker in normalized for marker in PRICE_CEILING_MARKERS
+    )
+
 
 def normalize(value: str) -> str:
     value = value.translate(str.maketrans({"İ": "i", "I": "i", "ı": "i"})).lower()
@@ -38,10 +57,7 @@ def numeric_slots(value: str) -> dict:
         quantities = re.findall(r"(?<![\w.,-])(\d+)['’]?[ea]\b", lowered)
     if len(set(amounts)) > 1 or len(set(quantities)) > 1:
         raise ValueError("Birden çok sayısal hedef; ayrı planlama gerekir.")
-    ceiling = any(
-        marker in normalize(value)
-        for marker in ("altinda", "ustune cikmadan", "en fazla", "butce", "limit", "tavan")
-    )
+    ceiling = any(marker in normalize(value) for marker in PRICE_CEILING_MARKERS)
     return {
         "quantity": int(quantities[0]) if quantities else None,
         "max_price_try": parse_money(amounts[0]) if amounts and ceiling else None,
