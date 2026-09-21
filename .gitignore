@@ -1,0 +1,99 @@
+# ======================================================================
+#  tbr-quote-assistant — monorepo .gitignore
+#  Secrets, ajan talimatlari ve plan notlari teslim deposuna GIRMEZ.
+# ======================================================================
+
+# ---- Secrets / local env (asla commit etme) ----
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+*.key
+*.p8
+*.p12
+*.jks
+*.keystore
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+secrets/
+
+# ---- Ajan talimat dosyalari ve yerel AI durumu (yalnizca yerel) ----
+AGENTS.md
+CLAUDE.md
+.claude/
+.codex/
+
+# ---- Python (apps/api) ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# ---- Node (apps/web, apps/mobile, packages/contracts) ----
+node_modules/
+npm-debug.log*
+yarn-*.log
+pnpm-debug.log*
+*.tsbuildinfo
+
+# ---- Build ciktilari ----
+dist/
+dist-ssr/
+build/
+.vite/
+.turbo/
+.cache/
+coverage/
+web-build/
+playwright-report/
+test-results/
+
+# ---- Expo (apps/mobile) ----
+.expo/
+.expo-shared/
+expo-env.d.ts
+*.apk
+*.aab
+*.ipa
+.metro-health-check*
+# CNG kullaniliyorsa prebuild ciktilari; yerel native duzenleme yapilirsa kaldir
+apps/mobile/ios/
+apps/mobile/android/
+
+# ---- Docker / DB volumes / local data ----
+pgdata/
+postgres-data/
+docker-data/
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+
+# ---- Runtime artefaktlari ----
+# reports/ altindaki gercek test raporlari commit edilir (secret icermemeli).
+artifacts/
+logs/
+*.log
+tmp/
+
+# ---- Editor / OS ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*~
