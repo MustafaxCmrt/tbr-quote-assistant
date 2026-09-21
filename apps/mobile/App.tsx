@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AppState,
+  KeyboardAvoidingView,
+  Platform,
   Modal,
   ScrollView,
   StatusBar,
@@ -120,152 +122,158 @@ function Workspace() {
     };
   }, [quoteId, refresh]);
   return (
-    <SafeAreaView style={[ui.flex, { backgroundColor: c.bg }]}>
-      <StatusBar barStyle={dark ? "light-content" : "dark-content"} />
-      <View
-        style={{
-          padding: 16,
-          gap: 10,
-          borderBottomWidth: 1,
-          borderColor: c.line,
-          backgroundColor: c.surface,
-        }}
-      >
-        <View style={ui.row}>
-          <Text
-            accessibilityRole="header"
-            style={[ui.heading, { color: c.ink }]}
-          >
-            The Blue Red
-          </Text>
-          <Button disabled={busy} onPress={() => setContext(true)}>
-            Müşteri / teklif
-          </Button>
-        </View>
-        <Text style={[ui.caption, { color: c.muted }]}>
-          {customers.find((x) => x.customer_id === customer)?.name ??
-            "Bağlanıyor…"}{" "}
-          · {quoteId}
-        </Text>
-      </View>
-      {!!error && (
-        <View style={ui.content}>
-          <Text accessibilityRole="alert" style={[ui.body, { color: c.error }]}>
-            {error}
-          </Text>
-          <Button onPress={() => setRetry((v) => v + 1)}>Tekrar bağlan</Button>
-        </View>
-      )}
-      {stale && tab === "chat" && (
-        <Text
-          accessibilityRole="alert"
-          style={[ui.caption, { color: c.error, padding: 12 }]}
+    // Keep keyboard geometry at the screen root; nested chat frames use local coordinates.
+    <KeyboardAvoidingView
+      style={[ui.flex, { backgroundColor: c.bg }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <SafeAreaView style={ui.flex}>
+        <StatusBar barStyle={dark ? "light-content" : "dark-content"} />
+        <View
+          style={{
+            padding: 16,
+            gap: 10,
+            borderBottomWidth: 1,
+            borderColor: c.line,
+            backgroundColor: c.surface,
+          }}
         >
-          Bağlantı kesildi. Son kontrol {updated || "yapılamadı"}; teklif
-          ekranından yenileyebilirsin.
-        </Text>
-      )}
-      <View style={[ui.flex, { display: tab === "chat" ? "flex" : "none" }]}>
-        {quoteId ? (
-          <Chat
-            key={quoteId}
-            quoteId={quoteId}
-            customerId={customer}
-            refresh={refresh}
-            onBusy={setBusy}
-          />
-        ) : (
-          <View style={ui.content}>
-            <Label>Hazır teklif bekleniyor.</Label>
-          </View>
-        )}
-      </View>
-      <View style={[ui.flex, { display: tab === "quote" ? "flex" : "none" }]}>
-        <Quote
-          quote={quote}
-          stale={stale}
-          updated={updated}
-          refresh={refresh}
-        />
-      </View>
-      <View
-        accessibilityRole="tablist"
-        style={{
-          flexDirection: "row",
-          gap: 12,
-          padding: 12,
-          borderTopWidth: 1,
-          borderColor: c.line,
-          backgroundColor: c.surface,
-        }}
-      >
-        <View style={ui.flex}>
-          <Button selected={tab === "chat"} primary={tab === "chat"} onPress={() => setTab("chat")}>
-            Sohbet
-          </Button>
-        </View>
-        <View style={ui.flex}>
-          <Button
-            selected={tab === "quote"}
-            primary={tab === "quote"}
-            onPress={() => {
-              setTab("quote");
-              refresh();
-            }}
-          >
-            Teklif
-          </Button>
-        </View>
-      </View>
-      <Modal
-        visible={context}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setContext(false)}
-      >
-        <SafeAreaView style={[ui.flex, { backgroundColor: c.bg }]}>
-          <ScrollView contentContainerStyle={ui.content}>
-            <Button onPress={() => setContext(false)}>Tamam</Button>
-            <Text
-              accessibilityRole="header"
-              style={[ui.title, { color: c.ink }]}
-            >
-              Demo bağlamı
-            </Text>
-            <Label muted>
-              Müşteri değişince yeni sohbet başlar. Kayıtlı teklif korunur.
-            </Label>
-            {customers.map((item) => (
-              <Button
-                key={item.customer_id}
-                primary={customer === item.customer_id}
-                onPress={() => setCustomer(item.customer_id)}
-              >
-                {item.name} · {item.city}
-              </Button>
-            ))}
+          <View style={ui.row}>
             <Text
               accessibilityRole="header"
               style={[ui.heading, { color: c.ink }]}
             >
-              Hazır teklifler
+              The Blue Red
             </Text>
-            {quotes.map((item) => (
-              <Button
-                key={item.quote_id}
-                primary={quoteId === item.quote_id}
-                onPress={() => {
-                  setQuoteId(item.quote_id);
-                  setContext(false);
-                }}
+            <Button disabled={busy} onPress={() => setContext(true)}>
+              Müşteri / teklif
+            </Button>
+          </View>
+          <Text style={[ui.caption, { color: c.muted }]}>
+            {customers.find((x) => x.customer_id === customer)?.name ??
+              "Bağlanıyor…"}{" "}
+            · {quoteId}
+          </Text>
+        </View>
+        {!!error && (
+          <View style={ui.content}>
+            <Text accessibilityRole="alert" style={[ui.body, { color: c.error }]}>
+              {error}
+            </Text>
+            <Button onPress={() => setRetry((v) => v + 1)}>Tekrar bağlan</Button>
+          </View>
+        )}
+        {stale && tab === "chat" && (
+          <Text
+            accessibilityRole="alert"
+            style={[ui.caption, { color: c.error, padding: 12 }]}
+          >
+            Bağlantı kesildi. Son kontrol {updated || "yapılamadı"}; teklif
+            ekranından yenileyebilirsin.
+          </Text>
+        )}
+        <View style={[ui.flex, { display: tab === "chat" ? "flex" : "none" }]}>
+          {quoteId ? (
+            <Chat
+              key={quoteId}
+              quoteId={quoteId}
+              customerId={customer}
+              refresh={refresh}
+              onBusy={setBusy}
+            />
+          ) : (
+            <View style={ui.content}>
+              <Label>Hazır teklif bekleniyor.</Label>
+            </View>
+          )}
+        </View>
+        <View style={[ui.flex, { display: tab === "quote" ? "flex" : "none" }]}>
+          <Quote
+            quote={quote}
+            stale={stale}
+            updated={updated}
+            refresh={refresh}
+          />
+        </View>
+        <View
+          accessibilityRole="tablist"
+          style={{
+            flexDirection: "row",
+            gap: 12,
+            padding: 12,
+            borderTopWidth: 1,
+            borderColor: c.line,
+            backgroundColor: c.surface,
+          }}
+        >
+          <View style={ui.flex}>
+            <Button selected={tab === "chat"} primary={tab === "chat"} onPress={() => setTab("chat")}>
+              Sohbet
+            </Button>
+          </View>
+          <View style={ui.flex}>
+            <Button
+              selected={tab === "quote"}
+              primary={tab === "quote"}
+              onPress={() => {
+                setTab("quote");
+                refresh();
+              }}
+            >
+              Teklif
+            </Button>
+          </View>
+        </View>
+        <Modal
+          visible={context}
+          animationType="slide"
+          presentationStyle="pageSheet"
+          onRequestClose={() => setContext(false)}
+        >
+          <SafeAreaView style={[ui.flex, { backgroundColor: c.bg }]}>
+            <ScrollView contentContainerStyle={ui.content}>
+              <Button onPress={() => setContext(false)}>Tamam</Button>
+              <Text
+                accessibilityRole="header"
+                style={[ui.title, { color: c.ink }]}
               >
-                {item.quote_id}
-              </Button>
-            ))}
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
-    </SafeAreaView>
+                Demo bağlamı
+              </Text>
+              <Label muted>
+                Müşteri değişince yeni sohbet başlar. Kayıtlı teklif korunur.
+              </Label>
+              {customers.map((item) => (
+                <Button
+                  key={item.customer_id}
+                  primary={customer === item.customer_id}
+                  onPress={() => setCustomer(item.customer_id)}
+                >
+                  {item.name} · {item.city}
+                </Button>
+              ))}
+              <Text
+                accessibilityRole="header"
+                style={[ui.heading, { color: c.ink }]}
+              >
+                Hazır teklifler
+              </Text>
+              {quotes.map((item) => (
+                <Button
+                  key={item.quote_id}
+                  primary={quoteId === item.quote_id}
+                  onPress={() => {
+                    setQuoteId(item.quote_id);
+                    setContext(false);
+                  }}
+                >
+                  {item.quote_id}
+                </Button>
+              ))}
+            </ScrollView>
+          </SafeAreaView>
+        </Modal>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 export default function App() {

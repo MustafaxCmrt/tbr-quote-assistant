@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  KeyboardAvoidingView,
   Modal,
-  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -144,14 +142,12 @@ export function Chat({
     }
   }
   return (
-    <KeyboardAvoidingView
-      style={ui.flex}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
+    <View style={ui.flex}>
       <ScrollView
         ref={scroll}
         contentContainerStyle={ui.content}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         onScroll={(e) => {
           const { contentOffset, contentSize, layoutMeasurement } =
             e.nativeEvent;
@@ -305,6 +301,6 @@ export function Chat({
           </ScrollView>
         </SafeAreaView>
       </Modal>
-    </KeyboardAvoidingView>
+    </View>
   );
 }

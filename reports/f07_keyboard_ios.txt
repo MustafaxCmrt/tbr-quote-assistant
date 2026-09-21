@@ -1,0 +1,19 @@
+UTC: 2026-09-21T16:42:53.354934+00:00
+Base commit (working tree may contain pending changes): fd68b1464e284205f214dc800ff0ac2c35082095
+Command: env EXPO_NO_DOTENV=1 EXPO_PUBLIC_API_BASE_URL=http://api.example.invalid:8001 npm exec --workspace @tbr/mobile -- expo export --platform ios --output-dir dist
+Exit code: 0
+
+Expo Autolinking module resolution enabled
+Starting Metro Bundler
+
+| (node:84464) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+| (Use `node --trace-warnings ...` to show where the warning was created)
+iOS Bundled 1826ms apps/mobile/index.ts (608 modules)
+
+› ios bundles (1):
+_expo/static/js/ios/index-04785ff809425f3bd6d905ed892dc8df.hbc (1.5MB)
+
+› Files (1):
+metadata.json (142B)
+
+Exported: dist
