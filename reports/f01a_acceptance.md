@@ -38,3 +38,5 @@ API uygulama commit'i: `adefc3967c95446584812d569bdfa308e413ace1` (push exit 0).
 Bu raporu içeren commit, mobil/parser uygulamasını ve raporları birlikte taşır; son SHA vault'ta kaydedilir.
 
 Metro ilk deneme 127.0.0.1 sorgusunda timeout (exit 1); Expo’nun bildirdiği localhost ile tekrar exit 0. Native/LAN erişimi olarak sayılmadı.
+
+Mobil/parser uygulama commit’i: `db1a17b3637bac99fd872be6ffa5bafcab4ad43e` (push exit 0). Çıktı dosyalarında yalnız satır sonu/EOF boşlukları normalize edildi; komut/exit/sonuç metni korunmuştur.

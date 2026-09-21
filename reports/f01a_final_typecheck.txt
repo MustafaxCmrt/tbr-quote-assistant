@@ -14,4 +14,3 @@ Exit code: 0
 
 > @tbr/contracts@0.1.0 typecheck
 > tsc --noEmit
-

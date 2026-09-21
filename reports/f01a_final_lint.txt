@@ -6,4 +6,3 @@ Exit code: 0
 
 > tbr-quote-assistant@0.1.0 lint
 > eslint apps/mobile packages/contracts
-

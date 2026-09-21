@@ -1,0 +1,6 @@
+Command: DEBUG_STREAM_SMOKE=1 uv run --directory apps/api --locked uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-access-log
+Startup: application startup complete; host 0.0.0.0, port 8000.
+HTTP evidence: f01a_curl_stream.txt
+Shutdown: explicit Ctrl+C after checks; application shutdown complete.
+Exit code: 130 (intentional interrupt, not test failure).
+No API or Metro process is intentionally left running for handoff.
