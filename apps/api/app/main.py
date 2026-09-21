@@ -1,16 +1,39 @@
-"""F01a: DB'siz liveness ve açıkça etkinleştirilen debug aktarım testi."""
+"""Liveness, PostgreSQL readiness and opt-in debug streaming."""
 
 import asyncio
 import json
 import os
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
+
+from app.persistence.database import make_engine
+from app.persistence.readiness import is_ready
 
 
-def create_app() -> FastAPI:
-    app = FastAPI(title="The Blue Red Teklif Asistanı", version="0.1.0")
+def create_app(engine=None) -> FastAPI:
+    @asynccontextmanager
+    async def lifespan(app):
+        owned = engine is None and bool(os.getenv("DATABASE_URL") or os.getenv("POSTGRES_DB"))
+        app.state.engine = make_engine() if owned else engine
+        try:
+            yield
+        finally:
+            if owned:
+                await app.state.engine.dispose()
+
+    app = FastAPI(title="The Blue Red Teklif Asistanı", version="0.1.0", lifespan=lifespan)
+
+    @app.get("/health/ready", tags=["Sağlık"])
+    async def ready():
+        if await is_ready(app.state.engine):
+            return {"status": "ready"}
+        return JSONResponse(
+            status_code=503,
+            content={"status": "not_ready", "detail": "Veritabanı henüz hazır değil."},
+        )
 
     @app.get("/health/live", tags=["Sağlık"])
     async def live() -> dict[str, str]:

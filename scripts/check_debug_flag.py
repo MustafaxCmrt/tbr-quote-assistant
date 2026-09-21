@@ -12,5 +12,5 @@ for flag, enabled in [(None, False), ("0", False), ("false", False), ("invalid",
     paths = create_app().openapi()["paths"]
     assert (path in paths) is enabled, flag
     assert "/health/live" in paths
-    assert "/health/ready" not in paths
+    assert "/health/ready" in paths
     print(f"PASS DEBUG_STREAM_SMOKE={flag!r}: debug route registered={enabled}")
