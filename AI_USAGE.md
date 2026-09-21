@@ -13,3 +13,5 @@ Compose ve React/Vite iskeletini yazdı. Gerçek PostgreSQL'de 7 integration tes
 karşılaştırması, boş volume başlangıcı, build/lint ve tarayıcı smoke çalıştırıldı. İlk init izin
 hatası veriyi silmeden düzeltildi; başarısız çıktılar raporlarda korundu. AI testleri insan
 kod denetimi yerine sunulmaz; golden/tool/chat kabulü bu checkpoint'te henüz yapılmadı.
+
+F02: Codex Türkçe normalizasyon, read DTO/araçlar, EvidenceBundle, snapshot quote ve saf fiyatlamayı geliştirdi. 47 unit/PostgreSQL testi, gerçek HTTP smoke ve lint exit 0. Firma cevabı vault güncellemesiyle okundu; ADR-005/007 accepted aday tercihi olarak belgelendi. Golden/chat henüz çalıştırılmadı.

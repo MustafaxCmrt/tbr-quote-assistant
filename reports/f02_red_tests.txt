@@ -1,0 +1,28 @@
+UTC: 2026-09-21T15:07:02.633423+00:00
+Base commit (working tree may contain pending changes): d7de617d95c81eaf6b56b3913d540eef79901527
+Command: uv run --directory apps/api --locked pytest tests/unit/test_normalization.py --collect-only
+Exit code: 2
+
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/comert/Desktop/tbr-quote-assistant/apps/api
+configfile: pyproject.toml
+plugins: asyncio-1.4.0, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 0 items / 1 error
+
+==================================== ERRORS ====================================
+______________ ERROR collecting tests/unit/test_normalization.py _______________
+ImportError while importing test module '/Users/comert/Desktop/tbr-quote-assistant/apps/api/tests/unit/test_normalization.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+../../../../.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_normalization.py:3: in <module>
+    from app.services.normalization import normalize, parse_money, numeric_slots
+E   ModuleNotFoundError: No module named 'app.services.normalization'
+=========================== short test summary info ============================
+ERROR tests/unit/test_normalization.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+===================== no tests collected, 1 error in 0.06s =====================

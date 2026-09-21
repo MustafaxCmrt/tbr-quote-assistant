@@ -1,7 +1,7 @@
 # Bilinen sınırlamalar — F01
 
 - Native debug stream testi **passed** (Mustafa onayı + ekran görüntüsü). Tam cihaz/iOS/Expo Go sürümü henüz bildirilmedi. Gerçek chat ve ortak teklif doğrulaması henüz yok.
-- F01b DB/Compose/migration/seed/readiness/kalıcılık passed; 7 gerçek PostgreSQL testi geçti. Altı tool, gerçek chat/quote, web admin ve ortak teklif durumu henüz yok. Golden senaryolar **not_run**.
+- F01b DB/Compose/migration/seed/readiness/kalıcılık passed; 7 gerçek PostgreSQL testi geçti. Üç read tool ve kanonik quote okuması hazır; mutation tool’ları, gerçek chat, web admin ve ortak teklif ekranları henüz yok. Golden senaryolar **not_run**.
 - Web yalnız bağlantı iskeleti, yerel Vite sunucusudur. Auth/public deployment bu kapının kapsamı değildir.
 - Test veritabanları ve ayrı fresh-start volume teşhis için tutulur; zamanla yer kaplar. Otomatik yıkıcı temizlik yoktur.
 - Debug endpoint yalnız yerel bağlantı testi; `DEBUG_STREAM_SMOKE=1` ile açılır. Gerçek iş akışı değildir.
@@ -13,3 +13,5 @@
   bu oturumda prebuild/EAS/mağaza yayını yapılmadı.
 - SDK 57 için App Store Expo Go 57.0.9 kaydı esas alındı; telefondaki gerçek sürüm Mustafa tarafından doğrulanacak.
 - ADR-005/007 firma kararı adaya bıraktıktan sonra accepted; adayın gerekçeli tercihi olarak sunulur.
+
+- Retrieval küçük katalog için tüm aktif adayları normalize ederek tarar; büyük katalog ölçek testi yapılmadı. Admin CRUD henüz yok; canlı DB kaydının retrieval görünürlüğü test edildi.

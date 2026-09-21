@@ -1,8 +1,8 @@
 # The Blue Red — Teklif Asistanı
 
 Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
-**21 Eylül 2026: F01 tamamlandı.** PostgreSQL/Compose, Alembic, idempotent seed ve readiness doğrulandı.
-iPhone debug streaming Mustafa tarafından doğrulandı. Gerçek tool/chat/admin akışları sonraki fazlardır.
+**21 Eylül 2026: F01–F02 tamamlandı.** PostgreSQL/Compose, Alembic, idempotent seed ve readiness doğrulandı.
+iPhone debug streaming Mustafa tarafından doğrulandı. Üç okuma aracı ve kaynaklı retrieval hazır; mutasyon/chat/admin akışları sonraki fazlardır.
 
 ## Docker ile yerel altyapı
 
@@ -99,6 +99,23 @@ iOS bundle üretimi native cihaz gözlemi yerine geçmez. Kanıt haritası: [F01
 
 ADR-005 (indirimler toplanmaz, özel kural önceliği) ve ADR-007 (beklenen çağrı/kaynaklar minimum)
 firma tarafından karar adaya bırakıldıktan sonra **kabul edilmiş aday tercihleridir** (21 Eylül 2026).
-Şirketin belirlediği kesin kurallar olarak sunulmaz; fiyat/tool motoru henüz uygulanmadı.
+Şirketin belirlediği kesin kurallar olarak sunulmaz; saf fiyatlama uygulanıp test edildi; mutasyon yürütücüsü sıradadır.
 
 [AI kullanımı](AI_USAGE.md) · [Bilinen sınırlamalar](KNOWN_LIMITATIONS.md)
+
+## Kaynaklı okuma (F02)
+
+`POST /api/tools/search_products`, `POST /api/tools/get_knowledge_entries`,
+`GET /api/quotes/{quote_id}` gerçek PostgreSQL verisini okur. Para cevaplarda iki ondalıklı string,
+hesapta Decimal'dir. Teklif mevcut snapshot birim fiyatını kullanır; katalog fiyat güncellemesi eski teklifi değiştirmez.
+Aktif ve geçmiş satırlar ayrı döner. Read işlemleri teklif version'ını artırmaz.
+
+```sh
+python3 scripts/smoke_reads.py
+```
+
+Fiyat çakışmasında en özel tek kural uygulanır (bundle/acil hizmet hariç tutma → Plus →
+yazılım kombinasyonu → aksesuar → partner). Örneğin 4 × 9430 için Plus %6: net 35456.80;
+toplamsal %13 seçilseydi net 32816.40 olurdu. Firma kararı adaya bıraktı; bu belgelenmiş
+aday tercihidir. Kaynak condition metinleri eval edilmez.
+Kanıt: [F02 kabul raporu](reports/f02_acceptance.md).
