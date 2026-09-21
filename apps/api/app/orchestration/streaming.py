@@ -45,10 +45,12 @@ async def stream_chat(engine, request):
         try:
             response = await process_chat(engine, request, attempt_id=attempt, on_event=emit)
             emit("sources", {"sources": response["sources"]})
-            # Template chunk streaming, explicitly not provider token streaming.
-            for start in range(0, len(response["text"]), 160):
-                emit("text_delta", {"text": response["text"][start : start + 160]})
-                await asyncio.sleep(0.01)
+            # Deliberately paced template delivery, not provider token generation.
+            # Give native rendering time between frames; cap added delivery time at 4s.
+            chunk_size = max(80, (len(response["text"]) + 79) // 80)
+            for start in range(0, len(response["text"]), chunk_size):
+                emit("text_delta", {"text": response["text"][start : start + chunk_size]})
+                await asyncio.sleep(0.05)
             emit(
                 "done",
                 {

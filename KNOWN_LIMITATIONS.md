@@ -20,3 +20,5 @@
 - Retrieval scans the small catalogue; large catalogue performance has not been benchmarked. New admin rows are visible to retrieval; inactive explicitly named models do not fall back to unrelated products.
 - ADR-005/007 are accepted candidate choices after the company delegated the decision, not company-provided business rules.
 - F08 independent acceptance/security review and F09 clean-install/delivery gates are not complete. Public sharing, video recording/delivery and repository visibility changes need human authorization.
+
+SSE text delivery is deliberately paced after the deterministic answer is ready (50ms/frame, at most80 frames). This is template delivery, not LLM token generation. Physical keyboard/source interactions passed; latest mobile scroll/visible-stream changes still await Mustafa.

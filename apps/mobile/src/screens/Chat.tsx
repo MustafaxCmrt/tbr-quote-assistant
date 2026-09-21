@@ -25,6 +25,7 @@ interface Message {
   sources: Source[];
   tools: string[];
   status: string;
+  layoutRevision?: number;
   error?: string;
 }
 const toolText: Record<ToolName, string> = {
@@ -50,12 +51,14 @@ export function Chat({
   const [messages, setMessages] = useState<Message[]>([]),
     [draft, setDraft] = useState(""),
     [busy, setBusy] = useState(false),
+    [viewportHeight, setViewportHeight] = useState(0),
     [source, setSource] = useState<Source | null>(null);
   const session = useRef(""),
     active = useRef<AbortController | null>(null),
     mounted = useRef(true),
     scroll = useRef<ScrollView>(null),
-    followBottom = useRef(true);
+    pendingAnchor = useRef<string | null>(null),
+    messagePositions = useRef<Record<string, number>>({});
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -69,6 +72,13 @@ export function Chat({
         prev.map((m) => (m.id === id ? { ...m, ...change } : m)),
       );
   }
+  function anchorPendingMessage() {
+    const id = pendingAnchor.current;
+    if (id && messagePositions.current[id] !== undefined) {
+      scroll.current?.scrollTo({ y: Math.max(0, messagePositions.current[id] - 20), animated: false });
+      pendingAnchor.current = null;
+    }
+  }
   async function send(user: string, id: string = randomUUID()) {
     if (active.current || !user.trim()) return;
     const controller = new AbortController();
@@ -77,9 +87,10 @@ export function Chat({
     setBusy(true);
     onBusy(true);
     setDraft("");
-    followBottom.current = true;
+    pendingAnchor.current = id;
+    delete messagePositions.current[id];
     setMessages((prev) => prev.some((m) => m.id === id)
-      ? prev.map((m) => m.id === id ? { ...m, status: "connecting", error: undefined, tools: [] } : m)
+      ? prev.map((m) => m.id === id ? { ...m, status: "connecting", error: undefined, tools: [], layoutRevision: (m.layoutRevision ?? 0) + 1 } : m)
       : [...prev, { id, user, text: "", sources: [], tools: [], status: "connecting" }]);
     try {
       if (!session.current) {
@@ -148,18 +159,9 @@ export function Chat({
         contentContainerStyle={ui.content}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        onScroll={(e) => {
-          const { contentOffset, contentSize, layoutMeasurement } =
-            e.nativeEvent;
-          followBottom.current =
-            contentOffset.y + layoutMeasurement.height >=
-            contentSize.height - 80;
-        }}
-        scrollEventThrottle={100}
-        onContentSizeChange={() => {
-          if (followBottom.current)
-            scroll.current?.scrollToEnd({ animated: false });
-        }}
+        onLayout={(e) => setViewportHeight(e.nativeEvent.layout.height)}
+        onScrollBeginDrag={() => { pendingAnchor.current = null; }}
+        onContentSizeChange={anchorPendingMessage}
       >
         {!messages.length && (
           <View style={ui.section}>
@@ -178,10 +180,17 @@ export function Chat({
             </Button>
           </View>
         )}
-        {messages.map((m) => (
+        {messages.map((m, index) => (
           <View
-            key={m.id}
-            style={[ui.separator, { borderColor: c.line, gap: 12 }]}
+            key={`${m.id}:${m.layoutRevision ?? 0}`}
+            onLayout={(e) => {
+              messagePositions.current[m.id] = e.nativeEvent.layout.y;
+              anchorPendingMessage();
+            }}
+            style={[ui.separator, {
+              borderColor: c.line, gap: 12,
+              minHeight: index === messages.length - 1 ? Math.max(0, viewportHeight - 40) : undefined,
+            }]}
           >
             <View style={[ui.section, { backgroundColor: c.tint }]}>
               <Label>{m.user}</Label>
