@@ -1,0 +1,268 @@
+{
+  "search_products": {
+    "$defs": {
+      "ProductFilters": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Category"
+          },
+          "max_price_try": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,12}|(?=[\\d.]{1,15}0*$)\\d{0,12}\\.\\d{0,2}0*$)",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Price Try"
+          },
+          "in_stock_only": {
+            "default": true,
+            "title": "In Stock Only",
+            "type": "boolean"
+          },
+          "required_tags": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 30,
+            "title": "Required Tags",
+            "type": "array"
+          }
+        },
+        "title": "ProductFilters",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "query": {
+        "maxLength": 2000,
+        "title": "Query",
+        "type": "string"
+      },
+      "locale": {
+        "const": "tr",
+        "default": "tr",
+        "title": "Locale",
+        "type": "string"
+      },
+      "filters": {
+        "$ref": "#/$defs/ProductFilters"
+      },
+      "limit": {
+        "default": 10,
+        "maximum": 50,
+        "minimum": 1,
+        "title": "Limit",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "query"
+    ],
+    "title": "ProductSearchInput",
+    "type": "object"
+  },
+  "get_knowledge_entries": {
+    "additionalProperties": false,
+    "properties": {
+      "query": {
+        "maxLength": 2000,
+        "title": "Query",
+        "type": "string"
+      },
+      "locale": {
+        "const": "tr",
+        "default": "tr",
+        "title": "Locale",
+        "type": "string"
+      },
+      "topic": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Topic"
+      },
+      "limit": {
+        "default": 10,
+        "maximum": 50,
+        "minimum": 1,
+        "title": "Limit",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "query"
+    ],
+    "title": "KnowledgeInput",
+    "type": "object"
+  },
+  "get_quote": {
+    "additionalProperties": false,
+    "properties": {
+      "quote_id": {
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "Quote Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "quote_id"
+    ],
+    "title": "GetQuoteInput",
+    "type": "object"
+  },
+  "add_to_quote": {
+    "additionalProperties": false,
+    "properties": {
+      "quote_id": {
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "Quote Id",
+        "type": "string"
+      },
+      "product_id": {
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "Product Id",
+        "type": "string"
+      },
+      "quantity": {
+        "exclusiveMinimum": 0,
+        "title": "Quantity",
+        "type": "integer"
+      },
+      "idempotency_key": {
+        "title": "Idempotency Key",
+        "type": "string"
+      },
+      "source_message_id": {
+        "title": "Source Message Id",
+        "type": "string"
+      }
+    },
+    "required": [
+      "quote_id",
+      "product_id",
+      "quantity",
+      "idempotency_key",
+      "source_message_id"
+    ],
+    "title": "AddInput",
+    "type": "object"
+  },
+  "update_quote_item": {
+    "additionalProperties": false,
+    "properties": {
+      "quote_id": {
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "Quote Id",
+        "type": "string"
+      },
+      "product_id": {
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "Product Id",
+        "type": "string"
+      },
+      "quantity": {
+        "minimum": 0,
+        "title": "Quantity",
+        "type": "integer"
+      },
+      "reason": {
+        "maxLength": 2000,
+        "title": "Reason",
+        "type": "string"
+      }
+    },
+    "required": [
+      "quote_id",
+      "product_id",
+      "quantity",
+      "reason"
+    ],
+    "title": "UpdateInput",
+    "type": "object"
+  },
+  "replace_with_alternative": {
+    "additionalProperties": false,
+    "properties": {
+      "quote_id": {
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "Quote Id",
+        "type": "string"
+      },
+      "from_product_id": {
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "From Product Id",
+        "type": "string"
+      },
+      "to_product_id": {
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "To Product Id",
+        "type": "string"
+      },
+      "quantity": {
+        "anyOf": [
+          {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Quantity"
+      },
+      "reason": {
+        "maxLength": 2000,
+        "title": "Reason",
+        "type": "string"
+      },
+      "idempotency_key": {
+        "title": "Idempotency Key",
+        "type": "string"
+      }
+    },
+    "required": [
+      "quote_id",
+      "from_product_id",
+      "to_product_id",
+      "reason",
+      "idempotency_key"
+    ],
+    "title": "ReplaceInput",
+    "type": "object"
+  }
+}

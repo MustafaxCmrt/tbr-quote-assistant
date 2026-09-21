@@ -15,3 +15,10 @@ hatası veriyi silmeden düzeltildi; başarısız çıktılar raporlarda korundu
 kod denetimi yerine sunulmaz; golden/tool/chat kabulü bu checkpoint'te henüz yapılmadı.
 
 F02: Codex Türkçe normalizasyon, read DTO/araçlar, EvidenceBundle, snapshot quote ve saf fiyatlamayı geliştirdi. 47 unit/PostgreSQL testi, gerçek HTTP smoke ve lint exit 0. Firma cevabı vault güncellemesiyle okundu; ADR-005/007 accepted aday tercihi olarak belgelendi. Golden/chat henüz çalıştırılmadı.
+
+F03: Codex tek transaction executor, üç gerçek mutation wrapper, server key/receipt ve DB lock
+korumalarını yazdı. Aynı/farklı key yarışları, stale replay, atomik grup rollback, admin fiyat/stok
+kilidi, backorder, replacement ve restart sonrası gerçek wrapper replay PostgreSQL üzerinde test edildi.
+Salt okunur ikinci AI incelemesinde kanıtlanmış önemli kusur bulunmadı; altı test açığı raporlandı.
+Bu açıklar için eklenen testler dahil son gerçek PostgreSQL/unit koşusu 94 passed; ayrıntı reports/f03_acceptance.md.
+Bu inceleme insan denetimi veya ampirik mutation score değildir.

@@ -1,0 +1,11 @@
+UTC: 2026-09-21T15:22:17.228158+00:00
+Base commit (working tree may contain pending changes): 4905579c413d51a1c835eebec1f8af75fcaf397b
+Command: docker compose --profile test run --rm -v /Users/comert/Desktop/tbr-quote-assistant/artifacts/f03:/evidence test python -m tests.mutation_restart_probe check
+Exit code: 0
+
+ Container tbr-quote-assistant-test-db-1 Running
+ Container tbr-quote-assistant-test-db-1 Waiting
+ Container tbr-quote-assistant-test-db-1 Healthy
+ Container tbr-quote-assistant-test-run-3c37fb91def7 Creating
+ Container tbr-quote-assistant-test-run-3c37fb91def7 Created
+PASS after PostgreSQL restart + seed: actual add wrapper replay, quantity/version unchanged, 1 receipt, 2 real attempt logs.

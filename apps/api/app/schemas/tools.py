@@ -96,3 +96,27 @@ class QuoteDTO(DTO):
     discount_total_try: Money
     net_total_try: Money
     rule_ids: list[str]
+
+
+class AddInput(DTO):
+    quote_id: str = Field(min_length=1, max_length=100)
+    product_id: str = Field(min_length=1, max_length=100)
+    quantity: int = Field(gt=0, strict=True)
+    idempotency_key: str
+    source_message_id: str
+
+
+class UpdateInput(DTO):
+    quote_id: str = Field(min_length=1, max_length=100)
+    product_id: str = Field(min_length=1, max_length=100)
+    quantity: int = Field(ge=0, strict=True)
+    reason: str = Field(max_length=2000)
+
+
+class ReplaceInput(DTO):
+    quote_id: str = Field(min_length=1, max_length=100)
+    from_product_id: str = Field(min_length=1, max_length=100)
+    to_product_id: str = Field(min_length=1, max_length=100)
+    quantity: int | None = Field(default=None, gt=0, strict=True)
+    reason: str = Field(max_length=2000)
+    idempotency_key: str

@@ -1,0 +1,121 @@
+UTC: 2026-09-21T15:21:10.170039+00:00
+Base commit (working tree may contain pending changes): 4905579c413d51a1c835eebec1f8af75fcaf397b
+Command: docker compose --profile test run --build --rm -v /Users/comert/Desktop/tbr-quote-assistant/artifacts/f03:/evidence test python -m tests.mutation_restart_probe prepare
+Exit code: 0
+
+ Image tbr-postgres:16.15 Building
+#1 [internal] load local bake definitions
+#1 reading from stdin 587B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 212B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 40B done
+#5 DONE 0.0s
+
+#6 [1/2] FROM docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6
+#6 resolve docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6 0.0s done
+#6 DONE 0.0s
+
+#7 [2/2] COPY --chmod=0644 01-runtime-role.sh /docker-entrypoint-initdb.d/01-runtime-role.sh
+#7 CACHED
+
+#8 exporting to image
+#8 exporting layers done
+#8 exporting manifest sha256:a3d8f3bcba25a5a30190e32bf3194200b7d75a03c25fb645754f6418e96e9f54 done
+#8 exporting config sha256:01fa698c7eaaa64ef17a70439fd0d670f6f577d4d20422724dd23585d056e2c2 done
+#8 exporting attestation manifest sha256:d4da281f90648d18840873eae6b00f8dadfb211490d2578b2b76af0d76451a7d done
+#8 exporting manifest list sha256:97f06c0e3a09a988ea3948b35d62ce3d11caaecc72e671a49479ab0be8e863a9 done
+#8 naming to docker.io/library/tbr-postgres:16.15 done
+#8 unpacking to docker.io/library/tbr-postgres:16.15 done
+#8 DONE 0.1s
+
+#9 resolving provenance for metadata file
+#9 DONE 0.0s
+ Image tbr-postgres:16.15 Built
+ Container tbr-quote-assistant-test-db-1 Running
+ Image tbr-quote-assistant-test Building
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.06kB done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 948B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 198B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 20.59kB done
+#5 DONE 0.0s
+
+#6 [base  1/10] FROM docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+#6 resolve docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e 0.0s done
+#6 DONE 0.0s
+
+#7 [base  7/10] COPY apps/api/alembic.ini ./
+#7 CACHED
+
+#8 [base  9/10] COPY data/source/products.json data/source/knowledge_entries.json data/source/customers.json data/source/quotes.json data/source/quote_items.json data/source/price_rules.json /app/data/source/
+#8 CACHED
+
+#9 [base  8/10] COPY apps/api/migrations ./migrations
+#9 CACHED
+
+#10 [base  3/10] WORKDIR /app/apps/api
+#10 CACHED
+
+#11 [base  6/10] COPY apps/api/app ./app
+#11 CACHED
+
+#12 [base 10/10] RUN useradd --uid 10001 --create-home appuser
+#12 CACHED
+
+#13 [base  4/10] COPY apps/api/pyproject.toml apps/api/uv.lock ./
+#13 CACHED
+
+#14 [base  2/10] RUN pip install --no-cache-dir uv==0.12.17
+#14 CACHED
+
+#15 [base  5/10] RUN uv sync --locked --no-dev
+#15 CACHED
+
+#16 [test 1/2] RUN uv sync --locked
+#16 CACHED
+
+#17 [test 2/2] COPY apps/api/tests ./tests
+#17 DONE 0.0s
+
+#18 exporting to image
+#18 exporting layers 0.0s done
+#18 exporting manifest sha256:c578d8822b2f710eed859c2362c89db54423bf6ea61526e035957e948605c2a8 done
+#18 exporting config sha256:e59c9e6c430c840ca3c8baa6cbccc0360fac9bfa01f5827847c8c0daa2352c69 done
+#18 exporting attestation manifest sha256:c2619d74d86f37956108742b8257d56e816f251fc0d95ed2100264ec9df38a89 done
+#18 exporting manifest list sha256:c38123d5e33ab4888725ac666a3278637b9cb9079fc8dffe6e5608cb286dd66a done
+#18 naming to docker.io/library/tbr-quote-assistant-test:latest done
+#18 unpacking to docker.io/library/tbr-quote-assistant-test:latest 0.0s done
+#18 DONE 0.1s
+
+#19 resolving provenance for metadata file
+#19 DONE 0.0s
+ Image tbr-quote-assistant-test Built
+ Container tbr-quote-assistant-test-db-1 Waiting
+ Container tbr-quote-assistant-test-db-1 Healthy
+ Container tbr-quote-assistant-test-run-2ee6d63344ec Creating
+ Container tbr-quote-assistant-test-run-2ee6d63344ec Created
+PASS real add wrapper committed; initial quantity 1 -> 2, receipt and log persisted.

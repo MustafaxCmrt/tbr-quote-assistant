@@ -119,3 +119,21 @@ yazılım kombinasyonu → aksesuar → partner). Örneğin 4 × 9430 için Plus
 toplamsal %13 seçilseydi net 32816.40 olurdu. Firma kararı adaya bıraktı; bu belgelenmiş
 aday tercihidir. Kaynak condition metinleri eval edilmez.
 Kanıt: [F02 kabul raporu](reports/f02_acceptance.md).
+
+## Transaction ve tekrar davranışı (F03)
+
+Üç mutation tool'u tek executor'dan, kaydedilmiş plan ve güvenilir mesaj bağlamıyla çalışır.
+Sunucu anahtarı quote/message/action-index/tool üzerinden üretir; client veya LLM'nin değiştirdiği
+anahtar reddedilir. Teklif satırı `FOR UPDATE` kilidiyle receipt kontrolü ve güncelleme sıraya girer.
+Ürün satırları sabit ID sırasında `FOR SHARE` ile okunur; fiyat/stok admin güncellemesi commit öncesinde
+kontrolü geçersiz kılamaz. Grup içindeki ikinci hata, kalem/version/receipt/başarı loglarını birlikte geri alır.
+
+Aynı mesajın yeniden gönderimi gerçek wrapper'ı receipt yolundan geçirir; yeni deneme loglanır,
+teklif tekrar değiştirilmez. Farklı message_id kasıtlı yeni işlemdir. Eski quantity-set tekrarları,
+arada yapılan yeni güncellemeyi geri almaz. Başarı cevabı yalnız transaction commit'inden sonra döner.
+Bu belirli anahtarda tekrar etmeyen DB etkisidir; genel bir “exactly once delivery” iddiası değildir.
+
+`quantity=0` kalemi removed yapar; pasif/stok dışı kaynak ürünü kaldırmayı engellemez.
+Replace eski satırı replaced yapar ve hedefe bağlar; hedef zaten aktifse miktarı birleştirir.
+Yeni stok dışı add için hem müşteri uygunluğu hem açık bekleme onayı gerekir; replace hedefi stoklu olmalıdır.
+Taslak stok rezervasyonu yapmaz ve stok miktarını düşürmez. F03 domain araçları henüz chat UI'ya bağlı değildir.

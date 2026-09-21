@@ -104,3 +104,27 @@ def test_half_up_and_no_eval_unknown_rules():
             RULES
             + [{"rule_id": "EVIL", "condition": "exec(...)", "discount_percent": Decimal(100)}],
         )
+
+
+def test_partner_aggregates_category_but_accessories_require_same_product():
+    items = [line("A", 2), line("B", 1)]
+    products = catalog("A") | catalog("B")
+    result = price_lines(items, products, {"price_tier": "partner"}, RULES)
+    assert result["A"]["discount_total_try"] == Decimal(14)
+    assert result["B"]["discount_total_try"] == Decimal(7)
+    assert sum(row["net_total_try"] for row in result.values()) == Decimal(279)
+    items = [line("A", 3), line("B", 2)]
+    products = catalog("A", "accessory") | catalog("B", "accessory")
+    result = price_lines(items, products, {"price_tier": "partner"}, RULES)
+    assert [row["rule_ids"] for row in result.values()] == [[], []]
+    assert sum(row["net_total_try"] for row in result.values()) == Decimal(500)
+
+
+def test_missing_required_rate_fails_closed():
+    with pytest.raises(DomainError, match="PRICING_RULE_MISSING"):
+        price_lines(
+            [line(quantity=3)],
+            catalog(),
+            {"price_tier": "partner"},
+            [r for r in RULES if r["rule_id"] != "RUL-PARTNER-3"],
+        )
