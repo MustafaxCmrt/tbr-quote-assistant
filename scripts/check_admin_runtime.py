@@ -8,6 +8,7 @@ Usage: python3 scripts/check_admin_runtime.py [--lan]
 """
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -20,8 +21,9 @@ env = dict(
 )
 key = env.get("ADMIN_API_KEY", "")
 assert key, "ADMIN_API_KEY missing in .env; run python3 scripts/init_env.py"
-api = "http://127.0.0.1:" + env.get("API_PORT", "8001")
-web = "http://127.0.0.1:" + env.get("WEB_PORT", "5173")
+# Like Compose, shell variables override .env (e.g. a second install on other ports).
+api = "http://127.0.0.1:" + (os.environ.get("API_PORT") or env.get("API_PORT", "8001"))
+web = "http://127.0.0.1:" + (os.environ.get("WEB_PORT") or env.get("WEB_PORT", "5173"))
 invalid = {"price_try": "-1"}
 
 
@@ -73,7 +75,7 @@ checks = [
 if "--lan" in sys.argv:
     lan = subprocess.run(["ipconfig", "getifaddr", "en0"], capture_output=True, text=True).stdout.strip()
     assert lan, "No Wi-Fi address on en0"
-    lan_api = f"http://{lan}:" + env.get("API_PORT", "8001")
+    lan_api = f"http://{lan}:" + (os.environ.get("API_PORT") or env.get("API_PORT", "8001"))
     checks += [
         ("LAN (address redacted) readiness", call(lan_api + "/health/ready"), 200, None),
         ("LAN (address redacted) write without key", call(lan_api + "/api/products/PRD-BC-110", "PATCH", invalid), 401, "ADMIN_KEY_REQUIRED"),

@@ -6,8 +6,8 @@ Altı gerçek araç, transaction/receipt, kaynaklı deterministik sohbet, SSE, w
 uygulaması çalışıyor. Son tam backend koşusu **229 passed** (22 golden dahil):
 [komut/çıktı](reports/hardening_full_backend.txt), [golden sonuçları](reports/golden_results.json).
 Teslim öncesi güvenlik sertleştirmesi: [çözüm kaydı](reports/hardening_resolution.md).
-Doğrulanan aday: `demo-candidate-20260921-v2` / `81765bd`; runtime `53b9948`.
-Yeni clone’da da 225 test geçti: [temiz kurulum kanıtı](reports/f09_acceptance.md).
+Doğrulanan aday: `demo-candidate-20260921-v3` / `bf92756`.
+Yeni clone’da da 229 test geçti: [v3 temiz kurulum kanıtı](reports/hardening_resolution.md#v3-temiz-clone-provası).
 Mustafa fiziksel iPhone'da stream, ürün ekleme, web ile ortak teklif, aynı isteğin tekrarı,
 klavye ve kaynak aç/kapat akışlarını doğruladı. Kullanıcı bildirimi: iPhone 16e / iOS 26.6.2; Expo Go Client Version 57.0.9, Supported SDK 57.0.0.
 [Kabul kanıtları](reports/acceptance.md) kapsamı ve kalan teslim kapılarını ayırır.

@@ -1,6 +1,8 @@
 # F09 — Temiz kurulum ve teslim hazırlığı
 
 21 Eylül 2026. Durum: **in_progress**; video ve gönderim yapılmış sayılmaz.
+**Güncel aday v3 (`bf92756`) temiz clone provası:** [hardening_resolution.md](hardening_resolution.md#v3-temiz-clone-provası)
+— 229 passed, runtime/admin anahtarı/istemci adımları exit0. Aşağıdaki tablo tarihsel v2 kaydıdır.
 Doğrulanan clone commit: `81765bda71c4dd819d2b8004cf15409c8b9537bf`
 (`demo-candidate-20260921-v2`); runtime son değişikliği `53b9948`.
 

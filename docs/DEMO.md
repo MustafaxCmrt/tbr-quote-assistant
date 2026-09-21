@@ -1,8 +1,8 @@
 # Türkçe demo — yaklaşık 3 dakika 30 saniye
 
 Bu metin kayıt planıdır; video çekildi veya gönderildi anlamına gelmez.
-Doğrulanan kod: `demo-candidate-20260921-v2` (runtime `53b9948`).
-Test kanıtı: `reports/f09_clean_backend.txt` — 225 passed, 22 golden dahil.
+Doğrulanan kod: `demo-candidate-20260921-v3` (`bf92756`).
+Test kanıtı: `reports/hardening_v3_backend.txt` — temiz clone'da 229 passed, 22 golden dahil.
 
 ## Hazırlık
 
@@ -19,8 +19,8 @@ Kayıtta `.env`, QR/LAN adresi, kişisel sekmeler veya parolalar görünmesin.
 | 1:10–1:35 | Aynı isteği tekrar gönder; web İşlem kayıtları | “Aynı mesaj kimliği receipt üzerinden tekrarlandı; yeni deneme var ama ikinci miktar artışı yok.” |
 | 1:35–2:05 | Q1004 mevcut kalemini göster; ilk durum uygunsa `Pahalı okuyucuyu 9.000 TL altında bir alternatifle değiştir.` | “Fiyat tavanı sunucuda tekrar kontrol ediliyor. Eski satır geçmişte, yeni satır aktif.” |
 | 2:05–2:35 | `İade süresi nedir?`; bilgi kaynağı aç/kapat | “Harici model adaptörü yok. Kaynaklı deterministik mod gerçek knowledge kimliğiyle cevap veriyor; bu soru teklifi değiştirmiyor.” |
-| 2:35–3:00 | f09_clean_backend.txt ve golden_results.json | “225 backend testi ve 22 golden senaryo. Gerçek PostgreSQL; tool girdileri, yasak etkiler, kaynaklar ve DB sonucu birlikte kontrol edildi.” |
-| 3:00–3:30 | README trade-off, KNOWN_LIMITATIONS, AI_USAGE | “Firma indirim çakışmasını adaya bıraktı; özel tek kural önceliğini belgeledim. Yerel demo auth/RBAC içermiyor. AI katkısı ve insan cihaz doğrulaması ayrı kaydedildi.” |
+| 2:35–3:00 | hardening_v3_backend.txt ve golden_results.json | “229 backend testi ve 22 golden senaryo. Gerçek PostgreSQL; tool girdileri, yasak etkiler, kaynaklar ve DB sonucu birlikte kontrol edildi.” |
+| 3:00–3:30 | README trade-off, KNOWN_LIMITATIONS, AI_USAGE | “Firma indirim çakışmasını adaya bıraktı; özel tek kural önceliğini belgeledim. Yerel demo auth/RBAC içermiyor; katalog yazma paylaşılan admin anahtarı ister, web bunu sunucu tarafında ekler. AI katkısı ve insan cihaz doğrulaması ayrı kaydedildi.” |
 
 Replace adımını mevcut Q1004'ü okuyarak prova et; daha önce değiştirilmişse reset yapma.
 Akış yetişmezse replace bölümünü kısalt; ortak teklif ve retry kanıtını koru.

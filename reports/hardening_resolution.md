@@ -45,5 +45,23 @@ belleğini Docker'ın 64 MB `/dev/shm` sınırının üstüne çıkardı (`DiskF
 yalnız bu `tbr_test_*` veritabanları silindi ([kayıt](hardening_testdb_cleanup.txt)); volume'lar,
 demo DB ve temiz kurulum stack'i korundu. README'ye aynı temizlik komutu eklendi.
 
+## v3 temiz clone provası
+
+Remote'tan `demo-candidate-20260921-v3` (`bf92756`) yeni klasöre klonlandı; ayrı `tbr-f09-clean` projesi,
+loopback 18001/15173 ve yeni `tbr-f09-clean-v3-*` volume'ları. Eski v1/v2 volume'ları ve ana demo korundu.
+Adımlar makineyi yormamak için sırayla koştu; her adımdan sonra kullanılmayan container'lar durduruldu.
+Runner kaynağı: [hardening_v3_runner_source.txt](hardening_v3_runner_source.txt) (Codex'in `.git` script'lerinden türetildi, onlar değiştirilmedi).
+
+| Adım | Sonuç |
+|---|---|
+| [Clone](hardening_v3_clone.txt) | exit0 |
+| [Backend](hardening_v3_backend.txt) | init_env yeni `.env` + `ADMIN_API_KEY`; **229 passed / 43.38s**. Aynı kayıttaki `alembic check` exit1: runner onu db ayağa kalkmadan `--no-deps` ile koşturdu (`Name or service not known`); kod hatası değil |
+| [Setup](hardening_v3_setup.txt) | Compose build/up exit0; `alembic check` "No new upgrade operations detected" exit0 |
+| [Runtime](hardening_v3_runtime.txt) | exit0: seed 48/22/6/10/8/6; gerçek ekleme qty1→2, v1→2, net 15980; web proxy aynı DTO; tekrar tek etki; kaynaklı politika, provider_calls 0; admin anahtarı kontrolleri (401/422/200/413, web dosyalarında anahtar yok); DB/API restart + reseed + kalıcı receipt replay; ana 8001 Q-1001 aynı |
+| [İstemciler](hardening_v3_clients.txt) | npm ci, 22/22 test, typecheck, lint, web ci/build, Expo check, kontrat kontrolü: hepsi exit0 |
+
+Admin kontrolü için tag'deki script shell port değişkenlerini okumadığından güncel sürümü clone'a ayrı
+dosya olarak kopyalandı (`check_admin_runtime_current.py`); tag'deki izlenen dosyalar değiştirilmedi.
+
 Uygulanmayanlar: mikroservis/Redis/kuyruk, tam RBAC, rate limiter, production hosting,
 `data/source/` değişikliği. Fiziksel iPhone ile yeni doğrulama bu kayıtta yoktur: **not_verified**.
