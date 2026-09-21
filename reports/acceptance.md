@@ -4,6 +4,9 @@
 ayrıca açık. F08 için golden JSON ve Git geçmişi taraması hazır; bağımsız Claude review ve
 F09 son temiz kurulum/video/erişim kapısı açık. Aşağıdaki sonuçlar kendi raporlarındaki commit ve kapsama aittir.
 
+Son tam backend koşusu: [151 passed](f08_full_backend.txt), 22 golden dahil.
+[36 negatif hedef eşlemesi](negative_acceptance.md); NEG-10 opsiyonel provider adapter olmadığı için not_run.
+
 | Gereksinim | Durum / doğrudan kanıt |
 |---|---|
 | PostgreSQL 16, Compose başlangıç sırası, Alembic ve readiness | **passed:** [F01b](f01b_acceptance.md), [boş volume başlangıcı](f01b_fresh_stack.txt), [migration drift](f01b_migration_drift.txt) |

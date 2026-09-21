@@ -14,3 +14,5 @@ Son20test koşusu güncel assertion'ları içerir. Tam backend regresyonu bu ad�
 | NEG-22 kullanıcı kural/fiyat override ve kesin tavan | `test_user_override_instruction_cannot_bypass_explicit_price_ceiling`: 1TL altında BlueScanAir eklenmez, öneri/mutation/receipt yok, teklif aynı |
 
 Kanıt: f08_chat_acceptance_tests.txt; f08_chat_test_lint.txt. Source incelemede exact değer/negatif yan etki assertion'ları kontrol edildi; test sayısı tek başına başarı ölçütü sayılmadı.
+
+İkinci kabul eki: `test_negative_update_quantity_does_not_change_quote_or_receipts` negatif update reddi ve sıfır yan etkiyi; `test_software_bundle_discount_removed_after_chat_removes_paired_item` kaldırılmış geçmiş satırını ve kalan lisansın indirimden çıkmasını doğrular. Son bütünleşik koşu f08_full_backend.txt:151passed exit0; golden22 ayrı DB.
