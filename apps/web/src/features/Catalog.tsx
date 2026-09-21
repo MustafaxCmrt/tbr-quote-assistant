@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api, ApiError, categories, topics, money } from "../api/client";
+import { TableScroll } from "./TableScroll";
 interface RecordRow {
   product_id?: string;
   knowledge_id?: string;
@@ -320,7 +321,7 @@ export function Catalog({ kind }: { kind: "products" | "knowledge" }) {
       <p className="muted" role="status">
         {loading ? "Kayıtlar yükleniyor…" : `${total} kayıt`}
       </p>
-      <div className="table-scroll">
+      <TableScroll>
         <table>
           <thead>
             <tr>
@@ -366,7 +367,7 @@ export function Catalog({ kind }: { kind: "products" | "knowledge" }) {
             )}
           </tbody>
         </table>
-      </div>
+      </TableScroll>
       {!loading && !items.length && (
         <p className="empty">
           Bu filtrelerle kayıt bulunamadı. Aramayı değiştir veya yeni kayıt

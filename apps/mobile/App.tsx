@@ -16,7 +16,7 @@ import { api } from "./src/api";
 import { acceptQuote, isQuote } from "./src/api/state";
 import { Chat } from "./src/screens/Chat";
 import { Quote } from "./src/screens/Quote";
-import { Button, Label, ui, usePalette } from "./src/shared/ui";
+import { Button, Label, Logo, ui, usePalette } from "./src/shared/ui";
 import DebugSmoke from "./DebugSmoke";
 
 interface Customer {
@@ -141,17 +141,16 @@ function Workspace() {
           }}
         >
           <View style={ui.row}>
-            <Text
-              accessibilityRole="header"
-              style={[ui.heading, { color: c.ink }]}
-            >
-              The Blue Red
-            </Text>
+            <Logo />
             <Button disabled={busy} onPress={() => setContext(true)}>
               Müşteri / teklif
             </Button>
           </View>
-          <Text style={[ui.caption, { color: c.muted }]}>
+          <Text
+            accessibilityRole="header"
+            style={[ui.caption, { color: c.muted }]}
+          >
+            Teklif asistanı ·{" "}
             {customers.find((x) => x.customer_id === customer)?.name ??
               "Bağlanıyor…"}{" "}
             · {quoteId}

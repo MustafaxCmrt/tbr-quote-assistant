@@ -1,5 +1,6 @@
 import type { Quote, QuoteLine } from "../contracts";
 import { money } from "../api/client";
+import { TableScroll } from "./TableScroll";
 export function QuotePanel({
   quote,
   stale,
@@ -68,7 +69,7 @@ export function QuotePanel({
       </p>
       {quote && (
         <>
-          <div className="table-scroll">
+          <TableScroll>
             <table>
               <thead>
                 <tr>
@@ -82,13 +83,12 @@ export function QuotePanel({
               </thead>
               <tbody>{rows(quote.items)}</tbody>
             </table>
-            {quote.items.length === 0 && (
-              <p className="empty">
-                Bu teklif henüz boş. Sohbette bir ürün ekleyerek
-                başlayabilirsin.
-              </p>
-            )}
-          </div>
+          </TableScroll>
+          {quote.items.length === 0 && (
+            <p className="empty">
+              Bu teklif henüz boş. Sohbette bir ürün ekleyerek başlayabilirsin.
+            </p>
+          )}
           <dl className="totals">
             <div>
               <dt>Brüt toplam</dt>
@@ -124,11 +124,11 @@ export function QuotePanel({
           {quote.history.length > 0 && (
             <details>
               <summary>Kalem geçmişi ({quote.history.length})</summary>
-              <div className="table-scroll">
+              <TableScroll>
                 <table>
                   <tbody>{rows(quote.history)}</tbody>
                 </table>
-              </div>
+              </TableScroll>
             </details>
           )}
         </>

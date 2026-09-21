@@ -5,19 +5,40 @@
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  color: #172840;
-  background: #f4f7fa;
-  font-synthesis: none;
-  --blue: #184ca3;
-  --red: #a92438;
+  /* Brand: the firm's word mark is cyan-blue and signal red. Actions use the
+     same hue darkened until white text reaches AA (5.97:1). */
+  --blue: #0a67a8;
+  --blue-hover: #085b93;
+  --blue-deep: #084d80;
+  --blue-tint: #e4f1fb;
+  --red: #c8171d;
   --ink: #172840;
   --muted: #53647b;
   --line: #d6dee8;
+  --line-soft: #e6ecf2;
+  --field-line: #8797ad;
   --surface: #fff;
+  --canvas: #f4f7fa;
+  --canvas-hover: #f2f5f9;
+  --code-surface: #f1f4f8;
+  --tag-surface: #eef2f7;
+  --tag-ink: #40516a;
+  --warning-surface: #fff2df;
+  --warning-ink: #96500b;
+  --error-ink: #a01f31;
+  --notice-surface: #e7f3ed;
+  --notice-ink: #18553f;
+  --ok-ink: #246047;
   --radius: 10px;
+  --radius-button: 7px;
+  --radius-field: 6px;
+  color: var(--ink);
+  background: var(--canvas);
+  font-synthesis: none;
   line-height: 1.5;
-  scrollbar-color: #8999ad #eef2f7;
+  scrollbar-color: #8999ad var(--tag-surface);
   caret-color: var(--blue);
+  accent-color: var(--blue);
 }
 * {
   box-sizing: border-box;
@@ -44,14 +65,14 @@ button {
   border: 1px solid transparent;
   background: var(--blue);
   color: #fff;
-  border-radius: 7px;
+  border-radius: var(--radius-button);
   min-height: 42px;
   padding: 9px 16px;
   font-weight: 650;
   transition: background 0.15s ease-out;
 }
 button:hover {
-  background: #103c86;
+  background: var(--blue-hover);
 }
 button:disabled {
   opacity: 0.55;
@@ -63,7 +84,7 @@ button.secondary {
   border-color: var(--line);
 }
 button.secondary:hover {
-  background: #e9eff8;
+  background: var(--blue-tint);
 }
 button.text-button {
   background: none;
@@ -71,6 +92,11 @@ button.text-button {
   padding: 8px 0;
   font-size: 0.82rem;
   min-height: 36px;
+}
+button.text-button:hover {
+  background: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 button:focus-visible,
 a:focus-visible,
@@ -82,8 +108,8 @@ summary:focus-visible {
   outline-offset: 3px;
 }
 ::selection {
-  background: #d3e3fc;
-  color: #102e60;
+  background: #cfe6fa;
+  color: var(--blue-deep);
 }
 a {
   color: var(--blue);
@@ -125,14 +151,14 @@ small {
   font-size: 0.875rem;
 }
 .error-text {
-  color: #a01f31;
+  color: var(--error-ink);
   font-size: 0.875rem;
 }
 .notice {
-  color: #18553f;
-  background: #e7f3ed;
+  color: var(--notice-ink);
+  background: var(--notice-surface);
   padding: 12px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-field);
 }
 .wrap {
   overflow-wrap: anywhere;
@@ -147,7 +173,7 @@ small {
   top: -100px;
   left: 20px;
   z-index: 20;
-  background: #fff;
+  background: var(--surface);
   padding: 12px;
 }
 .skip:focus {
@@ -159,9 +185,9 @@ small {
   min-height: 100vh;
 }
 .sidebar {
-  background: #fff;
+  background: var(--surface);
   border-right: 1px solid var(--line);
-  padding: 32px 18px 24px;
+  padding: 28px 18px 24px;
   display: flex;
   flex-direction: column;
   position: sticky;
@@ -169,26 +195,20 @@ small {
   height: 100vh;
 }
 .brand {
-  color: var(--blue);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  line-height: 1;
-  font-size: 1.3rem;
-  font-weight: 850;
-  letter-spacing: -0.025em;
-  text-decoration: none;
+  display: block;
   padding: 0 12px;
+  border-radius: var(--radius-field);
 }
-.brand span:last-child {
-  color: var(--red);
-  font-size: 2.2rem;
-  margin-top: 3px;
+.brand img {
+  display: block;
+  width: 100%;
+  max-width: 150px;
+  height: auto;
 }
 .workspace-name {
   font-size: 0.8rem;
   color: var(--muted);
-  margin: 20px 12px 30px;
+  margin: 12px 12px 30px;
 }
 .sidebar nav {
   display: flex;
@@ -204,11 +224,11 @@ small {
   font-weight: 550;
 }
 .sidebar nav button:hover {
-  background: #f2f5f9;
+  background: var(--canvas-hover);
 }
 .sidebar nav button[aria-current] {
-  background: #e9eff9;
-  color: #143d80;
+  background: var(--blue-tint);
+  color: var(--blue-deep);
   font-weight: 700;
 }
 .sidebar-note {
@@ -231,7 +251,7 @@ main {
   display: flex;
   align-items: flex-end;
   gap: 20px;
-  background: #fff;
+  background: var(--surface);
   border-bottom: 1px solid var(--line);
   padding: 20px 32px;
 }
@@ -245,7 +265,7 @@ main {
 }
 .connection {
   font-size: 0.8rem;
-  color: #246047;
+  color: var(--ok-ink);
   margin-left: auto;
   align-self: center;
   white-space: nowrap;
@@ -273,7 +293,7 @@ main {
 .quote-panel,
 .chat-panel {
   min-width: 0;
-  background: #fff;
+  background: var(--surface);
   padding: 24px;
   border-radius: var(--radius);
 }
@@ -289,8 +309,8 @@ main {
 }
 .tag {
   display: inline-block;
-  background: #eef2f7;
-  color: #40516a;
+  background: var(--tag-surface);
+  color: var(--tag-ink);
   font-size: 0.72rem;
   padding: 3px 7px;
   border-radius: 5px;
@@ -299,8 +319,8 @@ main {
 }
 .tag.warning,
 .warning {
-  color: #96500b;
-  background: #fff2df;
+  color: var(--warning-ink);
+  background: var(--warning-surface);
 }
 label {
   display: flex;
@@ -314,10 +334,10 @@ input,
 select,
 textarea {
   width: 100%;
-  background: #fff;
-  border: 1px solid #aebccb;
+  background: var(--surface);
+  border: 1px solid var(--field-line);
   color: var(--ink);
-  border-radius: 6px;
+  border-radius: var(--radius-field);
   padding: 10px 12px;
   min-height: 43px;
   max-width: 100%;
@@ -333,10 +353,15 @@ input[aria-invalid="true"],
 textarea[aria-invalid="true"] {
   border-color: var(--red);
 }
+/* Tables scroll inside their panel on narrow screens. TableScroll adds
+   .has-more while columns remain to the right; the fade is the cue. */
 .table-scroll {
   overflow: auto;
   width: 100%;
   scrollbar-width: thin;
+}
+.table-scroll.has-more {
+  mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
 }
 table {
   border-collapse: collapse;
@@ -354,7 +379,7 @@ th {
 }
 td {
   padding: 16px 10px;
-  border-bottom: 1px solid #e6ecf2;
+  border-bottom: 1px solid var(--line-soft);
   vertical-align: top;
 }
 td:first-child,
@@ -434,8 +459,8 @@ summary {
   border-bottom: 1px solid var(--line);
 }
 .user-message {
-  background: #eaf0fa;
-  color: #183c70;
+  background: var(--blue-tint);
+  color: #0f4470;
   padding: 12px 14px;
   border-radius: 8px;
   margin-left: 20px;
@@ -494,7 +519,7 @@ summary {
   margin: 0;
 }
 .editor {
-  background: #fff;
+  background: var(--surface);
   padding: 24px;
   margin: 0 0 26px;
   border-radius: var(--radius);
@@ -521,9 +546,16 @@ summary {
   margin-top: 24px;
 }
 .log-entry {
-  background: #fff;
+  background: var(--surface);
   padding: 12px 18px;
   border-bottom: 1px solid var(--line);
+}
+.log-entry:first-child {
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.log-entry:last-child {
+  border-radius: 0 0 var(--radius) var(--radius);
+  border-bottom: 0;
 }
 .log-entry summary {
   display: flex;
@@ -537,8 +569,9 @@ summary {
 .log-entry pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  background: #f1f4f8;
+  background: var(--code-surface);
   padding: 16px;
+  border-radius: var(--radius-field);
   font-size: 0.8rem;
   max-height: 350px;
   overflow: auto;
@@ -571,36 +604,39 @@ summary {
   .sidebar {
     position: static;
     height: auto;
-    padding: 18px 16px;
+    padding: 16px 16px 12px;
     border-right: 0;
     border-bottom: 1px solid var(--line);
   }
   .brand {
-    flex-direction: row;
-    align-items: baseline;
-    gap: 5px;
-    font-size: 1.05rem;
     padding: 0;
   }
-  .brand span:last-child {
-    font-size: 1.05rem;
-    margin: 0;
+  .brand img {
+    max-width: 124px;
   }
   .workspace-name,
   .sidebar-note {
     display: none;
   }
+  /* Four sections wrap into two rows instead of scrolling off-screen. */
   .sidebar nav {
-    flex-direction: row;
-    overflow: auto;
-    gap: 4px;
-    margin-top: 15px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 14px;
   }
   .sidebar nav button {
     white-space: nowrap;
-    font-size: 0.75rem;
-    padding: 9px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    font-size: 0.8rem;
+    padding: 9px 10px;
     min-height: 42px;
+    border: 1px solid var(--line);
+  }
+  .sidebar nav button[aria-current] {
+    border-color: transparent;
   }
   .context-bar {
     padding: 16px;
@@ -665,6 +701,9 @@ summary {
   .pagination {
     justify-content: space-between;
     gap: 8px;
+  }
+  .log-entry {
+    padding: 12px 14px;
   }
   .log-entry summary {
     gap: 8px;

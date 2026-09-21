@@ -217,6 +217,11 @@ ortak parser/DTO kopyalarının eşleşmesini doğrular. Compose web build conte
 Yerel demo authentication/RBAC içermez; müşteri seçimi kimlik doğrulama değildir.
 Kanıt: [F06 kabul raporu](reports/f06_acceptance.md).
 
+Görsel dil: firmanın logosu ve ona hizalanmış mavi/kırmızı token seti (`apps/web/DESIGN.md`),
+sistem yazı tipi, animasyonsuz. Dar ekranda gezinme 2×2 ızgaraya geçer, tablolar sağda sütun
+kaldıkça solan kenarla kayar. Web'de karanlık tema yok; mobil sistem temasını izler.
+Kanıt ve öncesi/sonrası görüntüler: [tasarım düzenleme raporu](reports/design_polish.md).
+
 
 ## Son sağlamlaştırma (F08)
 

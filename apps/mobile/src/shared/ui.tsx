@@ -1,21 +1,26 @@
 import type { ReactNode } from "react";
 import {
+  Image,
   Pressable,
   StyleSheet,
   Text,
   useColorScheme,
   View,
 } from "react-native";
+import logoLight from "../../assets/bluered-logo-light.png";
+import logoDark from "../../assets/bluered-logo-dark.png";
 
+// Same brand hue as the web admin: the firm's cyan-blue darkened for contrast
+// on light surfaces, lightened on dark ones (both ≥ 4.5:1 against their bg).
 const light = {
   bg: "#F5F7FA",
   surface: "#FFFFFF",
   ink: "#172840",
   muted: "#53647B",
   line: "#D6DEE8",
-  blue: "#184CA3",
+  blue: "#0A67A8",
   error: "#A3212C",
-  tint: "#EAF0FA",
+  tint: "#E4F1FB",
 };
 const dark = {
   bg: "#11151D",
@@ -23,12 +28,25 @@ const dark = {
   ink: "#F1F4FA",
   muted: "#B7C3D5",
   line: "#404C5D",
-  blue: "#92B9FF",
+  blue: "#6FC0FF",
   error: "#FFADB7",
-  tint: "#293B59",
+  tint: "#22344D",
 };
 export function usePalette() {
   return useColorScheme() === "dark" ? dark : light;
+}
+/** The firm's word mark; the light variant inks the white "the" for light surfaces. */
+export function Logo({ height = 26 }: { height?: number }) {
+  const isDark = useColorScheme() === "dark";
+  return (
+    <Image
+      accessibilityRole="image"
+      accessibilityLabel="The Blue Red"
+      source={isDark ? logoDark : logoLight}
+      resizeMode="contain"
+      style={{ height, width: Math.round(height * (1192 / 215)) }}
+    />
+  );
 }
 export function Button({
   children,
@@ -100,8 +118,9 @@ export const ui = StyleSheet.create({
   content: { padding: 20, gap: 16 },
   body: { fontSize: 17, lineHeight: 25 },
   caption: { fontSize: 13, lineHeight: 19 },
-  title: { fontSize: 30, fontWeight: "700" },
+  title: { fontSize: 28, fontWeight: "700", letterSpacing: -0.4 },
   heading: { fontSize: 20, fontWeight: "700" },
+  subheading: { fontSize: 17, lineHeight: 23, fontWeight: "600" },
   row: {
     flexDirection: "row",
     alignItems: "center",

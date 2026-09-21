@@ -7,6 +7,7 @@ import { QuotePanel } from "./features/QuotePanel";
 import { ChatPanel } from "./features/ChatPanel";
 import { Catalog } from "./features/Catalog";
 import { Logs } from "./features/Logs";
+import logo from "./assets/bluered-logo.png";
 import "./style.css";
 interface Customer {
   customer_id: string;
@@ -105,10 +106,9 @@ function App() {
           }}
           aria-label="The Blue Red ana sayfa"
         >
-          <span>THE BLUE</span>
-          <span>RED</span>
+          <img src={logo} alt="The Blue Red" width="1192" height="215" />
         </a>
-        <p className="workspace-name">Teklif çalışma alanı</p>
+        <p className="workspace-name">Teklif asistanı</p>
         <nav aria-label="Ana gezinme">
           {(
             [

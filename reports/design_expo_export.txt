@@ -1,0 +1,23 @@
+UTC: 2026-09-21T22:30:31.749743+00:00
+Base commit (working tree may contain pending changes): 62e75dba7cc427c6ae05f7e4027151477186841d
+Command: npm exec --workspace @tbr/mobile -- expo export --platform ios --output-dir dist
+Exit code: 0
+
+env: load .env
+env: export EXPO_PUBLIC_API_BASE_URL
+Expo Autolinking module resolution enabled
+Starting Metro Bundler
+
+iOS Bundled 1621ms apps/mobile/index.ts (610 modules)
+
+› Assets (2):
+assets/bluered-logo-dark.png (49KB)
+assets/bluered-logo-light.png (50KB)
+
+› ios bundles (1):
+_expo/static/js/ios/index-42ff0c46c4248b04e614804781684bfd.hbc (1.5MB)
+
+› Files (1):
+metadata.json (267B)
+
+Exported: dist

@@ -19,11 +19,11 @@ export function Quote({
     return (
       <View
         key={p.quote_item_id}
-        style={[ui.separator, { borderColor: c.line, gap: 8 }]}
+        style={[ui.section, { backgroundColor: c.surface, gap: 8 }]}
       >
-        <Text style={[ui.heading, { color: c.ink }]}>{p.name_tr}</Text>
-        <Label muted>{p.sku}</Label>
+        <Text style={[ui.subheading, { color: c.ink }]}>{p.name_tr}</Text>
         <Label muted>
+          {p.sku} ·{" "}
           {p.status === "replaced"
             ? "Değiştirildi"
             : p.status === "removed"
