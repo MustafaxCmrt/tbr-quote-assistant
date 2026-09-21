@@ -15,4 +15,5 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-acc
 FROM base AS test
 RUN uv sync --locked
 COPY apps/api/tests ./tests
+COPY data/source/golden_test_scenarios.json /app/test-source/
 CMD ["pytest", "-v"]

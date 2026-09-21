@@ -21,7 +21,14 @@ def parse_money(value: str) -> Decimal:
 def numeric_slots(value: str) -> dict:
     lowered = value.lower()
     amounts = re.findall(r"(?<![\w.,])([0-9][0-9.,]*)\s*tl\b", lowered)
-    quantities = re.findall(r"\b(\d+)\s*(?:adet|adede|tane|lokasyon|şube|lisans)\b", lowered)
+    raw_quantities = re.findall(
+        r"(?<![\w.,])([-+]?\d[\d.,]*)\s*(?:adet|adede|tane|lokasyon|şube|lisans)\b", lowered
+    )
+    if any(not re.fullmatch(r"\d+", value) for value in raw_quantities):
+        raise ValueError("Miktar negatif veya kesirli olamaz.")
+    quantities = raw_quantities
+    if not quantities and "cikar" in normalize(value):
+        quantities = re.findall(r"(?<![\w.,-])(\d+)['’]?[ea]\b", lowered)
     if len(set(amounts)) > 1 or len(set(quantities)) > 1:
         raise ValueError("Birden çok sayısal hedef; ayrı planlama gerekir.")
     ceiling = any(

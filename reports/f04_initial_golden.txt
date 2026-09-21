@@ -1,0 +1,346 @@
+UTC: 2026-09-21T15:35:52.721456+00:00
+Base commit (working tree may contain pending changes): d3b0b822bca5089dfc1a4d3c02688ed688e10f36
+Command: docker compose --profile test run --build --rm test pytest tests/golden -q
+Exit code: 1
+
+ Image tbr-postgres:16.15 Building
+#1 [internal] load local bake definitions
+#1 reading from stdin 587B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 212B 0.0s done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6
+#3 DONE 0.1s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 40B done
+#5 DONE 0.0s
+
+#6 [1/2] FROM docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6
+#6 resolve docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6 0.0s done
+#6 DONE 0.0s
+
+#7 [2/2] COPY --chmod=0644 01-runtime-role.sh /docker-entrypoint-initdb.d/01-runtime-role.sh
+#7 CACHED
+
+#8 exporting to image
+#8 exporting layers done
+#8 exporting manifest sha256:a3d8f3bcba25a5a30190e32bf3194200b7d75a03c25fb645754f6418e96e9f54 done
+#8 exporting config sha256:01fa698c7eaaa64ef17a70439fd0d670f6f577d4d20422724dd23585d056e2c2 done
+#8 exporting attestation manifest sha256:cccb3f505b658ae8166b501f6dd161ce37bfe52a0813f9b1f178d9609b4cf382 done
+#8 exporting manifest list sha256:247a747a67dd560b482a50ee10f2747ef1df0b8841583222cb340b53cc68c0db done
+#8 naming to docker.io/library/tbr-postgres:16.15 done
+#8 unpacking to docker.io/library/tbr-postgres:16.15 done
+#8 DONE 0.1s
+
+#9 resolving provenance for metadata file
+#9 DONE 0.0s
+ Image tbr-postgres:16.15 Built
+ Container tbr-quote-assistant-test-db-1 Running
+ Image tbr-quote-assistant-test Building
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.06kB done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.01kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 198B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 45.71kB done
+#5 DONE 0.0s
+
+#6 [base  1/10] FROM docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+#6 resolve docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e 0.0s done
+#6 DONE 0.0s
+
+#7 [base  2/10] RUN pip install --no-cache-dir uv==0.12.17
+#7 CACHED
+
+#8 [base  3/10] WORKDIR /app/apps/api
+#8 CACHED
+
+#9 [base  4/10] COPY apps/api/pyproject.toml apps/api/uv.lock ./
+#9 CACHED
+
+#10 [base  5/10] RUN uv sync --locked --no-dev
+#10 CACHED
+
+#11 [base  6/10] COPY apps/api/app ./app
+#11 DONE 0.0s
+
+#12 [base  7/10] COPY apps/api/alembic.ini ./
+#12 DONE 0.0s
+
+#13 [base  8/10] COPY apps/api/migrations ./migrations
+#13 DONE 0.0s
+
+#14 [base  9/10] COPY data/source/products.json data/source/knowledge_entries.json data/source/customers.json data/source/quotes.json data/source/quote_items.json data/source/price_rules.json /app/data/source/
+#14 DONE 0.0s
+
+#15 [base 10/10] RUN useradd --uid 10001 --create-home appuser
+#15 DONE 0.1s
+
+#16 [test 1/3] RUN uv sync --locked
+#16 0.131 Resolved 31 packages in 1ms
+#16 0.558 Downloading pygments (1.2MiB)
+#16 0.559 Downloading ruff (9.5MiB)
+#16 1.188  Downloaded pygments
+#16 4.743  Downloaded ruff
+#16 4.747 Prepared 10 packages in 4.61s
+#16 4.774 Installed 10 packages in 26ms
+#16 4.774  + certifi==2026.7.22
+#16 4.774  + httpcore==1.0.9
+#16 4.774  + httpx==0.28.1
+#16 4.774  + iniconfig==2.3.0
+#16 4.774  + packaging==26.3
+#16 4.774  + pluggy==1.6.0
+#16 4.774  + pygments==2.21.0
+#16 4.774  + pytest==9.1.1
+#16 4.774  + pytest-asyncio==1.4.0
+#16 4.774  + ruff==0.16.8
+#16 DONE 4.9s
+
+#17 [test 2/3] COPY apps/api/tests ./tests
+#17 DONE 0.0s
+
+#18 [test 3/3] COPY data/source/golden_test_scenarios.json /app/test-source/
+#18 DONE 0.0s
+
+#19 exporting to image
+#19 exporting layers
+#19 exporting layers 0.7s done
+#19 exporting manifest sha256:f0a3ea75126c7115cc5f4a31e6000670f9922583d7f6ec782283e90e5e530fa4 done
+#19 exporting config sha256:35fc0d2e328942d618113fd39513f4251b058879ade5cf672828c287dff52c79 done
+#19 exporting attestation manifest sha256:62707f47f686844b3aff823499581ce0ebb4ded2eed859b8ef0b74405efe744c done
+#19 exporting manifest list sha256:12731223e1d56c37d4c49fe2895387fb18ca6af9b948edd314b3aa2f045b0346 done
+#19 naming to docker.io/library/tbr-quote-assistant-test:latest done
+#19 unpacking to docker.io/library/tbr-quote-assistant-test:latest
+#19 unpacking to docker.io/library/tbr-quote-assistant-test:latest 0.2s done
+#19 DONE 1.0s
+
+#20 resolving provenance for metadata file
+#20 DONE 0.0s
+ Image tbr-quote-assistant-test Built
+ Container tbr-quote-assistant-test-db-1 Waiting
+ Container tbr-quote-assistant-test-db-1 Healthy
+ Container tbr-quote-assistant-test-run-78593a0c3dba Creating
+ Container tbr-quote-assistant-test-run-78593a0c3dba Created
+....FF................                                                   [100%]
+=================================== FAILURES ===================================
+__________________ test_golden_message_through_http[SCN-005] ___________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffad059e50>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffffad1b73e0>
+scenario = {'scenario_id': 'SCN-005', 'title': 'Pahalı teklif kalemini daha ucuz alternatifle değiştirme', 'channel': 'mobile', 'customer_id': 'CUST-IST-001', ...}
+
+    @pytest.mark.parametrize("scenario", SCENARIOS, ids=lambda s: s["scenario_id"])
+    async def test_golden_message_through_http(db, monkeypatch, scenario):
+        monkeypatch.setenv("OPENAI_API_KEY", "")
+        monkeypatch.setenv("LLM_MODE", "off")
+        await seed_database(db)
+        app = create_app(db)
+        async with db.connect() as conn:
+            original_rows = (
+                (await conn.execute(sa.select(quote_items).order_by(quote_items.c.quote_item_id)))
+                .mappings()
+                .all()
+            )
+            original_stock = (
+                await conn.execute(
+                    sa.select(products.c.product_id, products.c.stock_qty).order_by(
+                        products.c.product_id
+                    )
+                )
+            ).all()
+        quote_id = scenario["quote_id"]
+        before = {
+            r["product_id"]: r["quantity"]
+            for r in original_rows
+            if r["quote_id"] == quote_id and r["status"] == "active"
+        }
+        expected_final = dict(before)
+        for product, quantity in EXPECTED.get(scenario["scenario_id"], {}).items():
+            if quantity is None:
+                expected_final.pop(product)
+            else:
+                expected_final[product] = quantity
+        responses = []
+        async with (
+            app.router.lifespan_context(app),
+            httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client,
+        ):
+            response = await client.post(
+                "/api/chat/sessions",
+                json={key: scenario[key] for key in ("customer_id", "quote_id", "channel")},
+            )
+            assert response.status_code == 201, response.text
+            session_id = response.json()["session_id"]
+            payload = dict(
+                session_id=session_id,
+                message_id=uuid4().hex,
+                quote_id=quote_id,
+                message=scenario["user_message"],
+                channel=scenario["channel"],
+            )
+            for _ in range(2 if scenario.get("repeat_same_message_id") else 1):
+                response = await client.post("/api/chat", json=payload)
+                assert response.status_code == 200, response.text
+                responses.append(response.json())
+            final = (await client.get("/api/quotes/" + quote_id)).json()
+        async with db.connect() as conn:
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs)
+                        .where(tool_call_logs.c.session_id == session_id)
+                        .order_by(tool_call_logs.c.log_id)
+                    )
+                )
+                .mappings()
+                .all()
+            )
+            all_rows = (
+                (await conn.execute(sa.select(quote_items).order_by(quote_items.c.quote_item_id)))
+                .mappings()
+                .all()
+            )
+            final_stock = (
+                await conn.execute(
+                    sa.select(products.c.product_id, products.c.stock_qty).order_by(
+                        products.c.product_id
+                    )
+                )
+            ).all()
+        assert final_stock == original_stock
+>       assert {
+            r["product_id"]: r["quantity"]
+            for r in all_rows
+            if r["quote_id"] == quote_id and r["status"] == "active"
+        } == expected_final
+E       AssertionError: assert {'PRD-BC-120': 1} == {'PRD-BC-110': 1}
+E
+E         Left contains 1 more item:
+E         {'PRD-BC-120': 1}
+E         Right contains 1 more item:
+E         {'PRD-BC-110': 1}
+E         Use -v to get more diff
+
+tests/golden/test_chat_golden.py:156: AssertionError
+__________________ test_golden_message_through_http[SCN-006] ___________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffad0dd210>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffffad052960>
+scenario = {'scenario_id': 'SCN-006', 'title': 'Stok dışı teklif kalemini stoklu alternatifle değiştirme', 'channel': 'web', 'customer_id': 'CUST-IST-001', ...}
+
+    @pytest.mark.parametrize("scenario", SCENARIOS, ids=lambda s: s["scenario_id"])
+    async def test_golden_message_through_http(db, monkeypatch, scenario):
+        monkeypatch.setenv("OPENAI_API_KEY", "")
+        monkeypatch.setenv("LLM_MODE", "off")
+        await seed_database(db)
+        app = create_app(db)
+        async with db.connect() as conn:
+            original_rows = (
+                (await conn.execute(sa.select(quote_items).order_by(quote_items.c.quote_item_id)))
+                .mappings()
+                .all()
+            )
+            original_stock = (
+                await conn.execute(
+                    sa.select(products.c.product_id, products.c.stock_qty).order_by(
+                        products.c.product_id
+                    )
+                )
+            ).all()
+        quote_id = scenario["quote_id"]
+        before = {
+            r["product_id"]: r["quantity"]
+            for r in original_rows
+            if r["quote_id"] == quote_id and r["status"] == "active"
+        }
+        expected_final = dict(before)
+        for product, quantity in EXPECTED.get(scenario["scenario_id"], {}).items():
+            if quantity is None:
+                expected_final.pop(product)
+            else:
+                expected_final[product] = quantity
+        responses = []
+        async with (
+            app.router.lifespan_context(app),
+            httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client,
+        ):
+            response = await client.post(
+                "/api/chat/sessions",
+                json={key: scenario[key] for key in ("customer_id", "quote_id", "channel")},
+            )
+            assert response.status_code == 201, response.text
+            session_id = response.json()["session_id"]
+            payload = dict(
+                session_id=session_id,
+                message_id=uuid4().hex,
+                quote_id=quote_id,
+                message=scenario["user_message"],
+                channel=scenario["channel"],
+            )
+            for _ in range(2 if scenario.get("repeat_same_message_id") else 1):
+                response = await client.post("/api/chat", json=payload)
+                assert response.status_code == 200, response.text
+                responses.append(response.json())
+            final = (await client.get("/api/quotes/" + quote_id)).json()
+        async with db.connect() as conn:
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs)
+                        .where(tool_call_logs.c.session_id == session_id)
+                        .order_by(tool_call_logs.c.log_id)
+                    )
+                )
+                .mappings()
+                .all()
+            )
+            all_rows = (
+                (await conn.execute(sa.select(quote_items).order_by(quote_items.c.quote_item_id)))
+                .mappings()
+                .all()
+            )
+            final_stock = (
+                await conn.execute(
+                    sa.select(products.c.product_id, products.c.stock_qty).order_by(
+                        products.c.product_id
+                    )
+                )
+            ).all()
+        assert final_stock == original_stock
+>       assert {
+            r["product_id"]: r["quantity"]
+            for r in all_rows
+            if r["quote_id"] == quote_id and r["status"] == "active"
+        } == expected_final
+E       AssertionError: assert {'PRD-BC-130': 2} == {'PRD-BC-140': 2}
+E
+E         Left contains 1 more item:
+E         {'PRD-BC-130': 2}
+E         Right contains 1 more item:
+E         {'PRD-BC-140': 2}
+E         Use -v to get more diff
+
+tests/golden/test_chat_golden.py:156: AssertionError
+=========================== short test summary info ============================
+FAILED tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-005]
+FAILED tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-006]
+2 failed, 20 passed in 5.19s

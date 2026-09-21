@@ -137,3 +137,10 @@ Bu belirli anahtarda tekrar etmeyen DB etkisidir; genel bir “exactly once deli
 Replace eski satırı replaced yapar ve hedefe bağlar; hedef zaten aktifse miktarı birleştirir.
 Yeni stok dışı add için hem müşteri uygunluğu hem açık bekleme onayı gerekir; replace hedefi stoklu olmalıdır.
 Taslak stok rezervasyonu yapmaz ve stok miktarını düşürmez. F03 domain araçları henüz chat UI'ya bağlı değildir.
+
+F04 sohbet: `POST /api/chat/sessions` ile `customer_id`, `quote_id`, `channel` gönder;
+dönen `session_id` ile `POST /api/chat` gövdesinde `message_id`, `quote_id`, `message` gönder.
+Aynı gönderimin tekrarında aynı `message_id`, yeni mesajda yeni kimlik kullanılır. Plan sunucuda
+kalıcıdır; istemci guard veya idempotency anahtarı veremez. Anahtarsız Türkçe fallback gerçek
+araçları çalıştırır; şu anda ücretli/harici model adaptörü yoktur. 22 golden senaryo HTTP sohbet
+kapısından geçti; kanıt `reports/f04_acceptance.md`. SSE ve istemci chat entegrasyonu sonraki fazdır.

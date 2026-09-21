@@ -39,3 +39,13 @@ def test_price_is_not_quantity():
         "quantity": None,
         "max_price_try": Decimal(8500),
     }
+
+
+@pytest.mark.parametrize("value", ["-2 adet", "1,5 adet", "1.5 tane", "+3 adet"])
+def test_signed_or_fractional_quantities_rejected(value):
+    with pytest.raises(ValueError):
+        numeric_slots(value)
+
+
+def test_apostrophe_target_quantity():
+    assert numeric_slots("Miktarı 3'e çıkar.")["quantity"] == 3

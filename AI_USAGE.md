@@ -22,3 +22,9 @@ kilidi, backorder, replacement ve restart sonrası gerçek wrapper replay Postgr
 Salt okunur ikinci AI incelemesinde kanıtlanmış önemli kusur bulunmadı; altı test açığı raporlandı.
 Bu açıklar için eklenen testler dahil son gerçek PostgreSQL/unit koşusu 94 passed; ayrıntı reports/f03_acceptance.md.
 Bu inceleme insan denetimi veya ampirik mutation score değildir.
+
+F04: Codex genel Türkçe niyet/slot planlayıcı, kalıcı mesaj planı, kaynaklı template yanıtı ve
+HTTP golden runner yazdı. Bağımsız salt-okunur AI incelemesinin dört somut parser/guard bulgusu
+regresyonlarla düzeltildi; ilk negatif testlerdeki sayı ayrıştırma hataları da giderildi.
+Son gerçek koşu 136 passed (22 golden dahil); gerçek HTTP smoke/lint/delivery exit0.
+Sistem LLM tool calling yaptığını iddia etmez; provider adaptörü ve API harcaması yoktur.

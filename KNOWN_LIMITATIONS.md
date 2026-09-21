@@ -15,3 +15,8 @@
 - ADR-005/007 firma kararı adaya bıraktıktan sonra accepted; adayın gerekçeli tercihi olarak sunulur.
 
 - Retrieval küçük katalog için tüm aktif adayları normalize ederek tarar; büyük katalog ölçek testi yapılmadı. Admin CRUD henüz yok; canlı DB kaydının retrieval görünürlüğü test edildi.
+
+F04 güncellemesi: altı araç artık gerçek HTTP sohbet üzerinden çağrılıyor; 22 golden passed.
+Türkçe parser sınırlı niyet/slot grameridir; açık olmayan miktar/ürün referansında netleştirme ister.
+Genel LLM dil anlama veya provider tool calling yoktur. SSE, istemci chat ve native ortak quote
+kabulü henüz tamamlanmadı; final teslim olarak yorumlanmamalıdır.

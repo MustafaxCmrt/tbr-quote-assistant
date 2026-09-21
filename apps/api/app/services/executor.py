@@ -152,7 +152,14 @@ async def execute_plan(engine, session_id, message_id, *, attempt_id=None):
                 quote["quote_id"],
                 session["customer_id"],
                 index,
-                constraints,
+                constraints.model_copy(
+                    update={
+                        "required_tags": sorted(
+                            set(constraints.required_tags)
+                            | set(plan[index].get("required_tags", []))
+                        )
+                    }
+                ),
                 customer,
                 catalog,
             )
