@@ -11,7 +11,7 @@
   },
   "packageManager": "npm@11.19.0",
   "scripts": {
-    "test": "npm run test --workspace @tbr/contracts",
+    "test": "tsx --test packages/contracts/tests/*.test.ts apps/mobile/tests/*.test.ts apps/web/tests/*.test.ts",
     "typecheck": "npm run typecheck --workspaces",
     "lint": "eslint apps/mobile packages/contracts"
   },

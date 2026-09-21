@@ -1,0 +1,34 @@
+UTC: 2026-09-21T16:24:52.937317+00:00
+Base commit (working tree may contain pending changes): ecfc5dfd3320ef34a52b40a688da1def7b6a64b0
+Command: npm test
+Exit code: 0
+
+
+> tbr-quote-assistant@0.1.0 test
+> tsx --test packages/contracts/tests/*.test.ts apps/mobile/tests/*.test.ts apps/web/tests/*.test.ts
+
+✔ native transport posts identity and decodes every UTF-8 byte before terminal done (15.872958ms)
+✔ EOF without terminal rejects and preserves delivered partial text (0.466041ms)
+✔ controlled error is terminal, malformed content and native hostname never escape (0.784709ms)
+✔ mobile canonical quote ignores stale versions and responses from another selection (0.3875ms)
+✔ late poll cannot replace new version or changed quote context (0.900458ms)
+✔ actual envelope survives every UTF-8 split and reducer completes once (15.130209ms)
+✔ replayed delta is never applied locally and duplicate event is ignored (0.147541ms)
+✔ error preserves partial text and signals committed-state refetch (0.240708ms)
+✔ unknown schema, mismatched type, impossible receipt flags and broken order rejected (0.16375ms)
+✔ utf8_multibyte_split (1.153083ms)
+✔ crlf_across_chunks (0.133041ms)
+✔ multiple_events_in_one_chunk (0.109125ms)
+✔ unfinished_final_event_is_discarded (0.281459ms)
+✔ all_byte_boundaries_preserve_frames (1.56075ms)
+✔ comments_multiline_data_and_persistent_id (0.107375ms)
+✔ empty_stream_and_bare_cr (0.078125ms)
+✔ truncated_utf8_is_rejected (0.086333ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 178.509791

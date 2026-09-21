@@ -1,8 +1,10 @@
 # The Blue Red — Teklif Asistanı
 
 Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
-**21 Eylül 2026: F01–F02 tamamlandı.** PostgreSQL/Compose, Alembic, idempotent seed ve readiness doğrulandı.
-iPhone debug streaming Mustafa tarafından doğrulandı. Üç okuma aracı ve kaynaklı retrieval hazır; mutasyon/chat/admin akışları sonraki fazlardır.
+**21 Eylül 2026: F00–F06 tamamlandı; F07 cihaz doğrulaması bekliyor.** Altı gerçek araç,
+transaction/receipt, kaynaklı deterministic chat, SSE ve web admin çalışıyor. 144 backend testi
+(22 golden dahil) geçti. iPhone debug streaming Mustafa tarafından doğrulandı; tam native sohbet
+ve web/mobil ortak teklif testi henüz `not_verified`.
 
 ## Docker ile yerel altyapı
 
@@ -14,10 +16,10 @@ docker compose up --build -d --wait
 ```
 
 İlk komut güçlü parolalarla ignored `.env` oluşturur; mevcut dosyayı değiştirmez. API
-`http://localhost:8001/health/ready`, web iskeleti `http://localhost:5173` adresindedir.
+`http://localhost:8001/health/ready`, web yönetimi `http://localhost:5173` adresindedir.
 PostgreSQL host portu açılmaz. API ve web varsayılan olarak yalnız Mac loopback'e bağlanır.
 Migration ve JSON seed başarılı olmadan API başlamaz. Runtime DB rolü şema değiştiremez.
-Web F01'de Vite geliştirme sunucusudur; public dağıtım için kullanılmaz.
+Web Compose servisi Vite geliştirme sunucusudur; public dağıtım için kullanılmaz.
 
 ```sh
 docker compose --profile test run --build --rm test
@@ -35,16 +37,16 @@ Gerekenler: uv 0.12.17, Python 3.12.14, Node 24.21.0, npm 11.19.0.
 Python sürümü `apps/api/.python-version`, Node `.node-version`; bağımlılıklar `uv.lock` ve kök `package-lock.json` ile kilitli.
 Expo SDK 57, FastAPI 0.141.1 ve uvicorn 0.53.0 kurulup doğrulandı.
 
-1. Repo kökünde kur ve API'yi başlat:
+1. Repo kökünde kur ve kalıcı API'yi yerel ağ demosu için başlat:
 
    ```sh
    cd /Users/comert/Desktop/tbr-quote-assistant
-   uv sync --directory apps/api --locked
    npm ci
-   DEBUG_STREAM_SMOKE=1 uv run --directory apps/api --locked uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-access-log
+   python3 scripts/init_env.py
+   API_BIND_HOST=0.0.0.0 docker compose up --build -d --wait api web
    ```
 
-2. `apps/mobile/.env` dosyasına `EXPO_PUBLIC_API_BASE_URL=http://<MAC_LAN_IP>:8000` yaz.
+2. `apps/mobile/.env` dosyasına `EXPO_PUBLIC_API_BASE_URL=http://<MAC_LAN_IP>:8001` yaz.
    `<MAC_LAN_IP>` yerine Mac'in Wi-Fi ayarlarındaki IP adresini kullan. Bu oturumda yerel dosya hazırlandı;
    ağ değişirse güncelle. IP'yi rapora/örnek dosyaya/ekran görüntüsüne koyma. Telefonda localhost Mac'e gitmez.
 3. İkinci terminalde Expo'yu başlat:
@@ -56,18 +58,22 @@ Expo SDK 57, FastAPI 0.141.1 ve uvicorn 0.53.0 kurulup doğrulandı.
 
 4. Expo Go ve Mac CLI’da aynı Expo hesabıyla giriş yap (`npx expo login`); ardından Expo’yu yeniden başlat. Mac ve iPhone aynı Wi-Fi'dayken App Store'daki güncel Expo Go'yu kullan. iPhone Kamerasıyla
    terminaldeki QR'ı okut, Expo Go'da aç; yerel ağ izni sorulursa izin ver.
-5. **Stream testi** butonuna bas. Önce “Bağlantı çalışıyor ğüşiöç”, yaklaşık bir saniye sonra
-   “İkinci parça ulaştı: ĞÜŞİÖÇ”, yaklaşık bir saniye sonra **Tamamlandı** görmelisin.
-   Satırlar topluca değil, geldikçe görünmeli; başlarında geçen süre yer alır. İkinci denemede eski satırlar temizlenir.
-6. macOS güvenlik duvarı sorarsa bu yerel test için Python/uvicorn ve Node'un gelen bağlantılarına izin ver;
+5. Mavi Kırmızı Market A.Ş. / Q-1001 seç; mevcut adedi not et. **“BlueScan Air 1 adet daha ekle.”**
+   gönder. Parça parça yanıt ve kaynaklar görünmeli; Teklif tabında adet bir artmalı. Web'de aynı
+   Q-1001 aynı adet/sürümü göstermeli. **Aynı isteği tekrar gönder** adedi yeniden artırmamalı.
+6. macOS güvenlik duvarı sorarsa bu yerel test için Docker/API ve Node'un gelen bağlantılarına izin ver;
    güvenlik duvarını tamamen kapatman gerekmez.
 7. Çalışmazsa ilk üç kontrol: **(a)** aynı Wi-Fi, VPN/misafir ağı izolasyonu ve Expo Go yerel ağ izni;
-   **(b)** iPhone Safari'den `http://<MAC_LAN_IP>:8000/health/live` açılıyor mu, API terminali çalışıyor mu;
+   **(b)** iPhone Safari'den `http://<MAC_LAN_IP>:8001/health/ready` açılıyor mu, API çalışıyor mu;
    **(c)** `.env` adresi doğru mu, Expo yeniden başlatıldı mı, Expo Go SDK 57 ile uyumlu mu?
 
 Metro QR bağlantısı ile API bağlantısı ayrıdır. Expo'nun açılması API erişimini tek başına kanıtlamaz.
-Native sonuç **passed**: Mustafa iPhone ekranında 0.0/1.1 sn zamanları ve Tamamlandı durumunu paylaştı.
-Kanıt `reports/native_smoke.md` içinde; tam cihaz/iOS/Expo Go sürüm bilgisi henüz bildirilmedi.
+F01 debug sonucu **passed**: Mustafa 0.0/1.1 sn ve Tamamlandı görüntüsünü paylaştı.
+Bu tam sohbet testi değildir. Güncel fiziksel kabul durumu `reports/native_smoke.md` içindedir.
+Eski debug ekranı için mobil `.env` içinde `EXPO_PUBLIC_DEBUG_STREAM_SMOKE=1`, API'de
+`DEBUG_STREAM_SMOKE=1` gerekir. DB'siz debug API komutu:
+`DEBUG_STREAM_SMOKE=1 uv run --directory apps/api --locked uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-access-log`.
+Bu ayrı debug testi için mobil API portu 8000 seçilir; gerçek uygulama için 8001'e dönülür.
 
 ## Doğrulama
 
@@ -79,7 +85,7 @@ npm run typecheck
 npm run lint
 npm exec --workspace @tbr/mobile -- expo install --check
 PYTHONPATH=apps/api uv run --project apps/api --locked python scripts/check_debug_flag.py
-# API yukarıdaki komutla açıkken:
+# Ayrı debug API 8000 portunda açıkken:
 python3 scripts/smoke_api.py
 ```
 
@@ -91,15 +97,15 @@ iOS bundle üretimi native cihaz gözlemi yerine geçmez. Kanıt haritası: [F01
 
 - `apps/api`: `/health/live`, env ile açılan `/api/debug/stream-smoke`. `DEBUG_STREAM_SMOKE` yoksa/0 ise debug yolu yoktur;
   değişiklik API yeniden başlatılınca geçerli olur. Kök `.env` otomatik yüklenmez.
-- `apps/mobile`: geçici Türkçe bağlantı ekranı, `expo/fetch`, ortak saf parser. Compose dışında çalışır.
-- `packages/contracts`: testli SSE parser; gerçek DTO/event sözleşmeleri F05'te sabitlenecek.
-- `apps/web`: React/TypeScript/Vite bağlantı iskeleti. Ayrı `apps/web/package-lock.json` ile kilitli; `npm --prefix apps/web ci` ve `npm --prefix apps/web run build`.
+- `apps/mobile`: Türkçe sohbet, kaynaklar, retry ve kanonik teklif; `expo/fetch`, ortak parser. Compose dışında çalışır.
+- `packages/contracts`: testli SSE parser/reducer, Quote DTO ve version1 event sözleşmeleri.
+- `apps/web`: React/TypeScript/Vite admin/chat/quote/log. Ayrı `apps/web/package-lock.json` ile kilitli; `npm --prefix apps/web ci` ve `npm --prefix apps/web run build`.
 - `apps/api/app/persistence`: SQLAlchemy async Core şema, Alembic, JSON seed ve readiness.
 - `data/source`: orijinal, değiştirilmedi. Kalıcılık ve 7 gerçek PostgreSQL testi passed.
 
 ADR-005 (indirimler toplanmaz, özel kural önceliği) ve ADR-007 (beklenen çağrı/kaynaklar minimum)
 firma tarafından karar adaya bırakıldıktan sonra **kabul edilmiş aday tercihleridir** (21 Eylül 2026).
-Şirketin belirlediği kesin kurallar olarak sunulmaz; saf fiyatlama uygulanıp test edildi; mutasyon yürütücüsü sıradadır.
+Şirketin belirlediği kesin kurallar olarak sunulmaz; saf fiyatlama ve mutasyon yürütücüsü gerçek DB'de test edildi.
 
 [AI kullanımı](AI_USAGE.md) · [Bilinen sınırlamalar](KNOWN_LIMITATIONS.md)
 

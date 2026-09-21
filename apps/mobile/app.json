@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "TBR Stream Testi",
+    "name": "The Blue Red",
     "slug": "tbr-quote-assistant",
     "version": "0.1.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {"supportsTablet": true}
   }
 }

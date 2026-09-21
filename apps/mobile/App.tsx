@@ -1,132 +1,277 @@
-import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  AppState,
+  Modal,
+  ScrollView,
+  StatusBar,
+  Text,
+  View,
+  useColorScheme,
+} from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { fetch } from "expo/fetch";
-import { createSseParser, type SseEvent } from "@tbr/contracts";
+import type { Quote as QuoteDTO } from "@tbr/contracts";
+import { api } from "./src/api";
+import { acceptQuote } from "./src/api/state";
+import { Chat } from "./src/screens/Chat";
+import { Quote } from "./src/screens/Quote";
+import { Button, Label, ui, usePalette } from "./src/shared/ui";
+import DebugSmoke from "./DebugSmoke";
 
-export default function App() {
-  const [lines, setLines] = useState<string[]>([]);
-  const [status, setStatus] = useState("Teste hazır");
-  const [error, setError] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const active = useRef<AbortController | null>(null);
-  useEffect(() => () => active.current?.abort(), []);
-
-  async function startTest() {
-    if (active.current) return;
-    const baseUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim().replace(/\/+$/, "");
-    if (!baseUrl || !/^https?:\/\//.test(baseUrl)) {
-      setError(true);
-      setStatus("API adresi eksik. .env dosyasına EXPO_PUBLIC_API_BASE_URL yazıp Expo’yu yeniden başlat.");
-      return;
-    }
-    const controller = new AbortController();
-    active.current = controller;
-    const timeout = setTimeout(() => controller.abort(), 15000);
-    setBusy(true);
-    setError(false);
-    setLines([]);
-    setStatus("Bağlanıyor…");
-    let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
-    try {
-      const response = await fetch(`${baseUrl}/api/debug/stream-smoke`, {
-        method: "POST",
-        headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-        signal: controller.signal,
+interface Customer {
+  customer_id: string;
+  name: string;
+  city: string;
+}
+interface Summary {
+  quote_id: string;
+  version: number;
+}
+function Workspace() {
+  const c = usePalette();
+  const dark = useColorScheme() === "dark";
+  const [customers, setCustomers] = useState<Customer[]>([]),
+    [customer, setCustomer] = useState("");
+  const [quotes, setQuotes] = useState<Summary[]>([]),
+    [quoteId, setQuoteId] = useState(""),
+    [quote, setQuote] = useState<QuoteDTO | null>(null);
+  const [stale, setStale] = useState(false),
+    [updated, setUpdated] = useState(""),
+    [error, setError] = useState("");
+  const [tab, setTab] = useState<"chat" | "quote">("chat"),
+    [context, setContext] = useState(false),
+    [busy, setBusy] = useState(false),
+    [retry, setRetry] = useState(0);
+  const selected = useRef("");
+  selected.current = quoteId;
+  useEffect(() => {
+    let live = true;
+    api
+      .request<Customer[]>("/api/customers")
+      .then((rows) => {
+        if (live) {
+          setCustomers(rows);
+          setCustomer(
+            (current) =>
+              current ||
+              rows.find((r) => r.customer_id === "CUST-IST-001")?.customer_id ||
+              rows[0]?.customer_id ||
+              "",
+          );
+          setError("");
+        }
+      })
+      .catch((e) => live && setError(e.message));
+    return () => {
+      live = false;
+    };
+  }, [retry]);
+  useEffect(() => {
+    let live = true;
+    setQuoteId("");
+    setQuote(null);
+    setQuotes([]);
+    setUpdated("");
+    if (customer)
+      api
+        .request<Summary[]>(
+          "/api/quotes?customer_id=" + encodeURIComponent(customer),
+        )
+        .then((rows) => {
+          if (live) {
+            setQuotes(rows);
+            setQuoteId(rows[0]?.quote_id ?? "");
+            setError("");
+          }
+        })
+        .catch((e) => live && setError(e.message));
+    return () => {
+      live = false;
+    };
+  }, [customer, retry]);
+  const refresh = useCallback(() => {
+    const id = selected.current;
+    if (!id) return;
+    void api
+      .request<QuoteDTO>("/api/quotes/" + encodeURIComponent(id))
+      .then((next) => {
+        if (selected.current !== id) return;
+        setQuote((prev) => acceptQuote(prev, next, id));
+        setStale(false);
+        setUpdated(new Date().toLocaleTimeString("tr-TR"));
+      })
+      .catch(() => {
+        if (selected.current === id) setStale(true);
       });
-      if (!response.ok) {
-        throw new Error(response.status === 404
-          ? "Test endpoint’i kapalı. API’yi DEBUG_STREAM_SMOKE=1 ile başlat."
-          : "API isteği başarısız. Sunucuyu kontrol edip tekrar dene.");
-      }
-      if (!response.body || !response.headers.get("content-type")?.includes("text/event-stream")) {
-        throw new Error("API beklenen olay akışını göndermedi.");
-      }
-      reader = response.body.getReader();
-      const parser = createSseParser();
-      const started = Date.now();
-      let completed = false;
-      function showEvent(event: SseEvent) {
-        const payload: unknown = JSON.parse(event.data);
-        if (typeof payload !== "object" || payload === null || !("debug" in payload) || payload.debug !== true) {
-          throw new Error("Beklenmeyen test yanıtı alındı.");
-        }
-        if (event.event === "text_delta" && "text" in payload && typeof payload.text === "string") {
-          const text = payload.text;
-          const elapsed = ((Date.now() - started) / 1000).toFixed(1);
-          setLines((previous) => [...previous, `${elapsed} sn · ${text}`]);
-          setStatus("Akış sürüyor…");
-        } else if (event.event === "done") {
-          completed = true;
-          setStatus("Tamamlandı");
-        } else {
-          throw new Error("Beklenmeyen test olayı alındı.");
-        }
-      }
-      while (!completed) {
-        const chunk = await reader.read();
-        if (chunk.done) {
-          parser.finish().forEach(showEvent);
-          break;
-        }
-        for (const event of parser.push(chunk.value)) {
-          showEvent(event);
-          if (completed) break;
-        }
-      }
-      if (!completed) throw new Error("Bağlantı tamamlanmadan kesildi. Tekrar dene.");
-    } catch (cause) {
-      setError(true);
-      // Fetch exceptions can contain hostnames; only our controlled messages are shown.
-      const controlled = cause instanceof Error && [
-        "Test endpoint’i kapalı.", "API isteği başarısız.", "API beklenen", "Beklenmeyen test", "Bağlantı tamamlanmadan",
-      ].some((prefix) => cause.message.startsWith(prefix));
-      setStatus(controlled && cause instanceof Error ? cause.message :
-        "Bağlantı kurulamadı veya zaman aşımına uğradı. Aynı Wi-Fi ağını ve API’nin açık olduğunu kontrol edip tekrar dene.");
-    } finally {
-      clearTimeout(timeout);
-      await reader?.cancel().catch(() => undefined);
-      reader?.releaseLock();
-      active.current = null;
-      setBusy(false);
-    }
-  }
-
+  }, []);
+  useEffect(() => {
+    setQuote(null);
+    setUpdated("");
+    setStale(false);
+    refresh();
+    const timer = setInterval(() => {
+      if (AppState.currentState === "active") refresh();
+    }, 2500);
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") refresh();
+    });
+    return () => {
+      clearInterval(timer);
+      subscription.remove();
+    };
+  }, [quoteId, refresh]);
+  return (
+    <SafeAreaView style={[ui.flex, { backgroundColor: c.bg }]}>
+      <StatusBar barStyle={dark ? "light-content" : "dark-content"} />
+      <View
+        style={{
+          padding: 16,
+          gap: 10,
+          borderBottomWidth: 1,
+          borderColor: c.line,
+          backgroundColor: c.surface,
+        }}
+      >
+        <View style={ui.row}>
+          <Text
+            accessibilityRole="header"
+            style={[ui.heading, { color: c.ink }]}
+          >
+            The Blue Red
+          </Text>
+          <Button disabled={busy} onPress={() => setContext(true)}>
+            Müşteri / teklif
+          </Button>
+        </View>
+        <Text style={[ui.caption, { color: c.muted }]}>
+          {customers.find((x) => x.customer_id === customer)?.name ??
+            "Bağlanıyor…"}{" "}
+          · {quoteId}
+        </Text>
+      </View>
+      {!!error && (
+        <View style={ui.content}>
+          <Text accessibilityRole="alert" style={[ui.body, { color: c.error }]}>
+            {error}
+          </Text>
+          <Button onPress={() => setRetry((v) => v + 1)}>Tekrar bağlan</Button>
+        </View>
+      )}
+      {stale && tab === "chat" && (
+        <Text
+          accessibilityRole="alert"
+          style={[ui.caption, { color: c.error, padding: 12 }]}
+        >
+          Bağlantı kesildi. Son kontrol {updated || "yapılamadı"}; teklif
+          ekranından yenileyebilirsin.
+        </Text>
+      )}
+      <View style={[ui.flex, { display: tab === "chat" ? "flex" : "none" }]}>
+        {quoteId ? (
+          <Chat
+            key={quoteId}
+            quoteId={quoteId}
+            customerId={customer}
+            refresh={refresh}
+            onBusy={setBusy}
+          />
+        ) : (
+          <View style={ui.content}>
+            <Label>Hazır teklif bekleniyor.</Label>
+          </View>
+        )}
+      </View>
+      <View style={[ui.flex, { display: tab === "quote" ? "flex" : "none" }]}>
+        <Quote
+          quote={quote}
+          stale={stale}
+          updated={updated}
+          refresh={refresh}
+        />
+      </View>
+      <View
+        accessibilityRole="tablist"
+        style={{
+          flexDirection: "row",
+          gap: 12,
+          padding: 12,
+          borderTopWidth: 1,
+          borderColor: c.line,
+          backgroundColor: c.surface,
+        }}
+      >
+        <View style={ui.flex}>
+          <Button primary={tab === "chat"} onPress={() => setTab("chat")}>
+            Sohbet
+          </Button>
+        </View>
+        <View style={ui.flex}>
+          <Button
+            primary={tab === "quote"}
+            onPress={() => {
+              setTab("quote");
+              refresh();
+            }}
+          >
+            Teklif
+          </Button>
+        </View>
+      </View>
+      <Modal
+        visible={context}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setContext(false)}
+      >
+        <SafeAreaView style={[ui.flex, { backgroundColor: c.bg }]}>
+          <ScrollView contentContainerStyle={ui.content}>
+            <Button onPress={() => setContext(false)}>Tamam</Button>
+            <Text
+              accessibilityRole="header"
+              style={[ui.title, { color: c.ink }]}
+            >
+              Demo bağlamı
+            </Text>
+            <Label muted>
+              Müşteri değişince yeni sohbet başlar. Kayıtlı teklif korunur.
+            </Label>
+            {customers.map((item) => (
+              <Button
+                key={item.customer_id}
+                primary={customer === item.customer_id}
+                onPress={() => setCustomer(item.customer_id)}
+              >
+                {item.name} · {item.city}
+              </Button>
+            ))}
+            <Text
+              accessibilityRole="header"
+              style={[ui.heading, { color: c.ink }]}
+            >
+              Hazır teklifler
+            </Text>
+            {quotes.map((item) => (
+              <Button
+                key={item.quote_id}
+                primary={quoteId === item.quote_id}
+                onPress={() => {
+                  setQuoteId(item.quote_id);
+                  setContext(false);
+                }}
+              >
+                {item.quote_id}
+              </Button>
+            ))}
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+    </SafeAreaView>
+  );
+}
+export default function App() {
+  if (process.env.EXPO_PUBLIC_DEBUG_STREAM_SMOKE === "1") return <DebugSmoke />;
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.safe}>
-        <StatusBar barStyle="dark-content" />
-        <ScrollView contentContainerStyle={styles.content}>
-          <Text accessibilityRole="header" style={styles.title}>Stream testi</Text>
-          <Text style={styles.description}>Geçici debug ekranı. API’den gelen iki metin parçasını sırayla gösterir; teklif verisini değiştirmez.</Text>
-          <Pressable accessibilityRole="button" accessibilityState={{ disabled: busy, busy }} disabled={busy}
-            onPress={() => void startTest()} style={({ pressed }) => [styles.button, (pressed || busy) && styles.buttonDim]}>
-            {busy && <ActivityIndicator color="#fff" />}
-            <Text style={styles.buttonText}>{busy ? "Test sürüyor…" : "Stream testi"}</Text>
-          </Pressable>
-          <Text accessibilityRole={error ? "alert" : "text"} accessibilityLiveRegion="polite"
-            style={[styles.status, error && styles.error]}>{status}</Text>
-          <View style={styles.events}>
-            {lines.length === 0 ? <Text style={styles.description}>Gelen parçalar burada görünecek.</Text> :
-              lines.map((line, index) => <Text key={index} style={styles.line}>{line}</Text>)}
-          </View>
-        </ScrollView>
-      </SafeAreaView>
+      <Workspace />
     </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#F5F7FA" },
-  content: { padding: 24, gap: 20, width: "100%", maxWidth: 640, alignSelf: "center" },
-  title: { fontSize: 30, fontWeight: "700", color: "#14233B" },
-  description: { fontSize: 17, lineHeight: 25, color: "#46566D" },
-  button: { minHeight: 52, padding: 16, backgroundColor: "#1649A2", borderRadius: 12, flexDirection: "row", gap: 12, justifyContent: "center", alignItems: "center" },
-  buttonDim: { opacity: 0.7 },
-  buttonText: { color: "#fff", fontSize: 18, fontWeight: "600" },
-  status: { fontSize: 18, fontWeight: "600", color: "#14233B" },
-  error: { color: "#A3212C" },
-  events: { gap: 16, borderTopWidth: 1, borderTopColor: "#CCD4E0", paddingTop: 20 },
-  line: { fontSize: 17, lineHeight: 26, color: "#14233B" },
-});

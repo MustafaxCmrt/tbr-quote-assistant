@@ -5,11 +5,12 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start --lan",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.tests.json --noEmit"
   },
   "dependencies": {
     "@tbr/contracts": "0.1.0",
     "expo": "57.0.24",
+    "expo-crypto": "57.0.3",
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-safe-area-context": "5.7.0"

@@ -33,3 +33,13 @@ F05: Codex gerçek executor eventleri, SSE envelope, güvenli hata/başarısız 
 sonrası devam ve ortak TS reducer ekledi. 142 backend testi, 12 parser/reducer testi; API ve proxy
 üstünden curl -N kademeli aktarım gözlemi passed. Commit sonrası render hatası ve disconnect
 regresyonları gerçek DB üstünde koşuldu. Native tam chat henüz insan tarafından denenmedi.
+
+F06: Codex backend CRUD ve React admin/chat/quote/log ekranlarını yazdı. 144 gerçek backend testi,
+web build/typecheck/lint, tarayıcıdan yeni ürün/bilgi ekleme, sohbet mutation/retry, ikinci istemci ve
+gerçek API kesintisi/toparlanma kanıtları raporlandı. Impeccable becerisiyle ayrı AI arayüz okuyucusu
+stale metadata ve kontrast bulgularını bildirdi; düzeltmeleri doğruladı. Ayrı documenter mevcut
+tasarım tokenlarını belgeledi. Otomatik tasarım detector'ı izin hatasıyla çalışmadı; insan review denmedi.
+
+F07: Codex Expo native sohbet/kaynak sheet/kanonik teklif/bağlam seçimini ve typed expo/fetch
+client'ını yazdı. UUID için Expo Crypto resmî belgesi kullanıldı. Node transport testleri ve iOS export
+native kullanıcı kabulünün yerine sunulmaz; Mustafa'nın tam sohbet/shared quote gözlemi bekleniyor.
