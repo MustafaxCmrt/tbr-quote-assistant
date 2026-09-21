@@ -1,0 +1,25 @@
+UTC: 2026-09-21T10:11:34.363103+00:00
+Base commit (working tree may contain pending changes): adc921df1d5f2ad4622b6eac329d13a9fa5c06b1
+Command: uv add --directory apps/api --bounds exact fastapi uvicorn
+Exit code: 0
+
+Using CPython 3.12.14
+Creating virtual environment at: .venv
+Resolved 14 packages in 1.17s
+Downloading pydantic-core (1.8MiB)
+ Downloaded pydantic-core
+Prepared 13 packages in 427ms
+Installed 13 packages in 9ms
+ + annotated-doc==0.0.5
+ + annotated-types==0.8.0
+ + anyio==4.15.1
+ + click==8.5.0
+ + fastapi==0.141.1
+ + h11==0.16.0
+ + idna==3.20
+ + pydantic==2.13.5
+ + pydantic-core==2.46.5
+ + starlette==1.6.0
+ + typing-extensions==4.16.0
+ + typing-inspection==0.4.4
+ + uvicorn==0.53.0
