@@ -8,7 +8,14 @@ from decimal import Decimal
 def normalize(value: str) -> str:
     value = value.translate(str.maketrans({"İ": "i", "I": "i", "ı": "i"})).lower()
     value = "".join(c for c in unicodedata.normalize("NFKD", value) if not unicodedata.combining(c))
-    return " ".join(re.sub(r"[^a-z0-9-]+", " ", value).split())
+    value = " ".join(re.sub(r"[^a-z0-9-]+", " ", value).split())
+    for pattern, replacement in (
+        (r"\bwi[ -]?fi\b", "wifi"),
+        (r"\busb[ -]c\b", "usb-c"),
+        (r"\bcevrim[ -]?disi\b", "offline"),
+    ):
+        value = re.sub(pattern, replacement, value)
+    return value
 
 
 def parse_money(value: str) -> Decimal:

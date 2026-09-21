@@ -56,3 +56,25 @@ henüz kapanmadı. İlk lint import sırası hatası raporda korunur; düzeltilm
 `f08_review_race_lint_final.txt`. Bu kayıt 151 eski testin yeni sürümde yeniden koşulduğunu iddia etmez.
 
 Birleşik mutation + chat + golden koşusu: **104passed23.78s, exit0**; `f08_review_mutations_chat_golden.txt`. Son delivery scan exit0, orijinal12source aynı; `f08_review_race_delivery.txt`.
+
+## Katalog ve özellik yazımları — üçüncü düzeltme
+
+`f08_catalog_review_before.txt`: exit1/5failed. Wi-Fi/USB C/çevrimdışı artık normalize edilen
+arama gölgesinde wifi/usb-c/offline ile aynı özellik olur; özgün veri ve gösterim metni değişmez.
+Eşit güçlü ürünlerde fiyat/ID sıralaması kullanıcı tercihi sayılmaz; planner ürün kodu ister.
+Yeni canlı model/alias kategori sözcüğü olmadan da okuma ve ekleme yoluna girebilir.
+Koşullu eklemede de ilk ürün ve hedef için tek anlamlı seçim gerekir.
+
+| Requirement | Evidence |
+|---|---|
+| "Açık özellikler kesin filtre" | `test_feature_spelling_variants_do_not_drop_hard_constraints`: Wi-Fi/USB C/çevrimdışı gereğini taşımayan adlandırılmış ürün için boş öneri, aynı quote, receipt0. |
+| Geçerli açık özellik isteği çalışsın | `test_feature_spelling_variants_accept_matching_products`: uygun stoklu üç gerçek SKU için quantity1/version2/receipt1. |
+| "belirsiz niyette soru sor" | `test_generic_tied_product_choice_requires_clarification`: Barkod okuyucu ekle → ürün kodu sorusu, aynı quote/receipt0. |
+| "yeni eklenen kayıtlar … çalışmalı" | `test_new_live_model_without_category_is_readable_and_addable`: kategori içermeyen yeni MorMartı Nova model adıyla read tek doğru ürün; add2/net2468. |
+| Korunan mevcut akış | `f08_catalog_review_after.txt`: chat + golden22 + numeric unit, 83passed/exit0 (son üç olumlu örnek bu koşudan sonra eklendi). |
+
+Olumlu Wi-Fi testinin ilk seçiminde PRD-POS-220 yanlışlıkla stoklu varsayılmıştı; özgün JSON'da
+stok0 olduğu doğrulandı. Ürün kuralı/veri/assertion gevşetilmedi: "uygun stoklu ürün" testi için
+stok15 olan PRD-POS-230 seçildi. İlk 1failed/5passed çıktı `f08_catalog_positive.txt` içinde korunur.
+
+Son özellik olumlu/olumsuz koşusu: `pytest -q tests/test_chat.py -k feature_spelling`, 6passed/exit0; f08_catalog_positive_final.txt. Ruff/delivery exit0; source12 değişmedi.

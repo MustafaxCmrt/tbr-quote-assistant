@@ -102,6 +102,31 @@ async def build_plan(conn, session, message_id, text, mode):
         .one()
     )
 
+    def named_catalog_match(query):
+        words = tokens(query)
+        return any(
+            len(name_words := tokens(name)) >= 2 and name_words <= words
+            for row in catalog.values()
+            for name in [
+                " ".join(normalize(row["name_tr"]).split()[:2]),
+                *row["aliases"].get("tr", []),
+            ]
+        )
+
+    def unique_choice(options, query):
+        if len(options) < 2:
+            return options[0] if options else None
+
+        # Price/ID ordering makes browsing stable, but is not evidence of user intent.
+        def strength(candidate):
+            row = catalog[candidate.product_id]
+            words = tokens(query)
+            exact_model = set(normalize(row["name_tr"]).split()[:2]) <= words
+            exact_alias = normalize(query) in [normalize(a) for a in row["aliases"].get("tr", [])]
+            return (exact_model, exact_alias, len(candidate.match_evidence))
+
+        return options[0] if strength(options[0]) > max(map(strength, options[1:])) else None
+
     def call(name, **arguments):
         steps.append({"name": name, "arguments": arguments})
 
@@ -207,10 +232,12 @@ async def build_plan(conn, session, message_id, text, mode):
         if "indirim" in normalized:
             knowledge("discount_policy")
         if not topics - {"price_ceiling"} and (
-            category(text) or any(w.startswith(("prd-", "tbr-")) for w in tokens(text))
+            category(text)
+            or named_catalog_match(text)
+            or any(w.startswith(("prd-", "tbr-")) for w in tokens(text))
         ):
             await search(text)
-        if not topics and not category(text):
+        if not topics and not category(text) and not named_catalog_match(text):
             notice = "Hangi ürün veya teklif işlemini istediğini biraz daha açık yazar mısın?"
         return finish()
     quantity = slots["quantity"]
@@ -323,19 +350,26 @@ async def build_plan(conn, session, message_id, text, mode):
         if not original.unavailable_matches:
             notice = "İlk ürünü doğrulayamadım; koşullu eklemeyi uygulamadım."
             return finish()
+        original_choice = unique_choice(original.unavailable_matches, parts[0])
+        if original_choice is None:
+            notice = (
+                "Koşuldaki ilk ürün belirsiz. Ürün kodunu belirtir misin? Teklifi değiştirmedim."
+            )
+            return finish()
         knowledge("stock_rule")
         target = await search(parts[1])
-        substitute_ids = set(original.unavailable_matches[0].substitute_product_ids)
+        substitute_ids = set(original_choice.substitute_product_ids)
         options = [p for p in target.recommendations if p.product_id in substitute_ids]
-        if options:
+        selected = unique_choice(options, parts[1])
+        if selected:
             mutation(
                 "add_to_quote",
-                options[0].product_id,
+                selected.product_id,
                 quantity=quantity or 1,
                 required=tokens(parts[1]) & FEATURES,
             )
         else:
-            notice = "Koşulları sağlayan kayıtlı stoklu alternatif bulunamadı."
+            notice = "Koşulları sağlayan tek anlamlı stoklu alternatif seçilemedi. Ürün kodunu belirtir misin?"
         return finish()
     # Each conjunction requirement gets its own search and guard tags, then one atomic group.
     content = (
@@ -347,7 +381,11 @@ async def build_plan(conn, session, message_id, text, mode):
     requirements = []
     pending_features = []
     for segment in segments:
-        if category(segment) or any(w.startswith(("prd-", "tbr-")) for w in tokens(segment)):
+        if (
+            category(segment)
+            or named_catalog_match(segment)
+            or any(w.startswith(("prd-", "tbr-")) for w in tokens(segment))
+        ):
             requirements.append(" ".join(pending_features + [segment]))
             pending_features = []
         elif tokens(segment) & FEATURES:
@@ -367,11 +405,19 @@ async def build_plan(conn, session, message_id, text, mode):
     for segment in requirements:
         result = await search(segment)
         if result.recommendations:
-            choices.append((result.recommendations[0], tokens(segment) & FEATURES))
+            selected = unique_choice(result.recommendations, segment)
+            if selected is None:
+                notice = "Birden fazla ürün aynı ölçüde uyuyor. Ürün kodunu belirtir misin? Teklifi değiştirmedim."
+                return finish()
+            choices.append((selected, tokens(segment) & FEATURES))
         elif result.unavailable_matches:
             knowledge("stock_rule")
             if constraints.explicit_backorder_consent and customer["allow_backorder"]:
-                choices.append((result.unavailable_matches[0], tokens(segment) & FEATURES))
+                selected = unique_choice(result.unavailable_matches, segment)
+                if selected is None:
+                    notice = "Birden fazla stok dışı ürün uyuyor. Ürün kodunu belirtir misin? Teklifi değiştirmedim."
+                    return finish()
+                choices.append((selected, tokens(segment) & FEATURES))
             else:
                 notice = "İstenen ürün stokta yok. Açık bekleme onayı ve uygun müşteri olmadan eklenmez; teklif değişmedi."
                 # Offer catalog alternatives as read-only evidence, never substitute silently.

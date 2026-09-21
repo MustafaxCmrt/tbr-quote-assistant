@@ -627,3 +627,93 @@ async def test_non_draft_quote_rejects_new_mutation_but_allows_read_and_receipt_
         assert (await client.get("/api/quotes/Q-1001")).json() == before
     async with db.connect() as conn:
         assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 1
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "BlueScan Air Wi-Fi ekle.",
+        "BlueScan Air USB C ekle.",
+        "BlueStock Starter çevrimdışı lisans ekle.",
+    ],
+)
+async def test_feature_spelling_variants_do_not_drop_hard_constraints(db, text):
+    app, client = await chat_client(db)
+    async with app.router.lifespan_context(app), client:
+        session = await open_session(client, "Q-1002", "CUST-ANK-002")
+        before = (await client.get("/api/quotes/Q-1002")).json()
+        response = await client.post("/api/chat", json=message(session, text, "Q-1002"))
+        assert response.status_code == 200, response.text
+        assert (await client.get("/api/quotes/Q-1002")).json() == before
+        assert response.json()["recommended_product_ids"] == []
+    async with db.connect() as conn:
+        assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 0
+
+
+async def test_generic_tied_product_choice_requires_clarification(db):
+    app, client = await chat_client(db)
+    async with app.router.lifespan_context(app), client:
+        session = await open_session(client, "Q-1002", "CUST-ANK-002")
+        before = (await client.get("/api/quotes/Q-1002")).json()
+        response = await client.post(
+            "/api/chat", json=message(session, "Barkod okuyucu ekle.", "Q-1002")
+        )
+        assert response.status_code == 200, response.text
+        assert (await client.get("/api/quotes/Q-1002")).json() == before
+        assert "Ürün kodunu" in response.json()["notice"]
+    async with db.connect() as conn:
+        assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 0
+
+
+async def test_new_live_model_without_category_is_readable_and_addable(db):
+    app, client = await chat_client(db)
+    async with db.begin() as conn:
+        row = dict(
+            (await conn.execute(sa.select(products).where(products.c.product_id == "PRD-BC-110")))
+            .mappings()
+            .one()
+        )
+        row.update(
+            product_id="PRD-NEW-901",
+            sku="TBR-NEW-901",
+            name_tr="MorMartı Nova",
+            aliases={"tr": ["mor martı nova"]},
+            price_try=1234,
+            substitute_product_ids=[],
+        )
+        await conn.execute(products.insert().values(**row))
+    async with app.router.lifespan_context(app), client:
+        session = await open_session(client, "Q-1002", "CUST-ANK-002")
+        read = await client.post(
+            "/api/chat", json=message(session, "MorMartı Nova fiyatını söyle.", "Q-1002")
+        )
+        assert read.status_code == 200, read.text
+        assert read.json()["recommended_product_ids"] == ["PRD-NEW-901"]
+        response = await client.post(
+            "/api/chat", json=message(session, "2 adet MorMartı Nova ekle.", "Q-1002")
+        )
+        assert response.status_code == 200, response.text
+        quote = (await client.get("/api/quotes/Q-1002")).json()
+        assert [(r["product_id"], r["quantity"]) for r in quote["items"]] == [("PRD-NEW-901", 2)]
+        assert quote["net_total_try"] == "2468.00"
+
+
+@pytest.mark.parametrize(
+    "text,product",
+    [
+        ("PRD-POS-230 Wi-Fi 1 adet ekle.", "PRD-POS-230"),
+        ("PRD-ACC-740 USB C 1 adet ekle.", "PRD-ACC-740"),
+        ("PRD-SW-520 çevrimdışı 1 lisans ekle.", "PRD-SW-520"),
+    ],
+)
+async def test_feature_spelling_variants_accept_matching_products(db, text, product):
+    app, client = await chat_client(db)
+    async with app.router.lifespan_context(app), client:
+        session = await open_session(client, "Q-1002", "CUST-ANK-002")
+        response = await client.post("/api/chat", json=message(session, text, "Q-1002"))
+        assert response.status_code == 200, response.text
+        quote = (await client.get("/api/quotes/Q-1002")).json()
+        assert [(r["product_id"], r["quantity"]) for r in quote["items"]] == [(product, 1)]
+        assert quote["version"] == 2
+    async with db.connect() as conn:
+        assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 1
