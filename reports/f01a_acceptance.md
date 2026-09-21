@@ -1,6 +1,6 @@
 # F01a kabul kanıtı — 21 Eylül 2026
 
-Yerel uygulama/otomatik kontroller tamamlandı. Native **not_verified**; F01 çıkış kapısı açık.
+Yerel uygulama/otomatik kontroller tamamlandı. Native **passed** (Mustafa onayı ve ekran görüntüsü); F01a tamamlandı, F01b nedeniyle F01 çıkış kapısı açık.
 F01b **not_run** (SSD bekleniyor; bu oturumda Docker kullanılmadı).
 
 | Gereksinim | Kanıt |
@@ -19,9 +19,9 @@ F01b **not_run** (SSD bekleniyor; bu oturumda Docker kullanılmadı).
 | Expo SDK uyumu | f01a_expo_check_retry.txt exit 0; f01a_expo_doctor.txt 21/21, exit 0 |
 | Metro başlangıcı | f01a_metro_start_retry.txt exit 0; localhost /status doğrulandı; süreç kontrollü kapatıldı |
 | iOS bundle | f01a_ios_export.txt exit 0, 591 modül; fiziksel cihaz kanıtı değildir |
-| POST + expo/fetch + getReader + ortak parser | apps/mobile/App.tsx; derleme doğrulandı, native çalışma **not_verified** |
+| POST + expo/fetch + getReader + ortak parser | apps/mobile/App.tsx; derleme doğrulandı, native debug çalışma **passed** |
 | Orijinal kaynak + teslim taraması | f01a_delivery_check.txt exit 0; 12/12 kaynak aynı, yerel env/talimatlar ignore altında |
-| iPhone gözlemi | native_smoke.md: **not_verified**, Mustafa bekleniyor |
+| iPhone gözlemi | native_smoke.md: **passed**, Mustafa onayı; images/f01a_iphone_stream.png |
 
 SDK dayanağı: [App Store Expo Go](https://apps.apple.com/us/app/expo-go/id982107779) 57.0.9,
 [Expo SDK 57](https://expo.dev/changelog/sdk-57), [Expo fetch](https://docs.expo.dev/versions/v57.0.0/sdk/expo/).

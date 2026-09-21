@@ -2,7 +2,7 @@
 
 Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
 **21 Eylül 2026: yalnız F01a uygulanmıştır.** FastAPI debug SSE, Expo test ekranı ve ortak
-parser hazırdır. iPhone gözlemi `not_verified`; F01 tamamlanmış değildir.
+parser hazırdır. iPhone debug streaming Mustafa tarafından doğrulandı; F01a tamamlandı. F01b ve tam F01 kapısı açıktır.
 
 ## Kurulum ve iPhone testi
 
@@ -29,7 +29,7 @@ Expo SDK 57, FastAPI 0.141.1 ve uvicorn 0.53.0 kurulup doğrulandı.
    npm start
    ```
 
-4. Mac ve iPhone aynı Wi-Fi'dayken App Store'daki güncel Expo Go'yu kullan. iPhone Kamerasıyla
+4. Expo Go ve Mac CLI’da aynı Expo hesabıyla giriş yap (`npx expo login`); ardından Expo’yu yeniden başlat. Mac ve iPhone aynı Wi-Fi'dayken App Store'daki güncel Expo Go'yu kullan. iPhone Kamerasıyla
    terminaldeki QR'ı okut, Expo Go'da aç; yerel ağ izni sorulursa izin ver.
 5. **Stream testi** butonuna bas. Önce “Bağlantı çalışıyor ğüşiöç”, yaklaşık bir saniye sonra
    “İkinci parça ulaştı: ĞÜŞİÖÇ”, yaklaşık bir saniye sonra **Tamamlandı** görmelisin.
@@ -41,8 +41,8 @@ Expo SDK 57, FastAPI 0.141.1 ve uvicorn 0.53.0 kurulup doğrulandı.
    **(c)** `.env` adresi doğru mu, Expo yeniden başlatıldı mı, Expo Go SDK 57 ile uyumlu mu?
 
 Metro QR bağlantısı ile API bağlantısı ayrıdır. Expo'nun açılması API erişimini tek başına kanıtlamaz.
-Mac ve iPhone gözlemi tamamlanınca cihaz/iOS/Expo Go sürümünü ve iki parçanın ayrı gelişini
-`reports/native_smoke.md` içine kaydet. Şu an native sonuç **not_verified**.
+Native sonuç **passed**: Mustafa iPhone ekranında 0.0/1.1 sn zamanları ve Tamamlandı durumunu paylaştı.
+Kanıt `reports/native_smoke.md` içinde; tam cihaz/iOS/Expo Go sürüm bilgisi henüz bildirilmedi.
 
 ## Doğrulama
 

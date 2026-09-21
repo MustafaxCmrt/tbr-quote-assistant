@@ -1,6 +1,6 @@
 # Bilinen sınırlamalar — F01a
 
-- Native iPhone testi **not_verified**. Typecheck/iOS export, cihazda artımlı gösterim kanıtı değildir.
+- Native debug stream testi **passed** (Mustafa onayı + ekran görüntüsü). Tam cihaz/iOS/Expo Go sürümü henüz bildirilmedi. Gerçek chat ve ortak teklif doğrulaması henüz yok.
 - F01b ve sonraki fazlar henüz uygulanmadı: DB, Compose, migration, seed, kalıcılık, altı tool,
   gerçek chat/quote, web admin ve ortak teklif durumu yok. Golden/DB testleri **not_run**.
 - Debug endpoint yalnız yerel bağlantı testi; `DEBUG_STREAM_SMOKE=1` ile açılır. Gerçek iş akışı değildir.
