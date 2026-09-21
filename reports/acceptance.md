@@ -25,8 +25,8 @@ Son tam backend koşusu: [151 passed](f08_full_backend.txt), 22 golden dahil.
 | Son mobil cevap başlangıcını koruma ve gözle görülür kademeli yanıt | **passed:** Mustafa son sürümde parça parça geliş ve sayfanın başında kalmayı doğruladı; [native kayıt](native_smoke.md). |
 | Native sürüm/cihaz bilgisi, büyük yazı/tablet/VoiceOver | **not_verified:** cihaz modeli, iOS, kurulu Expo Go sürümü henüz verilmedi; proje SDK sürümü bunların yerine yazılmadı. |
 | Kaynak dosyaları değişmedi; bundle/env/key kontrolü | **passed (sınırlı tarama):** [12 source ve son iOS bundle](f07_reading_delivery.txt). Tanınmayan secret biçimleri için tam garanti değildir. |
-| Git geçmişinde private path/anahtar/current local değerler | **passed (erişilebilir yerel ref kapsamı):** [history scan](f08_git_history_scan.txt). Unreachable nesneler ve yerelde olmayan remote ref'ler kapsam dışı. |
-| Bağımsız Claude güvenlik kabulü | **not_run:** ayrı Codex alan incelemeleri Claude veya insan denetimi yerine yazılmadı. |
+| Git geçmişinde private path/anahtar/current local değerler | **passed (erişilebilir yerel ref kapsamı):** [history scan](f08_final_history_scan.txt). Unreachable nesneler ve yerelde olmayan remote ref'ler kapsam dışı. |
+| Bağımsız Claude güvenlik kabulü | **in_progress:** [Opus 5/xhigh incelemesi](f08_claude_review.md) tamamlandı; dört P1 bulgusunun düzeltme/regresyonları ve ek hipotezlerin değerlendirmesi [çözüm kaydında](f08_review_resolution.md). Kabul henüz verilmedi. |
 | Son sürüm fresh clone yalnız README, demo videosu ve teslim erişimi | **not_run:** önceki F01b boş volume kanıtı son sürüm fresh-clone kabulü yerine geçmez. Gönderim/erişim değişimi insan onayında. |
 
 `test_output.txt` yeni bir test koşusu değildir; mevcut gerçek koşuların komut/sonuç indeksidir.

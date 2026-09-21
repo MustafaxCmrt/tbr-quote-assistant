@@ -43,9 +43,21 @@ def reference(text, quote, catalog):
     cat = category(text)
     identifiers = {w for w in words if w.startswith(("prd-", "tbr-"))}
     required = words & FEATURES
+    # A mentioned catalog brand/model cannot resolve to an unrelated lone line.
+    brands = {normalize(row["name_tr"]).split()[0] for row in catalog.values()}
+    named_brands = words & brands
+    model_ids = {
+        row["product_id"]
+        for row in catalog.values()
+        if set(normalize(row["name_tr"]).split()[:2]) <= words
+    }
     scored = []
     for item in quote.items:
         row = catalog[item.product_id]
+        if named_brands and normalize(row["name_tr"]).split()[0] not in named_brands:
+            continue
+        if model_ids and item.product_id not in model_ids:
+            continue
         if identifiers and not identifiers & {normalize(row["product_id"]), normalize(row["sku"])}:
             continue
         if cat and row["category"] != cat:
@@ -60,6 +72,8 @@ def reference(text, quote, catalog):
             score += 100
         if set(normalize(row["name_tr"]).split()[:2]) <= words:
             score += 30
+        if not (score or cat or required or words & {"ayni", "aynisindan"}):
+            continue
         scored.append((score, item))
     scored.sort(key=lambda pair: -pair[0])
     if not scored or (len(scored) > 1 and scored[0][0] == scored[1][0]):
@@ -159,6 +173,22 @@ async def build_plan(conn, session, message_id, text, mode):
     except ValueError:
         notice = "Miktar veya fiyat biçimini kesinleştiremedim. Ürün başına miktarı ve TL limitini açık yazar mısın?"
         return finish()
+    # Do not silently discard a constraint that the bounded parser cannot represent.
+    money_intent = bool(re.search(r"\btl\b|₺", text, re.IGNORECASE)) or any(
+        marker in normalized
+        for marker in ("butce", "limit", "tavan", "altinda", "asmayan", "gecmeyen")
+    )
+    if mutating and money_intent and slots["max_price_try"] is None:
+        notice = "Fiyat sınırını kesinleştiremedim. Örneğin 5.000 TL altında şeklinde yazar mısın? Teklifi değiştirmedim."
+        return finish()
+    # Stock absence describes the source of a supported substitution, not a negated feature.
+    attribute_text = re.sub(r"\bstokta olmayan\b", "", normalized)
+    if mutating and re.search(r"\b(olmasin|olmayan|degil)\b|\bplus[ -]?siz\b", attribute_text):
+        notice = "Olumsuzlanan ürün veya özelliği kesinleştiremedim. İstediğin ürün kodunu belirtir misin? Teklifi değiştirmedim."
+        return finish()
+    if mutating and re.search(r"\bdaha\s+(ucuz|pahali)\b", normalized):
+        notice = "Karşılaştırma için ürün kodunu ve fiyat sınırını belirtir misin? Teklifi değiştirmedim."
+        return finish()
     constraints = Constraints(
         max_price_try=slots["max_price_try"],
         explicit_plus="plus" in tokens(text) or any(t.endswith("-plus") for t in tokens(text)),
@@ -184,6 +214,15 @@ async def build_plan(conn, session, message_id, text, mode):
             notice = "Hangi ürün veya teklif işlemini istediğini biraz daha açık yazar mısın?"
         return finish()
     quantity = slots["quantity"]
+    if (
+        quantity is not None
+        and quantity > 0
+        and (
+            remove or ("cikar" in tokens(text) and re.search(r"\b\d+\s+(adet|tane)\b", normalized))
+        )
+    ):
+        notice = "Kaç adet kalmasını istediğini hedef miktarla yazar mısın? Örneğin 3 adede güncelle. Teklifi değiştirmedim."
+        return finish()
     if (update or total) and quantity is None:
         notice = "Hedef miktarı belirtir misin? Teklifi değiştirmedim."
         return finish()
@@ -238,8 +277,8 @@ async def build_plan(conn, session, message_id, text, mode):
         remove
         or update
         or total
-        or "daha" in tokens(text)
-        or any(w in normalized for w in ["ayni", "aynisindan"])
+        or bool(re.search(r"\b\d+\s+(adet|tane)\s+daha\b", normalized))
+        or bool(tokens(text) & {"ayni", "aynisindan"})
     )
     if reference_intent:
         quote_call()

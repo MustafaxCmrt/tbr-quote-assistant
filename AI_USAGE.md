@@ -42,4 +42,15 @@ tasarım tokenlarını belgeledi. Otomatik tasarım detector'ı izin hatasıyla 
 
 F07: Codex Expo native sohbet/kaynak sheet/kanonik teklif/bağlam seçimini ve typed expo/fetch
 client'ını yazdı. UUID için Expo Crypto resmî belgesi kullanıldı. Node transport testleri ve iOS export
-native kullanıcı kabulünün yerine sunulmaz; Mustafa'nın tam sohbet/shared quote gözlemi bekleniyor.
+native kullanıcı kabulünün yerine sunulmaz. Mustafa gerçek iPhone'da add/shared quote/retry, kaynak aç/Kapat, klavye ve kademeli yanıtın okuma konumunu doğruladı. Cihaz/iOS/Expo Go sürüm metadatası henüz not_verified.
+
+
+F08: Mustafa'nın isteğiyle Claude CLI üzerinden `claude-opus-5`, `--effort xhigh` ile bağımsız
+salt okunur kaynak incelemesi yapıldı. CLI sonucu exit0/is_error=false ve modelUsage `claude-opus-5`.
+Mevcut Claude aboneliği kullanıldı; uygulamaya provider adaptörü eklenmedi. İlk varsayılan model
+çağrısı istek netleşince durduruldu ve başarılı inceleme sayılmadı. Reviewer'a 30 seçilmiş kaynak/test/
+sözleşme dosyası satır numaralarıyla verildi; araçlar kapalıydı ve reviewer test çalıştırmadı.
+Dört P1 yorumlama bulgusu raporlandı. Codex bunlar için HTTP üzerinden gerçek PostgreSQL'de 13
+regresyon yazdı; düzeltmeden önce 13 failed kanıtı korundu. Düzeltme ve yeniden doğrulama kaydı
+`reports/f08_review_resolution.md` içindedir. Toplam-hedef concurrency ve diğer hipotezler açıkken
+bağımsız kabul tamamlandı denmez. Kaynak review insan kod denetimi değildir.

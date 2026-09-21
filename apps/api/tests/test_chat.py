@@ -457,3 +457,82 @@ async def test_software_bundle_discount_removed_after_chat_removes_paired_item(d
         assert after["rule_ids"] == []
         assert after["discount_total_try"] == "0.00"
         assert after["net_total_try"] == "14900.00"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "5.000 TL'ye kadar QR ve kablosuz okuyucu ekle.",
+        "5 bin TL altında QR ve kablosuz okuyucu ekle.",
+        "5.000 ₺ altında QR ve kablosuz okuyucu ekle.",
+        "5.000 TL'yi aşmayan QR ve kablosuz okuyucu ekle.",
+    ],
+)
+async def test_review_price_expression_never_silently_drops_ceiling(db, text):
+    app, client = await chat_client(db)
+    async with app.router.lifespan_context(app), client:
+        session = await open_session(client, "Q-1002", "CUST-ANK-002")
+        before = (await client.get("/api/quotes/Q-1002")).json()
+        response = await client.post("/api/chat", json=message(session, text, "Q-1002"))
+        assert response.status_code == 200, response.text
+        assert (await client.get("/api/quotes/Q-1002")).json() == before
+    async with db.connect() as conn:
+        assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 0
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "BlueScan Air ekle, Plus olmasın.",
+        "Plus'sız BlueScan Air ekle.",
+        "Kablosuz olmayan okuyucu ekle.",
+        "İndirimi kaldır.",
+        "Daha ucuz bir okuyucu ekle.",
+        "RedScan'den 1 tane daha ekle.",
+        "Teslim tarihini değiştir.",
+    ],
+)
+async def test_review_unsupported_or_unmatched_intent_clarifies_without_mutation(db, text):
+    app, client = await chat_client(db)
+    async with app.router.lifespan_context(app), client:
+        session = await open_session(client)
+        before = (await client.get("/api/quotes/Q-1001")).json()
+        response = await client.post("/api/chat", json=message(session, text))
+        assert response.status_code == 200, response.text
+        assert response.json()["notice"]
+        assert (await client.get("/api/quotes/Q-1001")).json() == before
+    async with db.connect() as conn:
+        assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 0
+        names = set((await conn.execute(sa.select(tool_call_logs.c.tool_name))).scalars())
+        assert not names & {"add_to_quote", "update_quote_item", "replace_with_alternative"}
+
+
+@pytest.mark.parametrize("verb", ["çıkar", "sil"])
+async def test_review_partial_removal_does_not_become_target_or_full_removal(db, verb):
+    app, client = await chat_client(db)
+    async with app.router.lifespan_context(app), client:
+        session = await open_session(client)
+        setup = await client.post(
+            "/api/chat", json=message(session, "Kablosuz okuyucuyu 5 adede çıkar.")
+        )
+        assert setup.status_code == 200, setup.text
+        before = (await client.get("/api/quotes/Q-1001")).json()
+        assert before["items"][0]["quantity"] == 5
+        request = message(session, f"Kablosuz okuyucudan 2 adet {verb}.")
+        response = await client.post("/api/chat", json=request)
+        assert response.status_code == 200, response.text
+        assert response.json()["notice"]
+        assert (await client.get("/api/quotes/Q-1001")).json() == before
+    async with db.connect() as conn:
+        # Only the known setup mutation, never a partial-removal guess.
+        assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 1
+        names = set(
+            (
+                await conn.execute(
+                    sa.select(tool_call_logs.c.tool_name).where(
+                        tool_call_logs.c.message_id == request["message_id"]
+                    )
+                )
+            ).scalars()
+        )
+        assert not names & {"add_to_quote", "update_quote_item", "replace_with_alternative"}
