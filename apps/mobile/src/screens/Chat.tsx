@@ -15,6 +15,7 @@ import {
   type ToolName,
 } from "@tbr/contracts";
 import { api } from "../api";
+import { isSessionNotFound } from "../api/client";
 import { visibleAttemptContent } from "../api/retry";
 import { Button, Label, ui, usePalette } from "../shared/ui";
 
@@ -136,12 +137,18 @@ export function Chat({
             refresh();
         },
       );
-    } catch {
-      update(id, {
-        status: "error",
-        error:
-          "Bağlantı kesildi. İşlem kaydedilmiş olabilir. Teklifi kontrol edip aynı mesajla tekrar dene.",
-      });
+    } catch (e) {
+      if (isSessionNotFound(e)) {
+        // Server state was reset; retry keeps the message ID but opens a fresh session.
+        session.current = "";
+        update(id, { status: "error", error: (e as Error).message });
+      } else {
+        update(id, {
+          status: "error",
+          error:
+            "Bağlantı kesildi. İşlem kaydedilmiş olabilir. Teklifi kontrol edip aynı mesajla tekrar dene.",
+        });
+      }
     } finally {
       clearTimeout(timer);
       active.current = null;

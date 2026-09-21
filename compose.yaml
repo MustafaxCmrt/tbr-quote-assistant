@@ -43,8 +43,12 @@ services:
       POSTGRES_USER: tbr_runtime
       POSTGRES_PASSWORD: ${APP_DB_PASSWORD:?Run python3 scripts/init_env.py first}
       DEBUG_STREAM_SMOKE: ${DEBUG_STREAM_SMOKE:-0}
+      ADMIN_API_KEY: ${ADMIN_API_KEY:?Run python3 scripts/init_env.py first}
     ports:
       - '${API_BIND_HOST:-127.0.0.1}:${API_PORT:-8001}:8000'
+    mem_limit: 512m
+    pids_limit: 256
+    security_opt: [no-new-privileges:true]
     depends_on:
       migrate-seed:
         condition: service_completed_successfully
@@ -56,8 +60,14 @@ services:
     restart: unless-stopped
   web:
     build: ./apps/web
+    environment:
+      # Read only by the Vite proxy process; never exposed to the browser bundle.
+      ADMIN_API_KEY: ${ADMIN_API_KEY:?Run python3 scripts/init_env.py first}
     ports:
       - '127.0.0.1:${WEB_PORT:-5173}:5173'
+    mem_limit: 1g
+    pids_limit: 512
+    security_opt: [no-new-privileges:true]
     depends_on:
       api:
         condition: service_healthy

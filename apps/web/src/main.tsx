@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { api } from "./api/client";
 import { acceptQuote } from "./api/state";
@@ -225,4 +225,28 @@ function App() {
     </div>
   );
 }
-createRoot(document.getElementById("root")!).render(<App />);
+/** A render fault must not leave a blank admin page; quote data stays on the server. */
+class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <main id="workspace">
+        <p role="alert">
+          Ekran beklenmeyen bir hatayla durdu. Teklif ve katalog verileri sunucuda korunur.
+        </p>
+        <button type="button" onClick={() => window.location.reload()}>
+          Sayfayı yenile
+        </button>
+      </main>
+    );
+  }
+}
+createRoot(document.getElementById("root")!).render(
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>,
+);

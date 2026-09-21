@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createClient, type Transport } from "../src/api/client";
+import { createClient, isSessionNotFound, type Transport } from "../src/api/client";
 import { initialStream, reduceChatEvent, type ChatEvent } from "@tbr/contracts";
 
 const envelope = (seq: number, type: string, payload: object) => ({
@@ -133,5 +133,44 @@ test("controlled error is terminal, malformed content and native hostname never 
       async () => new Response("<html>proxy</html>"),
     ).stream({}, new AbortController().signal, () => {}),
     /Akış açılamadı/,
+  );
+});
+
+test("missing API address is reported as configuration, not as a network failure", async () => {
+  let calls = 0;
+  const client = createClient(undefined, async () => {
+    calls += 1;
+    return new Response("{}");
+  });
+  await assert.rejects(client.request("/api/customers"), /API bağlantısı ayarlanmamış/);
+  await assert.rejects(
+    client.stream({}, new AbortController().signal, () => {}),
+    /API bağlantısı ayarlanmamış/,
+  );
+  await assert.rejects(
+    createClient("example.test", async () => new Response("{}")).request("/api/customers"),
+    /API bağlantısı ayarlanmamış/,
+  );
+  assert.equal(calls, 0);
+});
+
+test("unknown server session is distinguishable so the next retry can open a new one", async () => {
+  const client = createClient("http://example.test", async () =>
+    new Response(JSON.stringify({ error: { code: "QUOTE_CONTEXT_MISMATCH" } }), {
+      status: 404,
+      headers: { "Content-Type": "application/json" },
+    }),
+  );
+  await assert.rejects(
+    client.stream({}, new AbortController().signal, () => {}),
+    (e) => isSessionNotFound(e) && /yeni oturum/.test((e as Error).message),
+  );
+  await assert.rejects(
+    createClient("http://example.test", async () => new Response("{}", { status: 503 })).stream(
+      {},
+      new AbortController().signal,
+      () => {},
+    ),
+    (e) => !isSessionNotFound(e) && /Akış açılamadı/.test((e as Error).message),
   );
 });

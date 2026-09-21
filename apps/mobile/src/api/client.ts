@@ -9,6 +9,14 @@ export type Transport = (
   init?: RequestInit,
 ) => Promise<Pick<Response, "ok" | "status" | "headers" | "body" | "json">>;
 
+/** The server no longer knows this chat session (e.g. fresh database); a new one is needed. */
+export class SessionNotFoundError extends Error {
+  readonly code = "SESSION_NOT_FOUND";
+}
+// A code check survives transpiled Error subclasses where instanceof can fail.
+export const isSessionNotFound = (e: unknown) =>
+  e instanceof Error && (e as { code?: unknown }).code === "SESSION_NOT_FOUND";
+
 /** Transport is injected so byte framing and failures can be tested without a native bridge. */
 export function createClient(
   baseUrl: string | undefined,
@@ -24,9 +32,11 @@ export function createClient(
   }
   async function request<T>(path: string, body?: object): Promise<T> {
     const controller = new AbortController();
+    // Configuration errors stay visible; only transport failures get the network message.
+    const url = address(path);
     const timer = setTimeout(() => controller.abort(), 10000);
     try {
-      const response = await transport(address(path), {
+      const response = await transport(url, {
         method: body ? "POST" : "GET",
         headers: { "Content-Type": "application/json" },
         body: body ? JSON.stringify(body) : undefined,
@@ -48,9 +58,10 @@ export function createClient(
     signal: AbortSignal,
     receive: (event: ChatEvent) => void,
   ) {
+    const url = address("/api/chat/stream");
     let response;
     try {
-      response = await transport(address("/api/chat/stream"), {
+      response = await transport(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,6 +72,11 @@ export function createClient(
       });
     } catch {
       throw new Error("Akış açılamadı. Aynı mesajla tekrar deneyebilirsin.");
+    }
+    if (response.status === 404) {
+      throw new SessionNotFoundError(
+        "Sohbet oturumu sunucuda bulunamadı. Aynı mesajla tekrar denediğinde yeni oturum açılır.",
+      );
     }
     if (
       !response.ok ||

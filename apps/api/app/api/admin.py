@@ -1,7 +1,9 @@
+import os
+import secrets
 from uuid import uuid4
 
 import sqlalchemy as sa
-from fastapi import APIRouter, Query, Request, Response
+from fastapi import APIRouter, Depends, Header, Query, Request, Response
 from sqlalchemy.exc import IntegrityError
 
 from app.api.reads import engine_for
@@ -17,6 +19,25 @@ from app.schemas.admin import (
 from app.services.errors import DomainError
 
 router = APIRouter(prefix="/api", tags=["Yönetim"])
+
+
+def require_admin_key(x_admin_key: str = Header(default="")):
+    # Catalog writes change every later answer. The web proxy adds this server-side;
+    # it never reaches a browser bundle or the mobile app. Fail closed if unset.
+    expected = os.getenv("ADMIN_API_KEY", "")
+    if not expected:
+        raise DomainError(
+            "ADMIN_KEY_NOT_CONFIGURED",
+            "Yönetim anahtarı yapılandırılmamış; python3 scripts/init_env.py çalıştır.",
+            503,
+        )
+    if not secrets.compare_digest(x_admin_key.encode(), expected.encode()):
+        raise DomainError(
+            "ADMIN_KEY_REQUIRED", "Bu yönetim işlemi için geçerli anahtar gerekli.", 401
+        )
+
+
+admin_write = [Depends(require_admin_key)]
 
 
 async def one(engine, table, id_field, identifier):
@@ -141,7 +162,7 @@ async def list_products(
     }
 
 
-@router.post("/products", status_code=201, response_model=ProductRecord)
+@router.post("/products", status_code=201, response_model=ProductRecord, dependencies=admin_write)
 async def create_product(args: ProductCreate, request: Request):
     return await write(
         await engine_for(request), products, "product_id", args.model_dump(exclude_none=True)
@@ -153,7 +174,7 @@ async def product(identifier: str, request: Request):
     return await one(await engine_for(request), products, "product_id", identifier)
 
 
-@router.patch("/products/{identifier}", response_model=ProductRecord)
+@router.patch("/products/{identifier}", response_model=ProductRecord, dependencies=admin_write)
 async def update_product(identifier: str, args: ProductPatch, request: Request):
     values = args.model_dump(exclude_unset=True)
     if not values:
@@ -161,7 +182,7 @@ async def update_product(identifier: str, args: ProductPatch, request: Request):
     return await write(await engine_for(request), products, "product_id", values, identifier)
 
 
-@router.delete("/products/{identifier}", status_code=204)
+@router.delete("/products/{identifier}", status_code=204, dependencies=admin_write)
 async def delete_product(identifier: str, request: Request):
     await write(await engine_for(request), products, "product_id", {"active": False}, identifier)
     return Response(status_code=204)
@@ -205,7 +226,9 @@ async def list_knowledge(
     }
 
 
-@router.post("/knowledge", status_code=201, response_model=KnowledgeRecord)
+@router.post(
+    "/knowledge", status_code=201, response_model=KnowledgeRecord, dependencies=admin_write
+)
 async def create_knowledge(args: KnowledgeCreate, request: Request):
     return await write(
         await engine_for(request),
@@ -220,7 +243,7 @@ async def knowledge(identifier: str, request: Request):
     return await one(await engine_for(request), knowledge_entries, "knowledge_id", identifier)
 
 
-@router.patch("/knowledge/{identifier}", response_model=KnowledgeRecord)
+@router.patch("/knowledge/{identifier}", response_model=KnowledgeRecord, dependencies=admin_write)
 async def update_knowledge(identifier: str, args: KnowledgePatch, request: Request):
     values = args.model_dump(exclude_unset=True)
     if not values:
@@ -230,7 +253,7 @@ async def update_knowledge(identifier: str, args: KnowledgePatch, request: Reque
     )
 
 
-@router.delete("/knowledge/{identifier}", status_code=204)
+@router.delete("/knowledge/{identifier}", status_code=204, dependencies=admin_write)
 async def delete_knowledge(identifier: str, request: Request):
     await write(
         await engine_for(request), knowledge_entries, "knowledge_id", {"active": False}, identifier

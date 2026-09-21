@@ -13,7 +13,7 @@ import {
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import type { Quote as QuoteDTO } from "@tbr/contracts";
 import { api } from "./src/api";
-import { acceptQuote } from "./src/api/state";
+import { acceptQuote, isQuote } from "./src/api/state";
 import { Chat } from "./src/screens/Chat";
 import { Quote } from "./src/screens/Quote";
 import { Button, Label, ui, usePalette } from "./src/shared/ui";
@@ -94,9 +94,11 @@ function Workspace() {
     const id = selected.current;
     if (!id) return;
     void api
-      .request<QuoteDTO>("/api/quotes/" + encodeURIComponent(id))
+      .request<unknown>("/api/quotes/" + encodeURIComponent(id))
       .then((next) => {
         if (selected.current !== id) return;
+        // Keep the last valid quote and show it as stale instead of crashing the screen.
+        if (!isQuote(next)) throw new Error("invalid_quote");
         setQuote((prev) => acceptQuote(prev, next, id));
         setStale(false);
         setUpdated(new Date().toLocaleTimeString("tr-TR"));

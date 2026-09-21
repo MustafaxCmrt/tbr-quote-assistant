@@ -6,7 +6,7 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from app.api.admin import router as admin_router
@@ -15,6 +15,45 @@ from app.api.reads import router as reads_router
 from app.persistence.database import make_engine
 from app.persistence.readiness import is_ready
 from app.services.errors import DomainError
+
+# Largest schema-valid admin record is well below this; bodies are buffered before validation.
+MAX_BODY_BYTES = 256 * 1024
+TOO_LARGE = {
+    "code": "PAYLOAD_TOO_LARGE",
+    "detail": "İstek gövdesi çok büyük; içeriği kısaltıp tekrar dene.",
+}
+
+
+class PayloadTooLarge(HTTPException):
+    # FastAPI re-raises HTTPException from body parsing; other errors become a generic 400.
+    def __init__(self):
+        super().__init__(status_code=413)
+
+
+def limit_body(app):
+    async def guarded(scope, receive, send):
+        if scope["type"] != "http":
+            return await app(scope, receive, send)
+        declared = dict(scope["headers"]).get(b"content-length")
+        if declared is not None and (not declared.isdigit() or int(declared) > MAX_BODY_BYTES):
+            return await JSONResponse(status_code=413, content={"error": TOO_LARGE})(
+                scope, receive, send
+            )
+        received = 0
+
+        async def counted():
+            nonlocal received
+            message = await receive()
+            if message["type"] == "http.request":
+                # Chunked uploads carry no Content-Length; count what actually arrives.
+                received += len(message.get("body", b""))
+                if received > MAX_BODY_BYTES:
+                    raise PayloadTooLarge()
+            return message
+
+        return await app(scope, counted, send)
+
+    return guarded
 
 
 def create_app(engine=None) -> FastAPI:
@@ -33,12 +72,17 @@ def create_app(engine=None) -> FastAPI:
     app.include_router(reads_router)
     app.include_router(chat_router)
     app.include_router(admin_router)
+    app.add_middleware(limit_body)
 
     @app.exception_handler(DomainError)
     async def domain_error(request: Request, exc: DomainError):
         return JSONResponse(
             status_code=exc.status, content={"error": {"code": exc.code, "detail": exc.detail}}
         )
+
+    @app.exception_handler(PayloadTooLarge)
+    async def payload_too_large(request: Request, exc: PayloadTooLarge):
+        return JSONResponse(status_code=413, content={"error": TOO_LARGE})
 
     @app.get("/health/ready", tags=["Sağlık"])
     async def ready():

@@ -64,7 +64,7 @@ async def stream_chat(engine, request):
         except Exception as exc:  # noqa: BLE001 -- transport boundary masks unexpected internals
             committed = False
             try:
-                async with engine.connect() as conn:
+                async with asyncio.timeout(3), engine.connect() as conn:
                     committed = bool(
                         await conn.scalar(
                             sa.select(sa.func.count())
@@ -75,8 +75,9 @@ async def stream_chat(engine, request):
                             )
                         )
                     )
-            except sa.exc.SQLAlchemyError:
+            except Exception:  # noqa: BLE001 -- unreachable DB raises raw OSError/TimeoutError too
                 # Uncertain commit state: refetch instead of telling a client nothing happened.
+                # Any probe failure must still end the stream with the terminal error frame.
                 committed = True
             emit(
                 "error",

@@ -1,9 +1,17 @@
 import httpx
+import pytest
 import sqlalchemy as sa
 
 from app.main import create_app
 from app.persistence.models import products
 from app.persistence.seed import seed_database
+
+ADMIN = {"X-Admin-Key": "test-admin-key"}
+
+
+@pytest.fixture(autouse=True)
+def admin_key(monkeypatch):
+    monkeypatch.setenv("ADMIN_API_KEY", ADMIN["X-Admin-Key"])
 
 
 async def test_product_crud_validation_retrieval_and_soft_delete(db):
@@ -11,7 +19,9 @@ async def test_product_crud_validation_retrieval_and_soft_delete(db):
     app = create_app(db)
     async with (
         app.router.lifespan_context(app),
-        httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client,
+        httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://test", headers=ADMIN
+        ) as client,
     ):
         data = {
             "sku": "TBR-NEW-CRUD",
@@ -69,7 +79,9 @@ async def test_knowledge_crud_live_sources_and_context_lists(db):
     app = create_app(db)
     async with (
         app.router.lifespan_context(app),
-        httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client,
+        httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://test", headers=ADMIN
+        ) as client,
     ):
         data = {
             "topic": "training",
