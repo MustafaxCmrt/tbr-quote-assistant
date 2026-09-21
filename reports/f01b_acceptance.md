@@ -40,4 +40,4 @@ Mutation runner çalıştırılmadı; mutation-score iddiası yok. Otomatik sour
 `tree-sitter-language-pack` eksikliğiyle exit 2 verdi; test başarıları yerine sayılmadı.
 
 F01a native debug kanıtı reports/native_smoke.md içinde passed. Gerçek mobil chat/ortak teklif ve 22 golden
-senaryo F03–F08 kapılarıdır; henüz not_run. ADR-005/007 provisional kalır.
+senaryo F03–F08 kapılarıdır; henüz not_run. ADR-005/007 vault firma cevabına göre accepted (aday tercihi); kaynak sözleşme değişmedi.

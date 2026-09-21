@@ -12,4 +12,4 @@
   Ayrıntı ve advisory: `reports/f01a_npm_audit.txt`. Paket ağacı native prebuild araçlarını da içerir;
   bu oturumda prebuild/EAS/mağaza yayını yapılmadı.
 - SDK 57 için App Store Expo Go 57.0.9 kaydı esas alındı; telefondaki gerçek sürüm Mustafa tarafından doğrulanacak.
-- ADR-005/007 şirket cevabı gelene kadar geçici yorum; şirkete ait kesin kural gibi sunulmaz.
+- ADR-005/007 firma kararı adaya bıraktıktan sonra accepted; adayın gerekçeli tercihi olarak sunulur.

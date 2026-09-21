@@ -98,6 +98,7 @@ iOS bundle üretimi native cihaz gözlemi yerine geçmez. Kanıt haritası: [F01
 - `data/source`: orijinal, değiştirilmedi. Kalıcılık ve 7 gerçek PostgreSQL testi passed.
 
 ADR-005 (indirimler toplanmaz, özel kural önceliği) ve ADR-007 (beklenen çağrı/kaynaklar minimum)
-firma cevabı bekleyen **geçici yorumlardır**; fiyat/tool motoru henüz uygulanmadı.
+firma tarafından karar adaya bırakıldıktan sonra **kabul edilmiş aday tercihleridir** (21 Eylül 2026).
+Şirketin belirlediği kesin kurallar olarak sunulmaz; fiyat/tool motoru henüz uygulanmadı.
 
 [AI kullanımı](AI_USAGE.md) · [Bilinen sınırlamalar](KNOWN_LIMITATIONS.md)
