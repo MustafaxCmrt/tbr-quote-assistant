@@ -78,3 +78,25 @@ stok0 olduğu doğrulandı. Ürün kuralı/veri/assertion gevşetilmedi: "uygun 
 stok15 olan PRD-POS-230 seçildi. İlk 1failed/5passed çıktı `f08_catalog_positive.txt` içinde korunur.
 
 Son özellik olumlu/olumsuz koşusu: `pytest -q tests/test_chat.py -k feature_spelling`, 6passed/exit0; f08_catalog_positive_final.txt. Ruff/delivery exit0; source12 değişmedi.
+
+
+## Kaynak doğrulaması ve kalan P2 değerlendirmesi
+
+Tautolojik `bundle.require(list(sources))` kaldırıldı. Renderer artık yayımlayacağı knowledge,
+ürün (stoklu/stoksuz) ve son teklifin ürün/fiyat kuralı kimliklerini tool çıktısından toplar;
+bunları ayrı kaynak listesinden doğrular. Eksik/ilgisiz kaynakla yanıt yayımlanmaz.
+
+| Requirement | Evidence |
+|---|---|
+| "Her politika cevabı gerçek knowledge_id içerir"; ürün/fiyat kuralı kaynağı doğrulansın | `test_rendered_claim_requires_matching_tool_evidence`: beş çıktı türünde boş kaynak ve yanlış ID SOURCE_NOT_GROUNDED; doğru kaynakla render succeeds, kaynak aynı ve metindeki gerçek ID doğrulanır. |
+| Gerçek koşu | `uv run --directory apps/api --locked pytest -q tests/unit/test_templates.py`: önce5failed/exit1, sonra5passed/exit0; f08_grounding_before.txt / f08_grounding_after.txt. Ruff exit0, f08_grounding_lint.txt. |
+
+Migration hipotezi: `test_unique_active_item_and_history_and_checks` gerçek migration kurulmuş
+PostgreSQL üzerinde duplicate aktif satırın ve invalid quantity'nin IntegrityError olmasını sınar;
+`test_same_and_distinct_key_concurrency` aynı anda tek aktif satır davranışını doğrular. Bunlar
+model tanımına bakılarak verilmiş sonuçlar değildir; son toplu koşuda tekrar yer alır.
+Planlama okumaları ile executor loglarının ayrılığı ve retry'da eski notice korunması P2 kapsamıyla
+KNOWN_LIMITATIONS içinde açıklandı. Retry'ı yeniden planlamak çift/istenmeyen yeni etkiler
+üretebileceğinden kalıcı plan korunur; mutation guard'ları güncel/kilitli veriyle çalışır.
+Auth yokluğu, rule registry seçimi, session dahil olmayan key'in fail-closed conflict davranışı
+belgelenmiş tasarım sınırlarıdır; üretim yetkilendirmesi iddia edilmez.
