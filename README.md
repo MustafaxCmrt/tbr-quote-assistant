@@ -136,14 +136,14 @@ Bu belirli anahtarda tekrar etmeyen DB etkisidir; genel bir “exactly once deli
 `quantity=0` kalemi removed yapar; pasif/stok dışı kaynak ürünü kaldırmayı engellemez.
 Replace eski satırı replaced yapar ve hedefe bağlar; hedef zaten aktifse miktarı birleştirir.
 Yeni stok dışı add için hem müşteri uygunluğu hem açık bekleme onayı gerekir; replace hedefi stoklu olmalıdır.
-Taslak stok rezervasyonu yapmaz ve stok miktarını düşürmez. F03 domain araçları henüz chat UI'ya bağlı değildir.
+Taslak stok rezervasyonu yapmaz ve stok miktarını düşürmez. Araçlar gerçek web sohbetine bağlıdır.
 
 F04 sohbet: `POST /api/chat/sessions` ile `customer_id`, `quote_id`, `channel` gönder;
 dönen `session_id` ile `POST /api/chat` gövdesinde `message_id`, `quote_id`, `message` gönder.
 Aynı gönderimin tekrarında aynı `message_id`, yeni mesajda yeni kimlik kullanılır. Plan sunucuda
 kalıcıdır; istemci guard veya idempotency anahtarı veremez. Anahtarsız Türkçe fallback gerçek
 araçları çalıştırır; şu anda ücretli/harici model adaptörü yoktur. 22 golden senaryo HTTP sohbet
-kapısından geçti; kanıt `reports/f04_acceptance.md`. SSE ve istemci chat entegrasyonu sonraki fazdır.
+kapısından geçti; kanıt `reports/f04_acceptance.md`. SSE ve web chat entegrasyonu F05/F06'da tamamlandı.
 
 F05: `POST /api/chat/stream` aynı chat gövdesiyle gerçek SSE döndürür. `message_start`, gerçek
 `tool_call_start/result`, `sources`, `text_delta`, `done/error` olayları version 1 envelope kullanır.
@@ -152,3 +152,21 @@ işlemi geri almaz; aynı mesaj kimliğiyle tekrar dene ve `GET /api/quotes/{id}
 `GET /api/chat/sessions/{id}/messages` toparlanma, `GET /api/tool-calls?session_id=...` denetim içindir.
 Kalıcı token/Last-Event-ID replay yoktur; işlem tekrarsızlığı receipt ile sağlanır. Fallback metni
 parçalar halinde gönderilir; LLM token akışı diye sunulmaz. Kanıt `reports/f05_acceptance.md`.
+
+## Web yönetimi (F06)
+
+Compose açıkken `http://localhost:5173/`: müşteri/teklif seç, sohbetten işlem yap ve aynı kanonik
+teklifi izle. Ürünler ve Bilgi bankası ekranlarından listeleme/ekleme yapılır; yeni kayıtlar
+anında DB retrieval'ına katılır. İşlem kayıtları ekranı gerçek araç girdisi/sonucu, kaynaklar,
+deneme ve receipt tekrarını gösterir. API `/api/products` ve `/api/knowledge` için GET/list,
+POST, PATCH ve mantıksal DELETE sağlar. ID verilmezse sunucu üretir; silme geçmişi bozmaz.
+
+Web her 2,5 saniyede, pencereye dönünce ve mutation/retry sonunda teklifi yeniden okur;
+eski sürüm yeni sürümü ezmez. Bağlantı kesilince son görünüm ve başarılı kontrol zamanı korunur.
+Oturum kimliği tarayıcıda saklanır; fiyat ve miktar için ikinci bir kalıcı istemci deposu yoktur.
+
+`npm run build --prefix apps/web` production build/typecheck; `python3 scripts/sync_web_contracts.py --check`
+ortak parser/DTO kopyalarının eşleşmesini doğrular. Compose web build context'i `apps/web` olduğundan
+`python3 scripts/sync_web_contracts.py` ile üretilmiş, SHA256 işaretli kopyalar kullanılır; elle düzenlenmez.
+Yerel demo authentication/RBAC içermez; müşteri seçimi kimlik doğrulama değildir.
+Kanıt: [F06 kabul raporu](reports/f06_acceptance.md).

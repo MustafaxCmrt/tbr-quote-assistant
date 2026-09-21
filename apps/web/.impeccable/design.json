@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-21T16:14:08Z",
+  "title": "Design System: The Blue Red Admin",
+  "extensions": {
+    "breakpoints": [
+      { "name": "stack-workspace", "value": "1180px" },
+      { "name": "compact-navigation", "value": "700px" }
+    ],
+    "motion": [
+      { "name": "button-hover", "value": "background 0.15s ease-out", "purpose": "Buton hover renk değişimi; prefers-reduced-motion altında kapalı." }
+    ],
+    "shadows": []
+  },
+  "components": [
+    {
+      "name": "Birincil buton",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Gönderme ve kaydetme eylemi.",
+      "html": "<button class=\"ds-primary\">Gönder</button>",
+      "css": ".ds-primary { font: inherit; font-weight: 650; background: var(--blue, #184ca3); color: #fff; border: 1px solid transparent; border-radius: 7px; min-height: 42px; padding: 9px 16px; cursor: pointer; transition: background .15s ease-out; } .ds-primary:hover { background: #103c86; } .ds-primary:focus-visible { outline: 3px solid var(--blue, #184ca3); outline-offset: 3px; } .ds-primary:disabled { opacity: .55; cursor: not-allowed; } @media(prefers-reduced-motion: reduce) { .ds-primary { transition: none; } }"
+    },
+    {
+      "name": "İkincil buton",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Yenileme gibi yardımcı eylemler.",
+      "html": "<button class=\"ds-secondary\">Yenile</button>",
+      "css": ".ds-secondary { font: inherit; font-weight: 650; background: transparent; color: var(--blue, #184ca3); border: 1px solid var(--line, #d6dee8); border-radius: 7px; min-height: 42px; padding: 9px 16px; cursor: pointer; transition: background .15s ease-out; } .ds-secondary:hover { background: #e9eff8; } .ds-secondary:focus-visible { outline: 3px solid var(--blue, #184ca3); outline-offset: 3px; } .ds-secondary:disabled { opacity: .55; cursor: not-allowed; } @media(prefers-reduced-motion: reduce) { .ds-secondary { transition: none; } }"
+    },
+    {
+      "name": "Metin butonu",
+      "kind": "button",
+      "refersTo": "button-text",
+      "description": "Aynı isteği tekrar gönderme.",
+      "html": "<button class=\"ds-text\">Tekrar gönder (aynı istek)</button>",
+      "css": ".ds-text { font: inherit; font-size: .82rem; font-weight: 650; background: none; color: var(--blue, #184ca3); border: 1px solid transparent; border-radius: 7px; min-height: 36px; padding: 8px 0; cursor: pointer; } .ds-text:focus-visible { outline: 3px solid var(--blue, #184ca3); outline-offset: 3px; } .ds-text:disabled { opacity: .55; cursor: not-allowed; }"
+    },
+    {
+      "name": "Etiketli alan",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Görünür Türkçe etiketli metin girişi.",
+      "html": "<label class=\"ds-label\">Ürün adı<input class=\"ds-field\" placeholder=\"Ürün adı yaz…\"></label>",
+      "css": ".ds-label { display: flex; flex-direction: column; gap: 7px; font-size: .8rem; font-weight: 600; color: #42536b; } .ds-field { font: inherit; width: 100%; max-width: 100%; min-height: 43px; background: #fff; color: var(--ink, #172840); border: 1px solid #aebccb; border-radius: 6px; padding: 10px 12px; } .ds-field::placeholder { color: var(--muted, #53647b); } .ds-field:focus-visible { outline: 3px solid var(--blue, #184ca3); outline-offset: 3px; } .ds-field[aria-invalid=true] { border-color: var(--red, #a92438); }"
+    },
+    {
+      "name": "Gezinme",
+      "kind": "nav",
+      "description": "Etkin sayfayı metin ve yüzeyle ayıran menü.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Ana gezinme\"><button aria-current=\"page\">Teklif &amp; sohbet</button><button>Ürünler</button></nav>",
+      "css": ".ds-nav { display: flex; flex-direction: column; gap: 7px; } .ds-nav button { font: inherit; background: transparent; color: var(--muted, #53647b); border: 1px solid transparent; border-radius: 7px; min-height: 42px; text-align: left; font-size: .88rem; padding: 11px 12px; font-weight: 550; cursor: pointer; } .ds-nav button:hover { background: #f2f5f9; } .ds-nav button[aria-current] { background: #e9eff9; color: #143d80; font-weight: 700; } .ds-nav button:focus-visible { outline: 3px solid var(--blue, #184ca3); outline-offset: 3px; }"
+    },
+    {
+      "name": "Durum etiketi",
+      "kind": "chip",
+      "refersTo": "tag",
+      "description": "Metinle açıklanan kayıt veya stok durumu.",
+      "html": "<span class=\"ds-tag\">Stoklu</span> <span class=\"ds-tag ds-warning\">Beklemeli</span>",
+      "css": ".ds-tag { display: inline-block; background: #eef2f7; color: #40516a; font-size: .72rem; padding: 3px 7px; border-radius: 5px; font-weight: 600; white-space: nowrap; } .ds-warning { color: #96500b; background: #fff2df; }"
+    },
+    {
+      "name": "Çalışma paneli",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Teklif veya sohbet için gölgesiz beyaz yüzey.",
+      "html": "<section class=\"ds-panel\"><h2>Teklif kalemleri</h2><p>Kayıtlı teklif görünümü.</p></section>",
+      "css": ".ds-panel { min-width: 0; background: #fff; color: var(--ink, #172840); padding: 24px; border-radius: var(--radius, 10px); } .ds-panel h2 { margin: 0 0 12px; font-size: 1.18rem; line-height: 1.35; } .ds-panel p { margin: 0 0 12px; color: var(--muted, #53647b); font-size: .875rem; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Teklif çalışma alanı",
+    "overview": "Mevcut arayüzün kendi adını taşıyan bu sistem, açık yüzeyli ve yoğunluğu kontrollü bir B2B yönetim ekranıdır. Mavi eylemleri ve gezinmeyi, kırmızı marka vurgusunu ve alan hatalarını taşır. Türkçe metin, kayıtlı değerler ve kaynak kimlikleri görsel süsten önce gelir.",
+    "keyCharacteristics": ["Açık zemin, beyaz çalışma yüzeyleri.", "Türkçe, metinle açıklanan durumlar.", "Hizalı sayılar ve açılabilir ayrıntılar."],
+    "rules": [{ "name": "The Açık Durum Rule", "body": "Durum yalnız renkle anlatılmaz; görünür metinle adlandırılır.", "section": "colors" }],
+    "dos": ["Do Türkçe etiketleri ve görünür durum açıklamalarını koru.", "Do Yeni ekranlarda mevcut alan, buton, tablo ve panel biçimlerini kullan.", "Do Para ve miktarları sunucunun kayıtlı cevabından göster."],
+    "donts": ["Don't İstemcide fiyat veya iyimser miktar hesaplayarak görünümü değiştir.", "Don't Görsel süs için yoğun animasyon, ikinci UI kütüphanesi veya özgün ikon sistemi ekle."]
+  }
+}

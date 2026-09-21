@@ -64,7 +64,7 @@ async def search_products(connection, args: ProductSearchInput) -> ProductSearch
     words = tokens(query)
     required = set(map(normalize, args.filters.required_tags)) | (words & FEATURES)
     filters = args.filters.model_copy(update={"required_tags": sorted(required)})
-    statement = sa.select(products).where(products.c.active.is_(True))
+    statement = sa.select(products)
     rows = (await connection.execute(statement)).mappings().all()
     # Identify explicit ID/SKU without prefix-matching the base to its Plus sibling.
     identifiers = {word for word in words if word.startswith(("prd-", "tbr-"))}
@@ -77,6 +77,8 @@ async def search_products(connection, args: ProductSearchInput) -> ProductSearch
     plus_requested = "plus" in words or any(word.endswith("-plus") for word in identifiers)
     ranked = []
     for row in rows:
+        if not row["active"]:
+            continue
         if filters.category and row["category"] != filters.category:
             continue
         if filters.max_price_try is not None and row["price_try"] > filters.max_price_try:

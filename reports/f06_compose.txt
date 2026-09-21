@@ -1,0 +1,225 @@
+UTC: 2026-09-21T16:00:29.592813+00:00
+Base commit (working tree may contain pending changes): 51bcd7cb0fbb6469b2b8d7543599c068eedc26bc
+Command: docker compose up --build -d --wait api web
+Exit code: 0
+
+ Image tbr-quote-assistant-web Building
+ Image tbr-postgres:16.15 Building
+ Image tbr-quote-assistant-migrate-seed Building
+ Image tbr-quote-assistant-api Building
+#1 [internal] load local bake definitions
+#1 reading from stdin 2.08kB done
+#1 DONE 0.0s
+
+#2 [db internal] load build definition from Dockerfile
+#2 transferring dockerfile: 212B done
+#2 DONE 0.0s
+
+#3 [web internal] load build definition from Dockerfile
+#3 transferring dockerfile: 374B done
+#3 DONE 0.0s
+
+#4 [migrate-seed internal] load build definition from Dockerfile
+#4 transferring dockerfile: 1.01kB done
+#4 DONE 0.0s
+
+#5 [db internal] load metadata for docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6
+#5 DONE 0.0s
+
+#6 [api internal] load metadata for docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+#6 DONE 0.0s
+
+#7 [db internal] load .dockerignore
+#7 transferring context: 2B done
+#7 DONE 0.0s
+
+#8 [api internal] load .dockerignore
+#8 transferring context: 198B done
+#8 DONE 0.0s
+
+#9 [migrate-seed internal] load build context
+#9 DONE 0.0s
+
+#10 [db internal] load build context
+#10 transferring context: 40B done
+#10 DONE 0.0s
+
+#11 [db 1/2] FROM docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6
+#11 resolve docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6 0.0s done
+#11 DONE 0.0s
+
+#12 [migrate-seed base  1/10] FROM docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+#12 resolve docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e 0.0s done
+#12 DONE 0.0s
+
+#13 [web internal] load metadata for docker.io/library/node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#13 DONE 0.1s
+
+#14 [web internal] load .dockerignore
+#14 DONE 0.0s
+
+#15 [db 2/2] COPY --chmod=0644 01-runtime-role.sh /docker-entrypoint-initdb.d/01-runtime-role.sh
+#15 CACHED
+
+#9 [api internal] load build context
+#9 transferring context: 2.41kB done
+#9 DONE 0.0s
+
+#14 [web internal] load .dockerignore
+#14 transferring context: 90B done
+#14 DONE 0.0s
+
+#16 [migrate-seed base  9/10] COPY data/source/products.json data/source/knowledge_entries.json data/source/customers.json data/source/quotes.json data/source/quote_items.json data/source/price_rules.json /app/data/source/
+#16 CACHED
+
+#17 [migrate-seed base  5/10] RUN uv sync --locked --no-dev
+#17 CACHED
+
+#18 [migrate-seed base  4/10] COPY apps/api/pyproject.toml apps/api/uv.lock ./
+#18 CACHED
+
+#19 [migrate-seed base  2/10] RUN pip install --no-cache-dir uv==0.12.17
+#19 CACHED
+
+#20 [migrate-seed base  7/10] COPY apps/api/alembic.ini ./
+#20 CACHED
+
+#21 [migrate-seed base  6/10] COPY apps/api/app ./app
+#21 CACHED
+
+#22 [migrate-seed base  3/10] WORKDIR /app/apps/api
+#22 CACHED
+
+#23 [migrate-seed base  8/10] COPY apps/api/migrations ./migrations
+#23 CACHED
+
+#24 [migrate-seed base 10/10] RUN useradd --uid 10001 --create-home appuser
+#24 CACHED
+
+#25 [web 1/7] FROM docker.io/library/node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#25 resolve docker.io/library/node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 0.1s done
+#25 DONE 0.1s
+
+#26 [migrate-seed] exporting to image
+#26 exporting layers done
+#26 exporting manifest sha256:ba5c00f166c09a151debf166996c26e671ca03f3b0397ce7198db24b2837391e 0.0s done
+#26 exporting config sha256:f0caf3c72123f952852b15992f3e0f003f29e3d1d0da949fb850c9e542ed9e26 0.0s done
+#26 ...
+
+#27 [web internal] load build context
+#27 transferring context: 60.08kB done
+#27 DONE 0.0s
+
+#28 [web 2/7] WORKDIR /app
+#28 CACHED
+
+#29 [web 4/7] RUN npm ci --ignore-scripts
+#29 CACHED
+
+#30 [web 3/7] COPY package.json package-lock.json ./
+#30 CACHED
+
+#31 [web 5/7] COPY index.html tsconfig.json vite.config.ts ./
+#31 CACHED
+
+#32 [db] exporting to image
+#32 exporting layers done
+#32 exporting manifest sha256:eab4ca1b841a0411b69f5483f9214b8164f294deb5a356801786dd02f0b85b04 done
+#32 exporting config sha256:532c7e5ace48ea55f761d4c382b9f3b86292818a11a573f708dd9b22c2bf7332 done
+#32 exporting attestation manifest sha256:c649d28494279a2d4f5d83c2dda5e0b7316444a284b4c50d82d31ba0f970b939 0.0s done
+#32 exporting manifest list sha256:2dd54eb240584d66c9d881342a4aeb2c1a38a8604885f4931ca5d362567534bf 0.0s done
+#32 naming to docker.io/library/tbr-postgres:16.15 done
+#32 unpacking to docker.io/library/tbr-postgres:16.15 0.0s done
+#32 DONE 0.2s
+
+#26 [migrate-seed] exporting to image
+#26 exporting attestation manifest sha256:e71411e10a2e1614066670977bcd167e3cc224b33038a950add6cbfc72778170 0.0s done
+#26 exporting manifest list sha256:7f001782655ba2a56fb57f447a3fc7bd87a19e88687f18e55de4d82e77de408e
+#26 exporting manifest list sha256:7f001782655ba2a56fb57f447a3fc7bd87a19e88687f18e55de4d82e77de408e 0.8s done
+#26 naming to docker.io/library/tbr-quote-assistant-migrate-seed:latest 0.0s done
+#26 unpacking to docker.io/library/tbr-quote-assistant-migrate-seed:latest 0.0s done
+#26 DONE 1.0s
+
+#33 [web 6/7] COPY src ./src
+#33 DONE 0.8s
+
+#34 [api] exporting to image
+#34 exporting layers done
+#34 exporting manifest sha256:0681bff751130db97730f450af15ffb1753f2322c1effd7c2fa54ec23caebb9b 0.0s done
+#34 exporting config sha256:8e096aac6bd480147366ae582759b9dab1907d6928c784eae501f03b3e36613f 0.0s done
+#34 exporting attestation manifest sha256:f2a4740ca0f04f82366d8b0a3733bef36b46529d129f91867a34c59b012de06d 0.0s done
+#34 exporting manifest list sha256:1bce8d639653d300e0647ee129cf79963012dddc842ba02a0e77701caca57f1b 0.8s done
+#34 naming to docker.io/library/tbr-quote-assistant-api:latest 0.0s done
+#34 unpacking to docker.io/library/tbr-quote-assistant-api:latest 0.0s done
+#34 DONE 1.0s
+
+#35 [db] resolving provenance for metadata file
+#35 DONE 0.0s
+
+#36 [migrate-seed] resolving provenance for metadata file
+#36 DONE 0.0s
+
+#37 [api] resolving provenance for metadata file
+#37 DONE 0.0s
+
+#38 [web 7/7] RUN npm run build && chown -R node:node /app
+#38 0.265
+#38 0.265 > @tbr/web@0.1.0 build
+#38 0.265 > tsc --noEmit && vite build
+#38 0.265
+#38 1.361 vite v8.3.0 building client environment for production...
+#38 1.369 transforming...
+#38 1.425 ✓ 24 modules transformed.
+#38 1.502 rendering chunks...
+#38 1.545 computing gzip size...
+#38 1.551 dist/index.html                   0.37 kB │ gzip:  0.28 kB
+#38 1.551 dist/assets/index-xEV8Jq-k.css    8.76 kB │ gzip:  2.70 kB
+#38 1.551 dist/assets/index-CnBgwMye.js   216.21 kB │ gzip: 68.13 kB
+#38 1.551
+#38 1.552 ✓ built in 190ms
+#38 DONE 2.9s
+
+#39 [web] exporting to image
+#39 exporting layers 1.5s done
+#39 exporting manifest sha256:eb428b1e29a1670b5e03935fa5ac9a55ea36ddbdf21a471d672126966c7929a1 0.0s done
+#39 exporting config sha256:fa96bf72ed89267acf24c3c4d0578d52c18a51baf13d1f9155d93803fbe253bc done
+#39 exporting attestation manifest sha256:7ac4ce0a5e63ecbf9a03be04da7a3fb9a06b97443c3286ac442ee0540e34cd7a 0.0s done
+#39 exporting manifest list sha256:6a1177d504e6873d15307ccc432bf2e392e4b7bbf43b56dbcaa7769804649c56 0.0s done
+#39 naming to docker.io/library/tbr-quote-assistant-web:latest done
+#39 unpacking to docker.io/library/tbr-quote-assistant-web:latest
+#39 unpacking to docker.io/library/tbr-quote-assistant-web:latest 0.2s done
+#39 DONE 1.9s
+
+#40 [web] resolving provenance for metadata file
+#40 DONE 0.0s
+ Image tbr-quote-assistant-api Built
+ Image tbr-quote-assistant-web Built
+ Image tbr-postgres:16.15 Built
+ Image tbr-quote-assistant-migrate-seed Built
+ Container tbr-quote-assistant-db-1 Running
+ Container tbr-quote-assistant-migrate-seed-1 Recreate
+ Container tbr-quote-assistant-migrate-seed-1 Recreated
+ Container tbr-quote-assistant-api-1 Recreate
+ Container tbr-quote-assistant-api-1 Recreated
+ Container tbr-quote-assistant-web-1 Recreate
+ Container tbr-quote-assistant-web-1 Recreated
+ Container tbr-quote-assistant-db-1 Waiting
+ Container tbr-quote-assistant-db-1 Healthy
+ Container tbr-quote-assistant-migrate-seed-1 Starting
+ Container tbr-quote-assistant-migrate-seed-1 Started
+ Container tbr-quote-assistant-migrate-seed-1 Waiting
+ Container tbr-quote-assistant-migrate-seed-1 Exited
+ Container tbr-quote-assistant-api-1 Starting
+ Container tbr-quote-assistant-api-1 Started
+ Container tbr-quote-assistant-api-1 Waiting
+ Container tbr-quote-assistant-api-1 Healthy
+ Container tbr-quote-assistant-web-1 Starting
+ Container tbr-quote-assistant-web-1 Started
+ Container tbr-quote-assistant-web-1 Waiting
+ Container tbr-quote-assistant-db-1 Waiting
+ Container tbr-quote-assistant-migrate-seed-1 Waiting
+ Container tbr-quote-assistant-api-1 Waiting
+ Container tbr-quote-assistant-migrate-seed-1 Exited
+ Container tbr-quote-assistant-api-1 Healthy
+ Container tbr-quote-assistant-db-1 Healthy
+ Container tbr-quote-assistant-web-1 Healthy

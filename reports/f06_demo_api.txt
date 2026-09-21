@@ -1,0 +1,8 @@
+UTC: 2026-09-21T16:10:30.348127+00:00
+Base commit (working tree may contain pending changes): 51bcd7cb0fbb6469b2b8d7543599c068eedc26bc
+Command: python3 scripts/check_f06_demo.py
+Exit code: 0
+
+PASS browser and canonical API: Q-1002, version 2, quantity 1, net 1234.50
+PASS UI-created knowledge visible through real retrieval tool
+PASS actual wrapper retry: same message, distinct attempts, one applied mutation
