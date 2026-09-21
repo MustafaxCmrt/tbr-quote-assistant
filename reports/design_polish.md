@@ -37,9 +37,17 @@ tablonun sona kaydırılmış hali (solma kalkıyor); `after-quote-chat-1440` so
 **Kontrast (WCAG, hesaplanan):** işlem mavisi/beyaz 5.97; mavi/tint 5.19; kırmızı/beyaz 5.84;
 alan kenarlığı/beyaz 2.97; koyu tema mavi/tint 6.40; koyu tema ikincil metin/yüzey 8.74.
 
+## Fiziksel iPhone gözlemi
+
+**passed (kullanıcı gözlemi).** 22 Eylül 01:45 civarı (TR): Mustafa Expo Go'da yeni bundle'ı açtı;
+logo üst çubukta ve teklif kalemleri kart görünümünde geldi. İlk denemede "sunucuya ulaşılamadı"
+aldı: web container'ı `API_BIND_HOST` öneki olmadan yeniden build edilince Compose API'yi loopback
+ile yeniden oluşturmuştu (`127.0.0.1:8001`). `API_BIND_HOST=0.0.0.0 docker compose up -d --wait api`
+ile LAN'a döndürüldü; Q-1001 sürüm 3 / 23.970 TL değişmedi. README LAN adımına uyarı eklendi.
+Karanlık/açık tema karşılaştırması ve simülatör görüntüsü alınmadı.
+
 ## Doğrulanmayan
 
-Mobil ekranlar simülatörde veya cihazda görülmedi; export yalnız bundle'ın derlendiğini ve
-logoların pakete girdiğini gösterir. Fiziksel iPhone'da logo, kart görünümü ve karanlık/açık tema
-Mustafa'nın gözlemini bekler (`not_verified`). Web'de otomatik erişilebilirlik taraması yapılmadı;
+Export yalnız bundle'ın derlendiğini ve logoların pakete girdiğini gösterir; cihaz gözlemi
+yukarıdaki kadardır, ekran görüntüsü yoktur. Web'de otomatik erişilebilirlik taraması yapılmadı;
 kontrast değerleri hesapla doğrulandı, ekran okuyucu ile denenmedi.

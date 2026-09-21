@@ -85,7 +85,9 @@ Expo SDK 57, FastAPI 0.141.1 ve uvicorn 0.53.0 kurulup doğrulandı.
 
    Bu adım API'yi aynı Wi-Fi'daki cihazlara açar. Ürün/bilgi yazma anahtar ister; okuma ve sohbet açıktır.
    Yalnız güvenilen ağda ve demo süresince kullan. Bitince `docker compose up -d --wait api` ile API'yi
-   `.env` içindeki loopback adresine döndür.
+   `.env` içindeki loopback adresine döndür. Demo sırasında başka bir servisi yeniden build ederken
+   (örn. `docker compose up -d --build web`) aynı `API_BIND_HOST=0.0.0.0` önekini tekrar ver; yoksa
+   Compose API'yi loopback ayarıyla yeniden oluşturur ve telefon "sunucuya ulaşılamadı" der.
 
 2. `apps/mobile/.env` dosyasına `EXPO_PUBLIC_API_BASE_URL=http://<MAC_LAN_IP>:8001` yaz.
    `<MAC_LAN_IP>` yerine Mac'in Wi-Fi ayarlarındaki IP adresini kullan. Dosya git dışındadır; yeni kurulumda oluştur,
