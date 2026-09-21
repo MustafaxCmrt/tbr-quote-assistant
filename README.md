@@ -3,8 +3,9 @@
 Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
 **21 Eylül 2026: F00–F07 ana akışları doğrulandı; F08 kabul kapısı geçti; F09 temiz kurulum/teslim açık.**
 Altı gerçek araç, transaction/receipt, kaynaklı deterministik sohbet, SSE, web admin ve Expo
-uygulaması çalışıyor. Son tam backend koşusu **225 passed** (22 golden dahil):
-[komut/çıktı](reports/f08_release_backend.txt), [golden sonuçları](reports/golden_results.json).
+uygulaması çalışıyor. Son tam backend koşusu **229 passed** (22 golden dahil):
+[komut/çıktı](reports/hardening_full_backend.txt), [golden sonuçları](reports/golden_results.json).
+Teslim öncesi güvenlik sertleştirmesi: [çözüm kaydı](reports/hardening_resolution.md).
 Doğrulanan aday: `demo-candidate-20260921-v2` / `81765bd`; runtime `53b9948`.
 Yeni clone’da da 225 test geçti: [temiz kurulum kanıtı](reports/f09_acceptance.md).
 Mustafa fiziksel iPhone'da stream, ürün ekleme, web ile ortak teklif, aynı isteğin tekrarı,
@@ -20,11 +21,15 @@ python3 scripts/init_env.py
 docker compose up --build -d --wait
 ```
 
-İlk komut güçlü parolalarla ignored `.env` oluşturur; mevcut dosyayı değiştirmez. API
+İlk komut güçlü parolalar ve yönetim anahtarıyla ignored `.env` oluşturur; mevcut dosyada yalnız eksik
+`ADMIN_API_KEY` değerini ekler, diğer değerleri değiştirmez. API
 `http://localhost:8001/health/ready`, web yönetimi `http://localhost:5173` adresindedir.
 PostgreSQL host portu açılmaz. API ve web varsayılan olarak yalnız Mac loopback'e bağlanır.
 Migration ve JSON seed başarılı olmadan API başlamaz. Runtime DB rolü şema değiştiremez.
 Web Compose servisi Vite geliştirme sunucusudur; public dağıtım için kullanılmaz.
+Ürün/bilgi ekleme, düzenleme ve silme `X-Admin-Key` ister. Web paneli bu başlığı Vite proxy'si üzerinden
+sunucu tarafında ekler; tarayıcıya veya mobil uygulamaya anahtar verilmez. Anahtarsız yazma 401 döner.
+Okuma, sohbet ve teklif uçları anahtarsızdır. İstek gövdesi 256 KiB ile sınırlıdır.
 
 ```sh
 docker compose --profile test run --build --rm test
@@ -32,6 +37,14 @@ docker compose run --rm --no-deps migrate-seed alembic check
 ```
 
 Testler ayrı test-db servisinde her test için yeni veritabanı oluşturur; teşhis için tutar.
+Çok sayıda tam koşudan sonra testler `DiskFullError` verirse eski test veritabanlarını yalnız test-db'de sil
+(demo veritabanına ve volume'lara dokunmaz):
+
+```sh
+docker compose --profile test up -d --wait test-db
+docker compose --profile test exec test-db sh -c "psql -U tbr_owner -d tbr_test -tAc \"select format('DROP DATABASE %I;', datname) from pg_database where datname like 'tbr\\_test\\_%'\" | psql -U tbr_owner -d tbr_test -q"
+```
+
 Seed yalnız eksik ID'leri ekler, mevcut kullanıcı düzenlemelerini değiştirmez; startup'ta DROP/reset yoktur.
 Tüm seed ve başarı işareti tek transaction içindedir. Named volume veriyi restart'ta korur.
 Kaynak `seed.sql` otomatik çalıştırılmaz. Kanıt: [F01b kabul raporu](reports/f01b_acceptance.md).
@@ -69,6 +82,10 @@ Expo SDK 57, FastAPI 0.141.1 ve uvicorn 0.53.0 kurulup doğrulandı.
    python3 scripts/init_env.py
    API_BIND_HOST=0.0.0.0 docker compose up --build -d --wait api web
    ```
+
+   Bu adım API'yi aynı Wi-Fi'daki cihazlara açar. Ürün/bilgi yazma anahtar ister; okuma ve sohbet açıktır.
+   Yalnız güvenilen ağda ve demo süresince kullan. Bitince `docker compose up -d --wait api` ile API'yi
+   `.env` içindeki loopback adresine döndür.
 
 2. `apps/mobile/.env` dosyasına `EXPO_PUBLIC_API_BASE_URL=http://<MAC_LAN_IP>:8001` yaz.
    `<MAC_LAN_IP>` yerine Mac'in Wi-Fi ayarlarındaki IP adresini kullan. Dosya git dışındadır; yeni kurulumda oluştur,

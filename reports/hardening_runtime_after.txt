@@ -1,0 +1,20 @@
+UTC: 2026-09-21T19:55:26.385455+00:00
+Base commit (working tree may contain pending changes): dcee13d25eb32dad9265c2f914c067218a36cb05
+Command: python3 scripts/check_admin_runtime.py --lan
+Exit code: 0
+
+PASS API write without key: 401 ADMIN_KEY_REQUIRED
+PASS API write with wrong key: 401 ADMIN_KEY_REQUIRED
+PASS Web proxy write adds key (validation 422, no write): 422
+PASS Web proxy valid write (same stock value): 200
+PASS Web proxy read: 200
+PASS API read without key: 200
+PASS API body over 256 KiB: 413 PAYLOAD_TOO_LARGE
+PASS LAN (address redacted) readiness: 200
+PASS LAN (address redacted) write without key: 401 ADMIN_KEY_REQUIRED
+PASS Web file / does not contain the key (HTTP 200): True
+PASS Web file /src/main.tsx does not contain the key (HTTP 200): True
+PASS Web file /src/api/client.ts does not contain the key (HTTP 200): True
+PASS Web file /@fs/proc/self/environ does not contain the key (HTTP 403): True
+PASS Web file /@fs/app/.env does not contain the key (HTTP 200): True
+PASS PRD-BC-110 unchanged after all requests

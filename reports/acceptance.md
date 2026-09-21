@@ -36,3 +36,9 @@ F08 son tam koşu: commit313a486, `docker compose --profile test run --build --r
 Güncel F08 disposition: [f08_acceptance.md](f08_acceptance.md). Önceki satırlardaki in_progress kayıtları tarihsel aşamadır; son runtime e84b2a6,204passed. F09 hâlâ açık.
 
 V2 takip P2 kapanışı: [regresyon eşlemesi](f08_review_resolution.md), [web Plus spot](f08_p2_web_spot.txt), [225-test temiz clone](f09_acceptance.md). Cihaz sürüm metadatası Mustafa tarafından bildirildi; son backend için yeni fiziksel gözlem not_verified.
+
+Teslim öncesi mimari/güvenlik sertleştirmesi: [çözüm kaydı](hardening_resolution.md). Yazma uçları admin
+anahtarı ister, gövde 256 KiB ile sınırlı, SSE terminal hatası DB erişilemezken de gelir;
+[tam backend 229 passed](hardening_full_backend.txt), [çalışan stack kontrolü](hardening_runtime_after.txt)
+(önce: [anahtarsız LAN yazması doğrulamaya ulaşıyordu](hardening_runtime_before.txt)). Bu koşu için yeni
+fiziksel iPhone gözlemi not_verified.
