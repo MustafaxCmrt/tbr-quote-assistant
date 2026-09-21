@@ -1,10 +1,9 @@
 # Kabul kanıtları — 2026-09-21
 
-**Teslim kabulü henüz tamamlanmadı.** F00–F07 ana kapıları tamam; F07 cihaz sürüm metadatası ve geniş erişilebilirlik kontrolleri
-ayrıca açık. F08 için golden JSON ve Git geçmişi taraması hazır; bağımsız Claude review ve
-F09 son temiz kurulum/video/erişim kapısı açık. Aşağıdaki sonuçlar kendi raporlarındaki commit ve kapsama aittir.
+**Teslim kabulü henüz tamamlanmadı.** F00–F08 ana kapıları tamam; F07 cihaz sürüm metadatası ve geniş erişilebilirlik kontrolleri
+ayrıca açık. F08 son disposition [kabul checkpoint](f08_acceptance.md) içinde; F09 son temiz kurulum/video/erişim kapısı açık. Aşağıdaki sonuçlar kendi raporlarındaki commit ve kapsama aittir.
 
-Son tam backend koşusu: [179 passed](f08_review_full_backend.txt), 22 golden dahil.
+Son tam backend koşusu: [204 passed](f08_release_backend.txt), 22 golden dahil.
 [36 negatif hedef eşlemesi](negative_acceptance.md); NEG-10 opsiyonel provider adapter olmadığı için not_run.
 
 | Gereksinim | Durum / doğrudan kanıt |
@@ -33,3 +32,5 @@ Son tam backend koşusu: [179 passed](f08_review_full_backend.txt), 22 golden da
 Başarısız ilk denemeler raporlarda korunur. `skipped`, `not_run`, `not_verified` başarı değildir.
 
 F08 son tam koşu: commit313a486, `docker compose --profile test run --build --rm -e GOLDEN_REPORT_PATH=/evidence/golden_results.json -e EVIDENCE_COMMIT_SHA=313a4865dd2bcf15dec7fefd01d0c57f984eb01b -v /Users/comert/Desktop/tbr-quote-assistant/reports:/evidence test pytest -v`: exit0,179passed40.92s. reports/f08_review_full_backend.txt ve golden_results.json yenilendi. Opus5/xhigh odaklı takip review session6425 çalışıyor; verdict bekleniyor.
+
+Güncel F08 disposition: [f08_acceptance.md](f08_acceptance.md). Önceki satırlardaki in_progress kayıtları tarihsel aşamadır; son runtime e84b2a6,204passed. F09 hâlâ açık.

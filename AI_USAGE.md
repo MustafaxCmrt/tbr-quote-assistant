@@ -61,3 +61,7 @@ eşit ürün seçimi ve renderer kaynak doğrulaması için regresyonlar eklendi
 saklandı. Aynı Opus5/xhigh ayarıyla odaklı takip review başlatıldı; sonucu henüz bekleniyor.
 Canlı API ve web proxy stream testi yenilendi; önceki fiziksel demo teklif/receipt kayıtları salt
 okunur kontrolle korunduğu doğrulandı. Yeni fiziksel cihaz gözlemi yapıldığı iddia edilmez.
+
+F08 final: takip review da eski sürümde üç yorumlama sınıfını açık buldu. Codex ek regresyonlarla
+bunları ve kısmi replace belirsizliğini düzeltti; e84b2a6 üzerinde204test/22golden passed.
+Son F08 kapı kararı Codex'in rapor/test değerlendirmesidir; Claude son sürüme onay verdi denmez.

@@ -1,10 +1,10 @@
 # The Blue Red — Teklif Asistanı
 
 Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
-**21 Eylül 2026: F00–F07 ana akışları doğrulandı; F08 son incelemesi sürüyor.**
+**21 Eylül 2026: F00–F07 ana akışları doğrulandı; F08 kabul kapısı geçti; F09 temiz kurulum/teslim açık.**
 Altı gerçek araç, transaction/receipt, kaynaklı deterministik sohbet, SSE, web admin ve Expo
-uygulaması çalışıyor. Son tam backend koşusu **179 passed** (22 golden dahil):
-[komut/çıktı](reports/f08_review_full_backend.txt), [golden sonuçları](reports/golden_results.json).
+uygulaması çalışıyor. Son tam backend koşusu **204 passed** (22 golden dahil):
+[komut/çıktı](reports/f08_release_backend.txt), [golden sonuçları](reports/golden_results.json).
 Mustafa fiziksel iPhone'da stream, ürün ekleme, web ile ortak teklif, aynı isteğin tekrarı,
 klavye ve kaynak aç/kapat akışlarını doğruladı. Cihaz sürüm metadatası ayrıca `not_verified`.
 [Kabul kanıtları](reports/acceptance.md) kapsamı ve kalan teslim kapılarını ayırır.
