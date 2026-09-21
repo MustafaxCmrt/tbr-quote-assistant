@@ -22,3 +22,17 @@ Mustafa 19:25 ekran görüntüsünde gerçek uygulamanın iPhone'da açıldığ�
 [Karanlık mod başlangıcı](images/f07/native-launch-dark.png). Mavi Kırmızı Market A.Ş. / Q-1001
 bağlamı yüklenmiş, mesaj kutusu ve Sohbet/Teklif sekmeleri görünür. Bu görüntü **native açılış**
 kanıtıdır; henüz mesaj gönderimi, mutation/retry veya klavye açıkken kullanım kanıtı değildir.
+
+### F07 ilk mobil mutation ve ortak state — 19:29
+
+Mustafa'nın fiziksel iPhone görüntüleri Q-1001 **sürüm2, PRD-BC-110 adet2, birim7990.00,
+brüt/net15980.00, indirim0.00, stoklu** gösteriyor. Önceki API gözlemi sürüm1/adet1 idi.
+`channel=mobile` oturumunun gerçek logunda başarılı add_to_quote ve mutation_applied=true görüldü.
+Web'de aynı müşteri/teklif seçilip aynı sürüm/adet/tutarlar gözlendi (yalnız API cevabı değil).
+
+- [Native sürüm ve toplam](images/f07/native-quote-v2.png)
+- [Native kalem ve adet](images/f07/native-quote-quantity2.png)
+- [Web karşılığı](images/f07/web-quote-v2.png), erişilebilir DOM: `f07_web_shared_state.txt`.
+
+**Mobil add → web ortak state: passed.** Native retry, kaynak sheet, kademeli chat görünümü ve
+klavye etkileşimi henüz not_verified. Statik teklif ekranı streaming zamanlamasını kanıtlamaz.
