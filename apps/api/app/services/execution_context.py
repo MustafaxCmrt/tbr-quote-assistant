@@ -26,6 +26,7 @@ class ExecutionContext:
     constraints: Constraints
     customer: dict
     catalog: dict
+    expected_quote_version: int | None = None
 
 
 def action_key(quote_id, message_id, index, tool_name):

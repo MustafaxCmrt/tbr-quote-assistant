@@ -305,6 +305,10 @@ async def build_plan(conn, session, message_id, text, mode):
             mutation(
                 "add_to_quote", item.product_id, quantity=delta, required=tokens(text) & FEATURES
             )
+            if total:
+                # The delta is valid only for the snapshot used to calculate it.
+                # Internal metadata, never a new public tool argument.
+                steps[-1]["expected_quote_version"] = quote.version
         if "indirim" in normalized or total:
             knowledge("discount_policy")
         if catalog[item.product_id]["category"] == "service":

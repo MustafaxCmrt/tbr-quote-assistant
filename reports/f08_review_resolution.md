@@ -33,3 +33,26 @@ mutasyon yapmak yerine açık ürün/limit/hedef miktar ister. Source JSON'lar d
 
 Son tam 151-test koşusu bu patch'ten **öncedir**; 57-test koşusu tüm backend koşusu diye sunulmaz.
 Demo API henüz bu patch ile yeniden build edilmedi; fiziksel yeniden doğrulama iddiası yok.
+
+## Toplam hedef ve taslak durumu — ikinci düzeltme
+
+İki yeni HTTP regresyonu düzeltmeden önce başarısız: `f08_review_race_before.txt` (exit1).
+İki planın da aynı başlangıç sürümünü görmesini deterministik bir asyncio barrier sağlar;
+veritabanı, HTTP route, executor ve wrapper gerçek çalışır. Bu bir zamanlama şansı testi değildir.
+Toplam hedef delta'sı sunucu planında başlangıç quote version'ını taşır. Executor bunu context'e
+iletir, gerçek wrapper receipt aramasından **sonra**, quote kilidi altında yeni etki öncesi doğrular.
+Eski hedef planı 409 ile yeni mesaj ister. Yeni mutasyon yalnız draft üzerinde uygulanır.
+Başarılı receipt replay bu yeni durum/sürüm kontrollerinden önce döner; teklif tekrar değişmez.
+Kamuya açık altı tool input'una alan eklenmedi, mevcut receipt hash şeması değiştirilmedi.
+
+| Requirement | Evidence |
+|---|---|
+| "toplam … olsun" TOCTOU | `test_total_target_concurrency_rejects_stale_plan_and_preserves_replay`: iki eşzamanlı plan, bir200/bir409; toplam5/version2; başarısız plan retry409; araya update2 girince başarılı eski add replay200 ama adet2/version3 korunur; receipt2 ve gerçek add logları applied/replayed doğrulanır. |
+| "taslak teklife ekler" | `test_non_draft_quote_rejects_new_mutation_but_allows_read_and_receipt_replay`: accepted state yeni ekleme409; politika okuma ve eski receipt replay200; tüm quote aynı/receipt1. |
+| Odaklı gerçek koşu | `docker compose --profile test run --build --rm test pytest -q tests/test_chat.py -k 'total_target_concurrency or non_draft_quote'`: 2passed, exit0; `f08_review_race_after.txt`. |
+
+Yukarıdaki iki açık hipotez bu regresyonlarla doğrulandı ve düzeltildi. Diğer açık review maddeleri
+henüz kapanmadı. İlk lint import sırası hatası raporda korunur; düzeltilmiş Ruff exit0:
+`f08_review_race_lint_final.txt`. Bu kayıt 151 eski testin yeni sürümde yeniden koşulduğunu iddia etmez.
+
+Birleşik mutation + chat + golden koşusu: **104passed23.78s, exit0**; `f08_review_mutations_chat_golden.txt`. Son delivery scan exit0, orijinal12source aynı; `f08_review_race_delivery.txt`.

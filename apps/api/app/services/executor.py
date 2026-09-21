@@ -163,6 +163,7 @@ async def execute_plan(engine, session_id, message_id, *, attempt_id=None, on_ev
                 ),
                 customer,
                 catalog,
+                expected_quote_version=plan[index].get("expected_quote_version"),
             )
             if on_event:
                 on_event(

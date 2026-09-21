@@ -218,6 +218,16 @@ async def receipt_operation(conn, args, ctx, tool_name, operation):
             fail("IDEMPOTENCY_CONFLICT", "Aynı anahtar farklı işlem içeriğiyle kullanıldı.")
         return {**receipt["result"], "replayed": True, "mutation_applied": False}
     before = (await get_quote(conn, ctx.quote_id)).model_dump(mode="json")
+    # The executor holds the quote lock. Replay above remains valid even if the
+    # quote has since changed or left draft; only new effects need these guards.
+    if before["status"] != "draft":
+        raise DomainError("QUOTE_NOT_EDITABLE", "Yalnız taslak teklif değiştirilebilir.", 409)
+    if ctx.expected_quote_version is not None and before["version"] != ctx.expected_quote_version:
+        raise DomainError(
+            "QUOTE_VERSION_CONFLICT",
+            "Teklif değişti. Güncel miktarı kontrol edip hedefini yeni mesajla gönder.",
+            409,
+        )
     delta = await operation(conn, args, ctx)
     version = await conn.scalar(
         quotes.update()

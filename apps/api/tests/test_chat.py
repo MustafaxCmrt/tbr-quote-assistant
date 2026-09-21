@@ -536,3 +536,94 @@ async def test_review_partial_removal_does_not_become_target_or_full_removal(db,
             ).scalars()
         )
         assert not names & {"add_to_quote", "update_quote_item", "replace_with_alternative"}
+
+
+async def test_total_target_concurrency_rejects_stale_plan_and_preserves_replay(db, monkeypatch):
+    import asyncio
+
+    from app.orchestration import chat
+
+    app, client = await chat_client(db)
+    execute = chat.execute_plan
+    both_planned = asyncio.Event()
+    arrived = 0
+
+    async def after_both_planned(*args, **kwargs):
+        nonlocal arrived
+        arrived += 1
+        if arrived == 2:
+            both_planned.set()
+        await asyncio.wait_for(both_planned.wait(), timeout=5)
+        return await execute(*args, **kwargs)
+
+    monkeypatch.setattr(chat, "execute_plan", after_both_planned)
+    async with app.router.lifespan_context(app), client:
+        session = await open_session(client)
+        requests = [message(session, "Kablosuz okuyucu toplam 5 adet olsun.") for _ in range(2)]
+        responses = await asyncio.gather(
+            *[client.post("/api/chat", json=request) for request in requests]
+        )
+        assert sorted(r.status_code for r in responses) == [200, 409]
+        winner = next(i for i, r in enumerate(responses) if r.status_code == 200)
+        loser = 1 - winner
+        quote = (await client.get("/api/quotes/Q-1001")).json()
+        assert quote["items"][0]["quantity"] == 5
+        assert quote["version"] == 2
+        # Failed stale plans stay rejected; do not silently rebase an old operation.
+        retry_failed = await client.post("/api/chat", json=requests[loser])
+        assert retry_failed.status_code == 409
+        updated = await client.post(
+            "/api/chat", json=message(session, "Kablosuz okuyucuyu 2 adede güncelle.")
+        )
+        assert updated.status_code == 200
+        replay = await client.post("/api/chat", json=requests[winner])
+        assert replay.status_code == 200
+        final = (await client.get("/api/quotes/Q-1001")).json()
+        assert final["items"][0]["quantity"] == 2
+        assert final["version"] == 3
+    async with db.connect() as conn:
+        assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 2
+        logs = (
+            (
+                await conn.execute(
+                    sa.select(tool_call_logs)
+                    .where(
+                        tool_call_logs.c.message_id == requests[winner]["message_id"],
+                        tool_call_logs.c.tool_name == "add_to_quote",
+                    )
+                    .order_by(tool_call_logs.c.log_id)
+                )
+            )
+            .mappings()
+            .all()
+        )
+        assert [(r["replayed"], r["mutation_applied"]) for r in logs] == [
+            (False, True),
+            (True, False),
+        ]
+
+
+async def test_non_draft_quote_rejects_new_mutation_but_allows_read_and_receipt_replay(db):
+    from app.persistence.models import quotes
+
+    app, client = await chat_client(db)
+    async with app.router.lifespan_context(app), client:
+        session = await open_session(client)
+        original = message(session, "BlueScan Air 1 adet ekle.")
+        assert (await client.post("/api/chat", json=original)).status_code == 200
+        async with db.begin() as conn:
+            await conn.execute(
+                quotes.update().where(quotes.c.quote_id == "Q-1001").values(status="accepted")
+            )
+        before = (await client.get("/api/quotes/Q-1001")).json()
+        response = await client.post(
+            "/api/chat", json=message(session, "BlueScan Air 1 adet ekle.")
+        )
+        assert response.status_code == 409
+        assert (await client.post("/api/chat", json=original)).status_code == 200
+        assert (
+            await client.post("/api/chat", json=message(session, "İade süresi nedir?"))
+        ).status_code == 200
+        assert (await client.get("/api/quotes/Q-1001")).json() == before
+    async with db.connect() as conn:
+        assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 1
