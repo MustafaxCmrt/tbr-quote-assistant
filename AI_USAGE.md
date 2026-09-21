@@ -54,3 +54,10 @@ Dört P1 yorumlama bulgusu raporlandı. Codex bunlar için HTTP üzerinden gerç
 regresyon yazdı; düzeltmeden önce 13 failed kanıtı korundu. Düzeltme ve yeniden doğrulama kaydı
 `reports/f08_review_resolution.md` içindedir. Toplam-hedef concurrency ve diğer hipotezler açıkken
 bağımsız kabul tamamlandı denmez. Kaynak review insan kod denetimi değildir.
+
+F08 düzeltme sonrası: 179 backend testi (22 golden dahil) gerçek PostgreSQL koşusunda geçti.
+Tanınmayan/olumsuzlanan komut, toplam-hedef yarışması, draft dışı mutasyon, özellik eşanlamları,
+eşit ürün seçimi ve renderer kaynak doğrulaması için regresyonlar eklendi. İlk başarısız koşular
+saklandı. Aynı Opus5/xhigh ayarıyla odaklı takip review başlatıldı; sonucu henüz bekleniyor.
+Canlı API ve web proxy stream testi yenilendi; önceki fiziksel demo teklif/receipt kayıtları salt
+okunur kontrolle korunduğu doğrulandı. Yeni fiziksel cihaz gözlemi yapıldığı iddia edilmez.

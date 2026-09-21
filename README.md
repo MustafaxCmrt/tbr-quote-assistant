@@ -1,10 +1,13 @@
 # The Blue Red — Teklif Asistanı
 
 Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
-**21 Eylül 2026: F00–F06 tamamlandı; F07 cihaz doğrulaması bekliyor.** Altı gerçek araç,
-transaction/receipt, kaynaklı deterministic chat, SSE ve web admin çalışıyor. 144 backend testi
-(22 golden dahil) geçti. iPhone debug streaming Mustafa tarafından doğrulandı; tam native sohbet
-ve web/mobil ortak teklif testi henüz `not_verified`.
+**21 Eylül 2026: F00–F07 ana akışları doğrulandı; F08 son incelemesi sürüyor.**
+Altı gerçek araç, transaction/receipt, kaynaklı deterministik sohbet, SSE, web admin ve Expo
+uygulaması çalışıyor. Son tam backend koşusu **179 passed** (22 golden dahil):
+[komut/çıktı](reports/f08_review_full_backend.txt), [golden sonuçları](reports/golden_results.json).
+Mustafa fiziksel iPhone'da stream, ürün ekleme, web ile ortak teklif, aynı isteğin tekrarı,
+klavye ve kaynak aç/kapat akışlarını doğruladı. Cihaz sürüm metadatası ayrıca `not_verified`.
+[Kabul kanıtları](reports/acceptance.md) kapsamı ve kalan teslim kapılarını ayırır.
 
 ## Docker ile yerel altyapı
 
@@ -40,20 +43,18 @@ Expo SDK 57, FastAPI 0.141.1 ve uvicorn 0.53.0 kurulup doğrulandı.
 1. Repo kökünde kur ve kalıcı API'yi yerel ağ demosu için başlat:
 
    ```sh
-   cd /Users/comert/Desktop/tbr-quote-assistant
    npm ci
    python3 scripts/init_env.py
    API_BIND_HOST=0.0.0.0 docker compose up --build -d --wait api web
    ```
 
 2. `apps/mobile/.env` dosyasına `EXPO_PUBLIC_API_BASE_URL=http://<MAC_LAN_IP>:8001` yaz.
-   `<MAC_LAN_IP>` yerine Mac'in Wi-Fi ayarlarındaki IP adresini kullan. Bu oturumda yerel dosya hazırlandı;
+   `<MAC_LAN_IP>` yerine Mac'in Wi-Fi ayarlarındaki IP adresini kullan. Dosya git dışındadır; yeni kurulumda oluştur,
    ağ değişirse güncelle. IP'yi rapora/örnek dosyaya/ekran görüntüsüne koyma. Telefonda localhost Mac'e gitmez.
-3. İkinci terminalde Expo'yu başlat:
+3. İkinci terminali repo kökünde açıp Expo'yu başlat:
 
    ```sh
-   cd /Users/comert/Desktop/tbr-quote-assistant/apps/mobile
-   npm start
+   npm start --workspace @tbr/mobile
    ```
 
 4. Expo Go ve Mac CLI’da aynı Expo hesabıyla giriş yap (`npx expo login`); ardından Expo’yu yeniden başlat. Mac ve iPhone aynı Wi-Fi'dayken App Store'daki güncel Expo Go'yu kullan. iPhone Kamerasıyla
@@ -95,13 +96,13 @@ iOS bundle üretimi native cihaz gözlemi yerine geçmez. Kanıt haritası: [F01
 
 ## Kapsam ve düzen
 
-- `apps/api`: `/health/live`, env ile açılan `/api/debug/stream-smoke`. `DEBUG_STREAM_SMOKE` yoksa/0 ise debug yolu yoktur;
+- `apps/api`: altı domain tool, kaynaklı sohbet/SSE, ürün/bilgi CRUD, `/health/live` ve `/health/ready`; env ile açılan `/api/debug/stream-smoke`. `DEBUG_STREAM_SMOKE` yoksa/0 ise debug yolu yoktur;
   değişiklik API yeniden başlatılınca geçerli olur. Kök `.env` otomatik yüklenmez.
 - `apps/mobile`: Türkçe sohbet, kaynaklar, retry ve kanonik teklif; `expo/fetch`, ortak parser. Compose dışında çalışır.
 - `packages/contracts`: testli SSE parser/reducer, Quote DTO ve version1 event sözleşmeleri.
 - `apps/web`: React/TypeScript/Vite admin/chat/quote/log. Ayrı `apps/web/package-lock.json` ile kilitli; `npm --prefix apps/web ci` ve `npm --prefix apps/web run build`.
 - `apps/api/app/persistence`: SQLAlchemy async Core şema, Alembic, JSON seed ve readiness.
-- `data/source`: orijinal, değiştirilmedi. Kalıcılık ve 7 gerçek PostgreSQL testi passed.
+- `data/source`: orijinal şirket dataset'i, değiştirilmez. Seed/kalıcılık, iş kuralları ve golden testleri gerçek PostgreSQL üzerinde çalışır.
 
 ADR-005 (indirimler toplanmaz, özel kural önceliği) ve ADR-007 (beklenen çağrı/kaynaklar minimum)
 firma tarafından karar adaya bırakıldıktan sonra **kabul edilmiş aday tercihleridir** (21 Eylül 2026).
@@ -176,3 +177,17 @@ ortak parser/DTO kopyalarının eşleşmesini doğrular. Compose web build conte
 `python3 scripts/sync_web_contracts.py` ile üretilmiş, SHA256 işaretli kopyalar kullanılır; elle düzenlenmez.
 Yerel demo authentication/RBAC içermez; müşteri seçimi kimlik doğrulama değildir.
 Kanıt: [F06 kabul raporu](reports/f06_acceptance.md).
+
+
+## Son sağlamlaştırma (F08)
+
+Tanınmayan fiyat sınırı, olumsuzlanan Plus/özellik, belirsiz kalem ve kısmi çıkarma komutlarında
+netleştirme istenir; rastgele mutasyon yapılmaz. Wi-Fi/USB C/çevrimdışı yazımları aynı kesin
+özellik filtrelerine dönüşür. Canlı ürünler kategori sözcüğü olmadan model adıyla bulunabilir.
+Eşit güçlü adaylar fiyat sırasına göre otomatik eklenmez; ürün kodu sorulur.
+
+“Toplam N olsun” planı, delta hesaplanan teklif sürümüne bağlıdır. Araya değişiklik girerse yeni
+etki 409 ile reddedilir ve güncel hedef yeni mesajla istenir. Taslak olmayan teklif değiştirilemez.
+Önceden tamamlanmış receipt replay bu kontrollerden önce doğrulanır; geçmiş işlem ikinci etki yaratmaz.
+[Bağımsız review](reports/f08_claude_review.md) ve [düzeltme/test eşlemesi](reports/f08_review_resolution.md)
+ayrıdır; test başarısı bütün olası doğal dil ifadelerinin desteklendiği iddiası değildir.

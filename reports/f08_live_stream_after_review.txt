@@ -1,0 +1,59 @@
+UTC: 2026-09-21T17:23:15.808296+00:00
+Base commit (working tree may contain pending changes): 1b0db69ad9f3b3f39a2c60731fc3c5ebeb04747a
+Command: python3 scripts/smoke_stream.py
+Exit code: 0
+
+curl -N POST http://127.0.0.1:8001/api/chat/stream
+0.073s message_start seq=1
+0.088s tool_call_start seq=2
+0.091s tool_call_start seq=3
+0.092s tool_call_start seq=4
+0.095s tool_call_result seq=5
+0.095s tool_call_result seq=6
+0.095s tool_call_result seq=7
+0.099s sources seq=8
+0.099s text_delta seq=9
+0.149s text_delta seq=10
+0.204s text_delta seq=11
+0.260s text_delta seq=12
+0.313s text_delta seq=13
+0.365s text_delta seq=14
+0.419s text_delta seq=15
+0.473s text_delta seq=16
+0.526s text_delta seq=17
+0.582s text_delta seq=18
+0.637s text_delta seq=19
+0.689s text_delta seq=20
+0.739s text_delta seq=21
+0.795s text_delta seq=22
+0.850s text_delta seq=23
+0.901s text_delta seq=24
+0.952s done seq=25
+PASS incremental template stream: 16 text chunks over 0.802s; curl exit 0
+curl -N POST http://127.0.0.1:5173/api/chat/stream
+0.015s message_start seq=1
+0.027s tool_call_start seq=2
+0.029s tool_call_start seq=3
+0.030s tool_call_start seq=4
+0.033s tool_call_result seq=5
+0.033s tool_call_result seq=6
+0.033s tool_call_result seq=7
+0.035s sources seq=8
+0.035s text_delta seq=9
+0.087s text_delta seq=10
+0.139s text_delta seq=11
+0.191s text_delta seq=12
+0.242s text_delta seq=13
+0.293s text_delta seq=14
+0.345s text_delta seq=15
+0.398s text_delta seq=16
+0.450s text_delta seq=17
+0.507s text_delta seq=18
+0.560s text_delta seq=19
+0.616s text_delta seq=20
+0.671s text_delta seq=21
+0.723s text_delta seq=22
+0.774s text_delta seq=23
+0.828s text_delta seq=24
+0.877s done seq=25
+PASS incremental template stream: 16 text chunks over 0.793s; curl exit 0
