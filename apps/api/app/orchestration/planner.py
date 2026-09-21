@@ -39,6 +39,9 @@ def category(text):
 
 def reference(text, quote, catalog):
     """Resolve a current item; equally plausible references require clarification."""
+    text = re.sub(r"\b\w+\s+icin\b", "", normalize(text))
+    # "Acil" also starts a service name; an urgency adverb is not that brand.
+    text = re.sub(r"\bacil\s+olarak\b", "", text)
     words = tokens(text)
     cat = category(text)
     identifiers = {w for w in words if w.startswith(("prd-", "tbr-"))}
@@ -46,10 +49,10 @@ def reference(text, quote, catalog):
     # A mentioned catalog brand/model cannot resolve to an unrelated lone line.
     brands = {normalize(row["name_tr"]).split()[0] for row in catalog.values()}
     named_brands = words & brands
-    # All live catalog tags are descriptors, including ones outside the core
-    # hard-filter vocabulary (e.g. endustriyel). Never discard a stated descriptor.
-    catalog_tags = {normalize(tag) for row in catalog.values() for tag in row["tags"]}
-    descriptors = words & catalog_tags
+    # A tag from another category can describe the use context, not this item.
+    category_tags = {}
+    for row in catalog.values():
+        category_tags.setdefault(row["category"], set()).update(map(normalize, row["tags"]))
     model_ids = {
         row["product_id"]
         for row in catalog.values()
@@ -65,6 +68,7 @@ def reference(text, quote, catalog):
             + " "
             + " ".join(row["tags"])
         )
+        descriptors = words & category_tags[row["category"]]
         if not descriptors <= descriptive_words:
             continue
         if named_brands and normalize(row["name_tr"]).split()[0] not in named_brands:
@@ -218,7 +222,7 @@ async def build_plan(conn, session, message_id, text, mode):
     # Stock absence describes the source of a supported substitution, not a negated feature.
     attribute_text = re.sub(r"\bstokta olmayan\b", "", normalized)
     if mutating and re.search(
-        r"\b(olmasin|olmayan|olmadan|degil\w*|iste(?:mi|me)\w*|haric\w*|disinda)\b|\bplus[ -]?s[iu]z\b",
+        r"\b(olmasin|olmayan|olmadan|degil\w*|istem(?:iyor|em|ez|edi|e)\w*|haric\w*|disinda)\b|\bplus[ -]?s[iu]z\b",
         attribute_text,
     ):
         notice = "Olumsuzlanan ürün veya özelliği kesinleştiremedim. İstediğin ürün kodunu belirtir misin? Teklifi değiştirmedim."
@@ -242,6 +246,15 @@ async def build_plan(conn, session, message_id, text, mode):
         and re.search(
             r"\b" + re.escape(" ".join(normalize(row["name_tr"]).split()[:2])) + r" plus\b",
             normalized,
+        )
+        for row in catalog.values()
+    ) or any(
+        row["sku"].endswith("PLUS")
+        and any(
+            "plus" in tokens(name)
+            and normalize(name) != "plus model"
+            and re.search(r"\b" + re.escape(normalize(name)) + r"\b", normalized)
+            for name in [row["name_tr"], *row["aliases"].get("tr", [])]
         )
         for row in catalog.values()
     )

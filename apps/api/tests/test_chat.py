@@ -490,6 +490,11 @@ async def test_review_price_expression_never_silently_drops_ceiling(db, text):
         "Plus'sız BlueScan Air ekle.",
         "BlueScan Air ekle, Plus olmadan.",
         "Plus istemiyorum, BlueScan Air ekle.",
+        "Plus model ekle.",
+        "Plus istemem, BlueScan Air ekle.",
+        "Plus istemez, BlueScan Air ekle.",
+        "Plus istemedik, BlueScan Air ekle.",
+        "Bütçe sınırlı, ucuz okuyucu ekle.",
         "Plus'suz BlueScan Air ekle.",
         "Okuyucunun teslim tarihini değiştir.",
         "Okuyucu indirimini kaldır.",
@@ -749,3 +754,56 @@ async def test_explicit_whole_line_replacement_can_set_target_quantity(db):
         assert quote["version"] == 3
     async with db.connect() as conn:
         assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 2
+
+
+@pytest.mark.parametrize(
+    "text,product",
+    [
+        ("BlueScan Air 2D Bluetooth Barkod Okuyucu Plus ekle.", "PRD-BC-110-PLUS"),
+        ("Depo Başlangıç Kiti Plus 1 adet ekle.", "PRD-KIT-610-PLUS"),
+        ("Koruyucu Silikon Kılıf Plus ekle.", "PRD-ACC-710-PLUS"),
+        ("TBR-ACC-710-PLUS ekle.", "PRD-ACC-710-PLUS"),
+    ],
+)
+async def test_plus_alias_selects_exact_catalog_product(db, text, product):
+    app, client = await chat_client(db)
+    async with app.router.lifespan_context(app), client:
+        session = await open_session(client, "Q-1002", "CUST-ANK-002")
+        response = await client.post("/api/chat", json=message(session, text, "Q-1002"))
+        assert response.status_code == 200, response.text
+        assert response.json()["notice"] == ""
+        quote = (await client.get("/api/quotes/Q-1002")).json()
+        assert [(r["product_id"], r["quantity"]) for r in quote["items"]] == [(product, 1)]
+        assert quote["version"] == 2
+    async with db.connect() as conn:
+        assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 1
+
+
+@pytest.mark.parametrize(
+    "text,quantity",
+    [
+        ("Depo için kablosuz okuyucudan 2 tane daha ekle.", 3),
+        ("Acil olarak kablosuz okuyucuyu kaldır.", 0),
+        ("Şimdiye kadar eklediğime 1 tane daha kablosuz okuyucu ekle.", 2),
+        ("Müşteri 2 adet istemiş, kablosuz okuyucudan 2 tane daha ekle.", 3),
+    ],
+    ids=["descriptor_context-purpose", "descriptor_context-urgent", "kadar-time", "istemis"],
+)
+async def test_review_context_words_preserve_explicit_mutation(db, text, quantity):
+    app, client = await chat_client(db)
+    async with app.router.lifespan_context(app), client:
+        session = await open_session(client)
+        response = await client.post("/api/chat", json=message(session, text))
+        assert response.status_code == 200, response.text
+        assert response.json()["notice"] == ""
+        quote = (await client.get("/api/quotes/Q-1001")).json()
+        assert [(r["product_id"], r["quantity"]) for r in quote["items"]] == (
+            [("PRD-BC-110", quantity)] if quantity else []
+        )
+        if quantity == 0:
+            assert [(r["product_id"], r["status"]) for r in quote["history"]] == [
+                ("PRD-BC-110", "removed")
+            ]
+        assert quote["version"] == 2
+    async with db.connect() as conn:
+        assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 1

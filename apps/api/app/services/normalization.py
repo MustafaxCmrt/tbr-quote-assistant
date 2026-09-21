@@ -19,8 +19,12 @@ PRICE_CEILING_MARKERS = (
 
 def has_price_intent(value: str) -> bool:
     normalized = normalize(value)
+    # Temporal "until now/today" is not a ceiling, even with an item quantity.
+    price_text = re.sub(r"\b(?:simdiye|bugune) kadar\b", "", normalized)
     return bool(re.search(r"\b(?:tl|try|lira\w*)\b|₺", value, re.IGNORECASE)) or any(
-        marker in normalized for marker in PRICE_CEILING_MARKERS
+        marker in price_text
+        and (marker != "kadar" or bool(re.search(r"\d", price_text)))
+        for marker in PRICE_CEILING_MARKERS
     )
 
 

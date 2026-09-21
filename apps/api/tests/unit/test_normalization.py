@@ -78,3 +78,25 @@ def test_currency_without_supported_amount_requests_clarification(currency):
 
     assert has_price_intent(f"beş bin {currency}") is True
     assert numeric_slots(f"beş bin {currency}")["max_price_try"] is None
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("şimdiye kadar ekle", False),
+        ("Şimdiye kadar eklediğime 1 tane daha ekle", False),
+        ("bugüne kadar 2 adet ekle", False),
+        ("5.000 TL'ye kadar", True),
+        ("5.000 kadar", True),
+        ("Şimdiye kadar eklemedim; 5.000 liraya kadar okuyucu ekle", True),
+        ("Bütçe sınırlı, ucuz okuyucu ekle", True),
+    ],
+)
+def test_kadar_price_intent_distinguishes_time_and_amount(text, expected):
+    from app.services.normalization import has_price_intent
+
+    assert has_price_intent(text) is expected
+
+
+def test_kadar_currency_ceiling_is_parsed():
+    assert numeric_slots("5.000 TL'ye kadar ekle")["max_price_try"] == Decimal(5000)
