@@ -5,6 +5,8 @@ Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı t
 Altı gerçek araç, transaction/receipt, kaynaklı deterministik sohbet, SSE, web admin ve Expo
 uygulaması çalışıyor. Son tam backend koşusu **225 passed** (22 golden dahil):
 [komut/çıktı](reports/f08_release_backend.txt), [golden sonuçları](reports/golden_results.json).
+Doğrulanan aday: `demo-candidate-20260921-v2` / `81765bd`; runtime `53b9948`.
+Yeni clone’da da 225 test geçti: [temiz kurulum kanıtı](reports/f09_acceptance.md).
 Mustafa fiziksel iPhone'da stream, ürün ekleme, web ile ortak teklif, aynı isteğin tekrarı,
 klavye ve kaynak aç/kapat akışlarını doğruladı. Kullanıcı bildirimi: iPhone 16e / iOS 26.6.2; Expo Go Client Version 57.0.9, Supported SDK 57.0.0.
 [Kabul kanıtları](reports/acceptance.md) kapsamı ve kalan teslim kapılarını ayırır.

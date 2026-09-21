@@ -2,7 +2,7 @@
 
 Bu metin kayıt planıdır; video çekildi veya gönderildi anlamına gelmez.
 Doğrulanan kod: `demo-candidate-20260921-v2` (runtime `53b9948`).
-Test kanıtı: `reports/f08_release_backend.txt` (F09 v2 temiz kurulum kanıtı yenileniyor), `reports/f09_clean_backend.txt` — 225 passed, 22 golden dahil.
+Test kanıtı: `reports/f09_clean_backend.txt` — 225 passed, 22 golden dahil.
 
 ## Hazırlık
 

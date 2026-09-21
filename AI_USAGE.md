@@ -69,3 +69,5 @@ Son F08 kapı kararı Codex'in rapor/test değerlendirmesidir; Claude son sürü
 F09: remote fresh clone f0febc4; separate Compose volume. README setup exit0; 204 PostgreSQL tests passed (41.65s), clients/build/Expo check exit0. reports/f09_acceptance.md maps actual evidence. Native fresh-clone/video/access/send remain not_verified.
 
 2026-09-21 takip P2: Codex üç bulguyu önce10failed ile doğruladı; Plus katalog seçimi, kategori içi referans ve zaman/negasyon ayrımını düzeltti. Önerilen rakam kontrolü ve Acil marka çakışması ek düzeltme gerektirdi. Runtime53b9948: odaklı19passed; tam225passed/22golden. Yeni Claude review/fiziksel cihaz onayı iddia edilmez.
+
+V2 remote clone81765bd/tagdemo-candidate-20260921-v2:225passed44.48s;19istemci testi, install/typecheck/lint/webbuild/Expo check exit0. Yeni volume ile aynı tbr-f09-clean/18001/15173 projesi; eski volume korundu. DB/APIrestart+reseed+receipt replay geçti; anaQ1001 tamDTO aynı.

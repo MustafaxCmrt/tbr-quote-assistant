@@ -1,0 +1,8 @@
+UTC: 2026-09-21T18:21:22.941896+00:00
+Base commit (working tree may contain pending changes): 81765bda71c4dd819d2b8004cf15409c8b9537bf
+Command: python3 .git/p2-verify-web.py
+Exit code: 0
+
+PASS browser localhost5173/Q1002: full Plus catalog name adds BC110-PLUS qty1; version2->3; previous Demo Deniz item preserved
+PASS browser ambiguous Plus model request: clarification visible; entire canonical quote unchanged, version3
+Browser actions via Codex tab playwright role locators; final AX snapshot: reports/f08_p2_web_snapshot.txt

@@ -1,10 +1,14 @@
-UTC: 2026-09-21T17:40:54.391762+00:00
-Commit: f0febc4d1f536cec6e74a567537367665552e91d
-Environment: isolated tbr-f09-clean Compose project
+UTC: 2026-09-21T18:20:16.610275+00:00
+Base commit (working tree may contain pending changes): 81765bda71c4dd819d2b8004cf15409c8b9537bf
+Command: python3 .git/p2-clean.py backend
+Exit code: 0
+
+Clone: /var/folders/qp/25bz40_x17x19kmh5g5rjb7m0000gn/T/tbr-f09-v2-qaxmujkb/repo Commit: 81765bda71c4dd819d2b8004cf15409c8b9537bf
+Project tbr-f09-clean; loopback 18001/15173; fresh v2 named volumes; old volumes retained
 Command: docker compose --profile test run --build --rm test
- Image tbr-postgres:16.15 Building 
+ Image tbr-postgres:16.15 Building
 #1 [internal] load local bake definitions
-#1 reading from stdin 655B done
+#1 reading from stdin 653B done
 #1 DONE 0.0s
 
 #2 [internal] load build definition from Dockerfile
@@ -33,25 +37,25 @@ Command: docker compose --profile test run --build --rm test
 #8 exporting layers done
 #8 exporting manifest sha256:90db3b9966814d28069fb9a086fe1cf28e4a756f8cec6d303f5c0740e308982b done
 #8 exporting config sha256:2d3980069d3fbbbcf232b0bbb1afcfe1fdd14f3174d7db9537d4485344ea8eb6 done
-#8 exporting attestation manifest sha256:fc16c81a403d885d4e3dadd75abaff7bcc0bd2eed5bb06fecf86d4f3e19ffc45
-#8 exporting attestation manifest sha256:fc16c81a403d885d4e3dadd75abaff7bcc0bd2eed5bb06fecf86d4f3e19ffc45 done
-#8 exporting manifest list sha256:57af13a14dd0e1a0a6edb29570cb8c5c20ffafc79a69f9a7646a3c561cec8ae8 done
+#8 exporting attestation manifest sha256:9267136d88e21b53713dc6ca23f7c8588b4467a16a8d9a41734547ebbd09f0ae done
+#8 exporting manifest list sha256:b639f1fade2e8f7e0926ff38fa1f33c27c086ab73031a4d57a6deb3913a691c7 done
+#8 naming to docker.io/library/tbr-postgres:16.15
 #8 naming to docker.io/library/tbr-postgres:16.15 done
 #8 unpacking to docker.io/library/tbr-postgres:16.15 done
 #8 DONE 0.1s
 
 #9 resolving provenance for metadata file
 #9 DONE 0.0s
- Image tbr-postgres:16.15 Built 
- Volume tbr-f09-clean_test_pgdata Creating 
- Volume tbr-f09-clean_test_pgdata Creating 
- Volume tbr-f09-clean_test_pgdata Created 
- Volume tbr-f09-clean_test_pgdata Created 
- Container tbr-f09-clean-test-db-1 Creating 
- Container tbr-f09-clean-test-db-1 Created 
- Container tbr-f09-clean-test-db-1 Starting 
- Container tbr-f09-clean-test-db-1 Started 
- Image tbr-f09-clean-test Building 
+ Image tbr-postgres:16.15 Built
+ Volume tbr-f09-clean-v2-test-pgdata Creating
+ Volume tbr-f09-clean-v2-test-pgdata Creating
+ Volume tbr-f09-clean-v2-test-pgdata Created
+ Volume tbr-f09-clean-v2-test-pgdata Created
+ Container tbr-f09-clean-test-db-1 Recreate
+ Container tbr-f09-clean-test-db-1 Recreated
+ Container tbr-f09-clean-test-db-1 Starting
+ Container tbr-f09-clean-test-db-1 Started
+ Image tbr-f09-clean-test Building
 #1 [internal] load local bake definitions
 #1 reading from stdin 1.19kB done
 #1 DONE 0.0s
@@ -68,66 +72,66 @@ Command: docker compose --profile test run --build --rm test
 #4 DONE 0.0s
 
 #5 [internal] load build context
-#5 transferring context: 137.39kB done
+#5 transferring context: 140.85kB done
 #5 DONE 0.0s
 
 #6 [base  1/10] FROM docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
 #6 resolve docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e 0.0s done
 #6 DONE 0.0s
 
-#7 [base  2/10] RUN pip install --no-cache-dir uv==0.12.17
+#7 [base  7/10] COPY apps/api/alembic.ini ./
 #7 CACHED
 
-#8 [base  9/10] COPY data/source/products.json data/source/knowledge_entries.json data/source/customers.json data/source/quotes.json data/source/quote_items.json data/source/price_rules.json /app/data/source/
+#8 [base  3/10] WORKDIR /app/apps/api
 #8 CACHED
 
-#9 [base  6/10] COPY apps/api/app ./app
+#9 [base 10/10] RUN useradd --uid 10001 --create-home appuser
 #9 CACHED
 
-#10 [base  3/10] WORKDIR /app/apps/api
+#10 [base  6/10] COPY apps/api/app ./app
 #10 CACHED
 
-#11 [base  4/10] COPY apps/api/pyproject.toml apps/api/uv.lock ./
+#11 [base  5/10] RUN uv sync --locked --no-dev
 #11 CACHED
 
-#12 [base  5/10] RUN uv sync --locked --no-dev
+#12 [base  8/10] COPY apps/api/migrations ./migrations
 #12 CACHED
 
-#13 [base  7/10] COPY apps/api/alembic.ini ./
+#13 [base  2/10] RUN pip install --no-cache-dir uv==0.12.17
 #13 CACHED
 
-#14 [base  8/10] COPY apps/api/migrations ./migrations
+#14 [base  9/10] COPY data/source/products.json data/source/knowledge_entries.json data/source/customers.json data/source/quotes.json data/source/quote_items.json data/source/price_rules.json /app/data/source/
 #14 CACHED
 
-#15 [base 10/10] RUN useradd --uid 10001 --create-home appuser
+#15 [base  4/10] COPY apps/api/pyproject.toml apps/api/uv.lock ./
 #15 CACHED
 
 #16 [test 1/3] RUN uv sync --locked
 #16 CACHED
 
 #17 [test 2/3] COPY apps/api/tests ./tests
-#17 DONE 0.1s
+#17 DONE 0.2s
 
 #18 [test 3/3] COPY data/source/golden_test_scenarios.json /app/test-source/
 #18 DONE 0.1s
 
 #19 exporting to image
-#19 exporting layers 0.0s done
-#19 exporting manifest sha256:b26662542d40a5d045c08a251dd0d760c82a78c8f938aff9c65ca748b6c5363f done
-#19 exporting config sha256:fb218b63f1e5ae2888af70a7a52bc33d3128bca76c786f9d691b58c73e4fa3e4 done
-#19 exporting attestation manifest sha256:1824a8caad5ae5a330480599ed9965a0e53eb397f95c4f5b5068c1a14e12f419 0.0s done
-#19 exporting manifest list sha256:63d872b6bf6fafde93304bd173d03111ab150c82fba5fba33ed6c02f98f55175 done
+#19 exporting layers 0.1s done
+#19 exporting manifest sha256:f0d8fcf1d06f8222fb23df842eaace198b3259bb920186f77860905900c663f2 0.0s done
+#19 exporting config sha256:e3ffe9945b9d3754b87371a5cfd3f9f41cbb0329a37eff6bf8456ea0a6d3dd3d 0.0s done
+#19 exporting attestation manifest sha256:7e079551196535edf9a38b69ca73d65f6039873934f1b3cb3a59f5fc587d8419 done
+#19 exporting manifest list sha256:016031427a98b63d3f436c49c04f72b8c157905941ce7d562af9641d8ad1a513 done
 #19 naming to docker.io/library/tbr-f09-clean-test:latest done
 #19 unpacking to docker.io/library/tbr-f09-clean-test:latest 0.0s done
-#19 DONE 0.1s
+#19 DONE 0.2s
 
 #20 resolving provenance for metadata file
 #20 DONE 0.0s
- Image tbr-f09-clean-test Built 
- Container tbr-f09-clean-test-db-1 Waiting 
- Container tbr-f09-clean-test-db-1 Healthy 
- Container tbr-f09-clean-test-run-9a9bf4b35e53 Creating 
- Container tbr-f09-clean-test-run-9a9bf4b35e53 Created 
+ Image tbr-f09-clean-test Built
+ Container tbr-f09-clean-test-db-1 Waiting
+ Container tbr-f09-clean-test-db-1 Healthy
+ Container tbr-f09-clean-test-run-2d4cc96df7f8 Creating
+ Container tbr-f09-clean-test-run-2d4cc96df7f8 Created
 ============================= test session starts ==============================
 platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- /opt/venv/bin/python
 cachedir: .pytest_cache
@@ -136,7 +140,7 @@ configfile: pyproject.toml
 testpaths: tests
 plugins: anyio-4.15.1, asyncio-1.4.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
-collecting ... collected 204 items
+collecting ... collected 225 items
 
 tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-001] PASSED [  0%]
 tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-002] PASSED [  0%]
@@ -148,118 +152,131 @@ tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-007] PASS
 tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-008] PASSED [  3%]
 tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-009] PASSED [  4%]
 tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-010] PASSED [  4%]
-tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-011] PASSED [  5%]
+tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-011] PASSED [  4%]
 tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-012] PASSED [  5%]
-tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-013] PASSED [  6%]
+tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-013] PASSED [  5%]
 tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-014] PASSED [  6%]
-tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-015] PASSED [  7%]
+tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-015] PASSED [  6%]
 tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-016] PASSED [  7%]
-tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-017] PASSED [  8%]
+tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-017] PASSED [  7%]
 tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-018] PASSED [  8%]
-tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-019] PASSED [  9%]
-tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-020] PASSED [  9%]
-tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-021] PASSED [ 10%]
-tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-022] PASSED [ 10%]
-tests/test_admin.py::test_product_crud_validation_retrieval_and_soft_delete PASSED [ 11%]
-tests/test_admin.py::test_knowledge_crud_live_sources_and_context_lists PASSED [ 11%]
-tests/test_bootstrap.py::test_seed_preserves_all_original_fields_and_counts PASSED [ 12%]
-tests/test_bootstrap.py::test_repeated_seed_preserves_edits_and_concurrent_calls PASSED [ 12%]
-tests/test_bootstrap.py::test_seed_failure_rolls_back_every_table_and_marker PASSED [ 13%]
-tests/test_bootstrap.py::test_unique_active_item_and_history_and_checks PASSED [ 13%]
-tests/test_bootstrap.py::test_ready_requires_migration_and_seed_and_safe_http PASSED [ 14%]
-tests/test_bootstrap.py::test_unavailable_database_is_not_ready PASSED   [ 14%]
-tests/test_bootstrap.py::test_runtime_role_can_read_but_cannot_change_schema_or_marker PASSED [ 15%]
-tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[BlueScan Air ekleme, sadece fiyat\u0131n\u0131 s\xf6yle.] PASSED [ 15%]
-tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[Bunu \xe7\u0131kar.] PASSED [ 16%]
-tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[Bir \xfcr\xfcn ekle.] PASSED [ 16%]
-tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[2 adet mi 3 adet mi ekle?] PASSED [ 17%]
-tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[BlueScan Air -2 adet ekle.] PASSED [ 17%]
-tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[BlueScan Air 1,5 adet ekle.] PASSED [ 18%]
-tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[BlueScan Air 9,000 TL alt\u0131nda ekle.] PASSED [ 18%]
-tests/test_chat.py::test_context_conflict_and_read_only_retrieved_instructions PASSED [ 19%]
-tests/test_chat.py::test_new_live_alias_and_rephrase_are_not_golden_lookup PASSED [ 19%]
-tests/test_chat.py::test_retry_persists_plan_stale_update_and_actual_receipt_logs PASSED [ 20%]
-tests/test_chat.py::test_ambiguous_current_items_do_not_pick_arbitrarily PASSED [ 20%]
-tests/test_chat.py::test_explicit_reference_cannot_remove_other_product[PRD-BC-999 kald\u0131r.] PASSED [ 21%]
-tests/test_chat.py::test_explicit_reference_cannot_remove_other_product[PRD-BC-120 kald\u0131r.] PASSED [ 21%]
-tests/test_chat.py::test_conjoined_features_preserved_and_read_ceiling_enforced PASSED [ 22%]
-tests/test_chat.py::test_explicit_replacement_target_is_not_substitute_default PASSED [ 22%]
-tests/test_chat.py::test_acceptance_explicit_plus_and_offline_license_through_chat[RedScan Mini Plus ekle.-PRD-BC-130-PLUS-1] PASSED [ 23%]
-tests/test_chat.py::test_acceptance_explicit_plus_and_offline_license_through_chat[Offline senkron lisans\u0131 ekle.-PRD-SW-520-1] PASSED [ 23%]
-tests/test_chat.py::test_quantityless_printer_cikar_asks_without_removing_existing_line PASSED [ 24%]
-tests/test_chat.py::test_partner_discount_is_removed_after_chat_quantity_drops_below_threshold PASSED [ 24%]
-tests/test_chat.py::test_user_override_instruction_cannot_bypass_explicit_price_ceiling PASSED [ 25%]
-tests/test_chat.py::test_negative_update_quantity_does_not_change_quote_or_receipts PASSED [ 25%]
-tests/test_chat.py::test_software_bundle_discount_removed_after_chat_removes_paired_item PASSED [ 25%]
-tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[5.000 TL'ye kadar QR ve kablosuz okuyucu ekle.] PASSED [ 26%]
-tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[5 bin TL alt\u0131nda QR ve kablosuz okuyucu ekle.] PASSED [ 26%]
-tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[5.000 \u20ba alt\u0131nda QR ve kablosuz okuyucu ekle.] PASSED [ 27%]
-tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[5.000 TL'yi a\u015fmayan QR ve kablosuz okuyucu ekle.] PASSED [ 27%]
-tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[5.000 liraya kadar QR ve kablosuz okuyucu ekle.] PASSED [ 28%]
-tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[En fazla 5.000 lira olan QR ve kablosuz okuyucu ekle.] PASSED [ 28%]
-tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[5.000 \xfcst\xfcne \xe7\u0131kmadan QR ve kablosuz okuyucu ekle.] PASSED [ 29%]
-tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[BlueScan Air ekle, Plus olmas\u0131n.] PASSED [ 29%]
-tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Plus's\u0131z BlueScan Air ekle.] PASSED [ 30%]
-tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[BlueScan Air ekle, Plus olmadan.] PASSED [ 30%]
-tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Plus istemiyorum, BlueScan Air ekle.] PASSED [ 31%]
+tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-019] PASSED [  8%]
+tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-020] PASSED [  8%]
+tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-021] PASSED [  9%]
+tests/golden/test_chat_golden.py::test_golden_message_through_http[SCN-022] PASSED [  9%]
+tests/test_admin.py::test_product_crud_validation_retrieval_and_soft_delete PASSED [ 10%]
+tests/test_admin.py::test_knowledge_crud_live_sources_and_context_lists PASSED [ 10%]
+tests/test_bootstrap.py::test_seed_preserves_all_original_fields_and_counts PASSED [ 11%]
+tests/test_bootstrap.py::test_repeated_seed_preserves_edits_and_concurrent_calls PASSED [ 11%]
+tests/test_bootstrap.py::test_seed_failure_rolls_back_every_table_and_marker PASSED [ 12%]
+tests/test_bootstrap.py::test_unique_active_item_and_history_and_checks PASSED [ 12%]
+tests/test_bootstrap.py::test_ready_requires_migration_and_seed_and_safe_http PASSED [ 12%]
+tests/test_bootstrap.py::test_unavailable_database_is_not_ready PASSED   [ 13%]
+tests/test_bootstrap.py::test_runtime_role_can_read_but_cannot_change_schema_or_marker PASSED [ 13%]
+tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[BlueScan Air ekleme, sadece fiyat\u0131n\u0131 s\xf6yle.] PASSED [ 14%]
+tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[Bunu \xe7\u0131kar.] PASSED [ 14%]
+tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[Bir \xfcr\xfcn ekle.] PASSED [ 15%]
+tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[2 adet mi 3 adet mi ekle?] PASSED [ 15%]
+tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[BlueScan Air -2 adet ekle.] PASSED [ 16%]
+tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[BlueScan Air 1,5 adet ekle.] PASSED [ 16%]
+tests/test_chat.py::test_ambiguous_negated_or_invalid_input_never_mutates[BlueScan Air 9,000 TL alt\u0131nda ekle.] PASSED [ 16%]
+tests/test_chat.py::test_context_conflict_and_read_only_retrieved_instructions PASSED [ 17%]
+tests/test_chat.py::test_new_live_alias_and_rephrase_are_not_golden_lookup PASSED [ 17%]
+tests/test_chat.py::test_retry_persists_plan_stale_update_and_actual_receipt_logs PASSED [ 18%]
+tests/test_chat.py::test_ambiguous_current_items_do_not_pick_arbitrarily PASSED [ 18%]
+tests/test_chat.py::test_explicit_reference_cannot_remove_other_product[PRD-BC-999 kald\u0131r.] PASSED [ 19%]
+tests/test_chat.py::test_explicit_reference_cannot_remove_other_product[PRD-BC-120 kald\u0131r.] PASSED [ 19%]
+tests/test_chat.py::test_conjoined_features_preserved_and_read_ceiling_enforced PASSED [ 20%]
+tests/test_chat.py::test_explicit_replacement_target_is_not_substitute_default PASSED [ 20%]
+tests/test_chat.py::test_acceptance_explicit_plus_and_offline_license_through_chat[RedScan Mini Plus ekle.-PRD-BC-130-PLUS-1] PASSED [ 20%]
+tests/test_chat.py::test_acceptance_explicit_plus_and_offline_license_through_chat[Offline senkron lisans\u0131 ekle.-PRD-SW-520-1] PASSED [ 21%]
+tests/test_chat.py::test_quantityless_printer_cikar_asks_without_removing_existing_line PASSED [ 21%]
+tests/test_chat.py::test_partner_discount_is_removed_after_chat_quantity_drops_below_threshold PASSED [ 22%]
+tests/test_chat.py::test_user_override_instruction_cannot_bypass_explicit_price_ceiling PASSED [ 22%]
+tests/test_chat.py::test_negative_update_quantity_does_not_change_quote_or_receipts PASSED [ 23%]
+tests/test_chat.py::test_software_bundle_discount_removed_after_chat_removes_paired_item PASSED [ 23%]
+tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[5.000 TL'ye kadar QR ve kablosuz okuyucu ekle.] PASSED [ 24%]
+tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[5 bin TL alt\u0131nda QR ve kablosuz okuyucu ekle.] PASSED [ 24%]
+tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[5.000 \u20ba alt\u0131nda QR ve kablosuz okuyucu ekle.] PASSED [ 24%]
+tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[5.000 TL'yi a\u015fmayan QR ve kablosuz okuyucu ekle.] PASSED [ 25%]
+tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[5.000 liraya kadar QR ve kablosuz okuyucu ekle.] PASSED [ 25%]
+tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[En fazla 5.000 lira olan QR ve kablosuz okuyucu ekle.] PASSED [ 26%]
+tests/test_chat.py::test_review_price_expression_never_silently_drops_ceiling[5.000 \xfcst\xfcne \xe7\u0131kmadan QR ve kablosuz okuyucu ekle.] PASSED [ 26%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[BlueScan Air ekle, Plus olmas\u0131n.] PASSED [ 27%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Plus's\u0131z BlueScan Air ekle.] PASSED [ 27%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[BlueScan Air ekle, Plus olmadan.] PASSED [ 28%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Plus istemiyorum, BlueScan Air ekle.] PASSED [ 28%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Plus model ekle.] PASSED [ 28%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Plus istemem, BlueScan Air ekle.] PASSED [ 29%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Plus istemez, BlueScan Air ekle.] PASSED [ 29%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Plus istemedik, BlueScan Air ekle.] PASSED [ 30%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[B\xfct\xe7e s\u0131n\u0131rl\u0131, ucuz okuyucu ekle.] PASSED [ 30%]
 tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Plus'suz BlueScan Air ekle.] PASSED [ 31%]
-tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Okuyucunun teslim tarihini de\u011fi\u015ftir.] PASSED [ 32%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Okuyucunun teslim tarihini de\u011fi\u015ftir.] PASSED [ 31%]
 tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Okuyucu indirimini kald\u0131r.] PASSED [ 32%]
-tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[End\xfcstriyel okuyucuyu kald\u0131r.] PASSED [ 33%]
-tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Kablosuz olmayan okuyucu ekle.] PASSED [ 33%]
-tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[\u0130ndirimi kald\u0131r.] PASSED [ 34%]
-tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Daha ucuz bir okuyucu ekle.] PASSED [ 34%]
-tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[RedScan'den 1 tane daha ekle.] PASSED [ 35%]
-tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Teslim tarihini de\u011fi\u015ftir.] PASSED [ 35%]
-tests/test_chat.py::test_review_partial_removal_does_not_become_target_or_full_removal[\xe7\u0131kar] PASSED [ 36%]
-tests/test_chat.py::test_review_partial_removal_does_not_become_target_or_full_removal[sil] PASSED [ 36%]
-tests/test_chat.py::test_review_partial_removal_does_not_become_target_or_full_removal[de\u011fi\u015ftir] PASSED [ 37%]
-tests/test_chat.py::test_total_target_concurrency_rejects_stale_plan_and_preserves_replay PASSED [ 37%]
-tests/test_chat.py::test_non_draft_quote_rejects_new_mutation_but_allows_read_and_receipt_replay PASSED [ 38%]
-tests/test_chat.py::test_feature_spelling_variants_do_not_drop_hard_constraints[BlueScan Air Wi-Fi ekle.] PASSED [ 38%]
-tests/test_chat.py::test_feature_spelling_variants_do_not_drop_hard_constraints[BlueScan Air USB C ekle.] PASSED [ 39%]
-tests/test_chat.py::test_feature_spelling_variants_do_not_drop_hard_constraints[BlueStock Starter \xe7evrimd\u0131\u015f\u0131 lisans ekle.] PASSED [ 39%]
-tests/test_chat.py::test_generic_tied_product_choice_requires_clarification PASSED [ 40%]
-tests/test_chat.py::test_new_live_model_without_category_is_readable_and_addable PASSED [ 40%]
-tests/test_chat.py::test_feature_spelling_variants_accept_matching_products[PRD-POS-230 Wi-Fi 1 adet ekle.-PRD-POS-230] PASSED [ 41%]
-tests/test_chat.py::test_feature_spelling_variants_accept_matching_products[PRD-ACC-740 USB C 1 adet ekle.-PRD-ACC-740] PASSED [ 41%]
-tests/test_chat.py::test_feature_spelling_variants_accept_matching_products[PRD-SW-520 \xe7evrimd\u0131\u015f\u0131 1 lisans ekle.-PRD-SW-520] PASSED [ 42%]
-tests/test_chat.py::test_explicit_whole_line_replacement_can_set_target_quantity PASSED [ 42%]
-tests/test_mutations.py::test_add_retry_new_message_and_real_wrapper_logs PASSED [ 43%]
-tests/test_mutations.py::test_same_and_distinct_key_concurrency PASSED   [ 43%]
-tests/test_mutations.py::test_changed_payload_conflict_and_stale_update_replay PASSED [ 44%]
-tests/test_mutations.py::test_group_rollback_and_two_distinct_action_keys PASSED [ 44%]
-tests/test_mutations.py::test_mutation_guards_cannot_be_bypassed[PRD-BC-110-1-constraints0-PRICE_LIMIT_EXCEEDED] PASSED [ 45%]
-tests/test_mutations.py::test_mutation_guards_cannot_be_bypassed[PRD-BC-140-1-constraints1-REQUIRED_FEATURE_MISSING] PASSED [ 45%]
-tests/test_mutations.py::test_mutation_guards_cannot_be_bypassed[PRD-BC-130-1-constraints2-OUT_OF_STOCK] PASSED [ 46%]
-tests/test_mutations.py::test_mutation_guards_cannot_be_bypassed[PRD-BC-130-1-constraints3-OUT_OF_STOCK] PASSED [ 46%]
-tests/test_mutations.py::test_mutation_guards_cannot_be_bypassed[PRD-BC-110-18-constraints4-INSUFFICIENT_STOCK] PASSED [ 47%]
-tests/test_mutations.py::test_replace_history_merge_and_removal_ignores_source_guards PASSED [ 47%]
-tests/test_mutations.py::test_backorder_requires_eligible_customer_and_explicit_consent[False] PASSED [ 48%]
-tests/test_mutations.py::test_backorder_requires_eligible_customer_and_explicit_consent[True] PASSED [ 48%]
-tests/test_mutations.py::test_replace_merges_and_rejects_backorder_even_with_consent PASSED [ 49%]
-tests/test_mutations.py::test_admin_update_lock_cannot_race_price_or_stock_guard[changed0-PRICE_LIMIT_EXCEEDED] PASSED [ 49%]
-tests/test_mutations.py::test_admin_update_lock_cannot_race_price_or_stock_guard[changed1-OUT_OF_STOCK] PASSED [ 50%]
-tests/test_mutations.py::test_forged_input_and_invalid_quantity_leave_quote_unchanged[arguments0-QUOTE_CONTEXT_MISMATCH] PASSED [ 50%]
-tests/test_mutations.py::test_forged_input_and_invalid_quantity_leave_quote_unchanged[arguments1-IDEMPOTENCY_CONFLICT] PASSED [ 50%]
-tests/test_mutations.py::test_forged_input_and_invalid_quantity_leave_quote_unchanged[arguments2-QUOTE_CONTEXT_MISMATCH] PASSED [ 51%]
-tests/test_mutations.py::test_forged_input_and_invalid_quantity_leave_quote_unchanged[arguments3-INVALID_INPUT] PASSED [ 51%]
-tests/test_mutations.py::test_forged_input_and_invalid_quantity_leave_quote_unchanged[arguments4-INVALID_INPUT] PASSED [ 52%]
-tests/test_mutations.py::test_forged_input_and_invalid_quantity_leave_quote_unchanged[arguments5-INVALID_INPUT] PASSED [ 52%]
-tests/test_mutations.py::test_plus_guard_and_reconnect_retry_keep_snapshot PASSED [ 53%]
-tests/test_mutations.py::test_active_minimum_and_existing_snapshot_guard[change0-constraints0-PRODUCT_INACTIVE] PASSED [ 53%]
-tests/test_mutations.py::test_active_minimum_and_existing_snapshot_guard[change1-constraints1-MIN_ORDER_NOT_MET] PASSED [ 54%]
-tests/test_mutations.py::test_active_minimum_and_existing_snapshot_guard[change2-constraints2-PRICE_LIMIT_EXCEEDED] PASSED [ 54%]
-tests/test_mutations.py::test_replace_alternative_constraints[step0-constraints0-INVALID_ALTERNATIVE] PASSED [ 55%]
-tests/test_mutations.py::test_replace_alternative_constraints[step1-constraints1-INVALID_ALTERNATIVE] PASSED [ 55%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[End\xfcstriyel okuyucuyu kald\u0131r.] PASSED [ 32%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Kablosuz olmayan okuyucu ekle.] PASSED [ 32%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[\u0130ndirimi kald\u0131r.] PASSED [ 33%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Daha ucuz bir okuyucu ekle.] PASSED [ 33%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[RedScan'den 1 tane daha ekle.] PASSED [ 34%]
+tests/test_chat.py::test_review_unsupported_or_unmatched_intent_clarifies_without_mutation[Teslim tarihini de\u011fi\u015ftir.] PASSED [ 34%]
+tests/test_chat.py::test_review_partial_removal_does_not_become_target_or_full_removal[\xe7\u0131kar] PASSED [ 35%]
+tests/test_chat.py::test_review_partial_removal_does_not_become_target_or_full_removal[sil] PASSED [ 35%]
+tests/test_chat.py::test_review_partial_removal_does_not_become_target_or_full_removal[de\u011fi\u015ftir] PASSED [ 36%]
+tests/test_chat.py::test_total_target_concurrency_rejects_stale_plan_and_preserves_replay PASSED [ 36%]
+tests/test_chat.py::test_non_draft_quote_rejects_new_mutation_but_allows_read_and_receipt_replay PASSED [ 36%]
+tests/test_chat.py::test_feature_spelling_variants_do_not_drop_hard_constraints[BlueScan Air Wi-Fi ekle.] PASSED [ 37%]
+tests/test_chat.py::test_feature_spelling_variants_do_not_drop_hard_constraints[BlueScan Air USB C ekle.] PASSED [ 37%]
+tests/test_chat.py::test_feature_spelling_variants_do_not_drop_hard_constraints[BlueStock Starter \xe7evrimd\u0131\u015f\u0131 lisans ekle.] PASSED [ 38%]
+tests/test_chat.py::test_generic_tied_product_choice_requires_clarification PASSED [ 38%]
+tests/test_chat.py::test_new_live_model_without_category_is_readable_and_addable PASSED [ 39%]
+tests/test_chat.py::test_feature_spelling_variants_accept_matching_products[PRD-POS-230 Wi-Fi 1 adet ekle.-PRD-POS-230] PASSED [ 39%]
+tests/test_chat.py::test_feature_spelling_variants_accept_matching_products[PRD-ACC-740 USB C 1 adet ekle.-PRD-ACC-740] PASSED [ 40%]
+tests/test_chat.py::test_feature_spelling_variants_accept_matching_products[PRD-SW-520 \xe7evrimd\u0131\u015f\u0131 1 lisans ekle.-PRD-SW-520] PASSED [ 40%]
+tests/test_chat.py::test_explicit_whole_line_replacement_can_set_target_quantity PASSED [ 40%]
+tests/test_chat.py::test_plus_alias_selects_exact_catalog_product[BlueScan Air 2D Bluetooth Barkod Okuyucu Plus ekle.-PRD-BC-110-PLUS] PASSED [ 41%]
+tests/test_chat.py::test_plus_alias_selects_exact_catalog_product[Depo Ba\u015flang\u0131\xe7 Kiti Plus 1 adet ekle.-PRD-KIT-610-PLUS] PASSED [ 41%]
+tests/test_chat.py::test_plus_alias_selects_exact_catalog_product[Koruyucu Silikon K\u0131l\u0131f Plus ekle.-PRD-ACC-710-PLUS] PASSED [ 42%]
+tests/test_chat.py::test_plus_alias_selects_exact_catalog_product[TBR-ACC-710-PLUS ekle.-PRD-ACC-710-PLUS] PASSED [ 42%]
+tests/test_chat.py::test_review_context_words_preserve_explicit_mutation[descriptor_context-purpose] PASSED [ 43%]
+tests/test_chat.py::test_review_context_words_preserve_explicit_mutation[descriptor_context-urgent] PASSED [ 43%]
+tests/test_chat.py::test_review_context_words_preserve_explicit_mutation[kadar-time] PASSED [ 44%]
+tests/test_chat.py::test_review_context_words_preserve_explicit_mutation[istemis] PASSED [ 44%]
+tests/test_mutations.py::test_add_retry_new_message_and_real_wrapper_logs PASSED [ 44%]
+tests/test_mutations.py::test_same_and_distinct_key_concurrency PASSED   [ 45%]
+tests/test_mutations.py::test_changed_payload_conflict_and_stale_update_replay PASSED [ 45%]
+tests/test_mutations.py::test_group_rollback_and_two_distinct_action_keys PASSED [ 46%]
+tests/test_mutations.py::test_mutation_guards_cannot_be_bypassed[PRD-BC-110-1-constraints0-PRICE_LIMIT_EXCEEDED] PASSED [ 46%]
+tests/test_mutations.py::test_mutation_guards_cannot_be_bypassed[PRD-BC-140-1-constraints1-REQUIRED_FEATURE_MISSING] PASSED [ 47%]
+tests/test_mutations.py::test_mutation_guards_cannot_be_bypassed[PRD-BC-130-1-constraints2-OUT_OF_STOCK] PASSED [ 47%]
+tests/test_mutations.py::test_mutation_guards_cannot_be_bypassed[PRD-BC-130-1-constraints3-OUT_OF_STOCK] PASSED [ 48%]
+tests/test_mutations.py::test_mutation_guards_cannot_be_bypassed[PRD-BC-110-18-constraints4-INSUFFICIENT_STOCK] PASSED [ 48%]
+tests/test_mutations.py::test_replace_history_merge_and_removal_ignores_source_guards PASSED [ 48%]
+tests/test_mutations.py::test_backorder_requires_eligible_customer_and_explicit_consent[False] PASSED [ 49%]
+tests/test_mutations.py::test_backorder_requires_eligible_customer_and_explicit_consent[True] PASSED [ 49%]
+tests/test_mutations.py::test_replace_merges_and_rejects_backorder_even_with_consent PASSED [ 50%]
+tests/test_mutations.py::test_admin_update_lock_cannot_race_price_or_stock_guard[changed0-PRICE_LIMIT_EXCEEDED] PASSED [ 50%]
+tests/test_mutations.py::test_admin_update_lock_cannot_race_price_or_stock_guard[changed1-OUT_OF_STOCK] PASSED [ 51%]
+tests/test_mutations.py::test_forged_input_and_invalid_quantity_leave_quote_unchanged[arguments0-QUOTE_CONTEXT_MISMATCH] PASSED [ 51%]
+tests/test_mutations.py::test_forged_input_and_invalid_quantity_leave_quote_unchanged[arguments1-IDEMPOTENCY_CONFLICT] PASSED [ 52%]
+tests/test_mutations.py::test_forged_input_and_invalid_quantity_leave_quote_unchanged[arguments2-QUOTE_CONTEXT_MISMATCH] PASSED [ 52%]
+tests/test_mutations.py::test_forged_input_and_invalid_quantity_leave_quote_unchanged[arguments3-INVALID_INPUT] PASSED [ 52%]
+tests/test_mutations.py::test_forged_input_and_invalid_quantity_leave_quote_unchanged[arguments4-INVALID_INPUT] PASSED [ 53%]
+tests/test_mutations.py::test_forged_input_and_invalid_quantity_leave_quote_unchanged[arguments5-INVALID_INPUT] PASSED [ 53%]
+tests/test_mutations.py::test_plus_guard_and_reconnect_retry_keep_snapshot PASSED [ 54%]
+tests/test_mutations.py::test_active_minimum_and_existing_snapshot_guard[change0-constraints0-PRODUCT_INACTIVE] PASSED [ 54%]
+tests/test_mutations.py::test_active_minimum_and_existing_snapshot_guard[change1-constraints1-MIN_ORDER_NOT_MET] PASSED [ 55%]
+tests/test_mutations.py::test_active_minimum_and_existing_snapshot_guard[change2-constraints2-PRICE_LIMIT_EXCEEDED] PASSED [ 55%]
+tests/test_mutations.py::test_replace_alternative_constraints[step0-constraints0-INVALID_ALTERNATIVE] PASSED [ 56%]
+tests/test_mutations.py::test_replace_alternative_constraints[step1-constraints1-INVALID_ALTERNATIVE] PASSED [ 56%]
 tests/test_mutations.py::test_replace_alternative_constraints[step2-constraints2-REQUIRED_FEATURE_MISSING] PASSED [ 56%]
-tests/test_mutations.py::test_replace_alternative_constraints[step3-constraints3-PRICE_LIMIT_EXCEEDED] PASSED [ 56%]
+tests/test_mutations.py::test_replace_alternative_constraints[step3-constraints3-PRICE_LIMIT_EXCEEDED] PASSED [ 57%]
 tests/test_mutations.py::test_runtime_db_role_executes_atomic_mutation PASSED [ 57%]
-tests/test_mutations.py::test_domain_examples_with_exact_net_totals[Q-1003-CUST-IST-001-plan0-expected0-29400.00] PASSED [ 57%]
+tests/test_mutations.py::test_domain_examples_with_exact_net_totals[Q-1003-CUST-IST-001-plan0-expected0-29400.00] PASSED [ 58%]
 tests/test_mutations.py::test_domain_examples_with_exact_net_totals[Q-1004-CUST-IST-001-plan1-expected1-7990.00] PASSED [ 58%]
-tests/test_mutations.py::test_domain_examples_with_exact_net_totals[Q-2004-CUST-EXT-001-plan2-expected2-7350.00] PASSED [ 58%]
+tests/test_mutations.py::test_domain_examples_with_exact_net_totals[Q-2004-CUST-EXT-001-plan2-expected2-7350.00] PASSED [ 59%]
 tests/test_mutations.py::test_domain_examples_with_exact_net_totals[Q-2005-CUST-EXT-002-plan3-expected3-9000.00] PASSED [ 59%]
-tests/test_mutations.py::test_domain_examples_with_exact_net_totals[Q-1002-CUST-ANK-002-plan4-expected4-22292.10] PASSED [ 59%]
+tests/test_mutations.py::test_domain_examples_with_exact_net_totals[Q-1002-CUST-ANK-002-plan4-expected4-22292.10] PASSED [ 60%]
 tests/test_mutations.py::test_domain_examples_with_exact_net_totals[Q-1002-CUST-ANK-002-plan5-expected5-22816.00] PASSED [ 60%]
 tests/test_mutations.py::test_positive_update_rechecks_guards[change0-constraints0-PRICE_LIMIT_EXCEEDED] PASSED [ 60%]
 tests/test_mutations.py::test_positive_update_rechecks_guards[change1-constraints1-OUT_OF_STOCK] PASSED [ 61%]
@@ -270,69 +287,77 @@ tests/test_mutations.py::test_add_preserves_existing_snapshot_after_catalog_pric
 tests/test_mutations.py::test_positive_update_insufficient_stock_preserves_receipts_and_version PASSED [ 63%]
 tests/test_mutations.py::test_explicit_replacement_quantity_overrides_source_quantity[False] PASSED [ 64%]
 tests/test_mutations.py::test_explicit_replacement_quantity_overrides_source_quantity[True] PASSED [ 64%]
-tests/test_reads.py::test_hard_price_features_and_base_variant[ceiling0] PASSED [ 65%]
+tests/test_reads.py::test_hard_price_features_and_base_variant[ceiling0] PASSED [ 64%]
 tests/test_reads.py::test_hard_price_features_and_base_variant[ceiling1] PASSED [ 65%]
-tests/test_reads.py::test_hard_price_features_and_base_variant[ceiling2] PASSED [ 66%]
+tests/test_reads.py::test_hard_price_features_and_base_variant[ceiling2] PASSED [ 65%]
 tests/test_reads.py::test_unavailable_does_not_become_plus_recommendation PASSED [ 66%]
-tests/test_reads.py::test_alias_and_separate_feature_searches[USB-C h\u0131zl\u0131 \u015farj-PRD-ACC-740] PASSED [ 67%]
+tests/test_reads.py::test_alias_and_separate_feature_searches[USB-C h\u0131zl\u0131 \u015farj-PRD-ACC-740] PASSED [ 66%]
 tests/test_reads.py::test_alias_and_separate_feature_searches[4G terminal-PRD-POS-210] PASSED [ 67%]
-tests/test_reads.py::test_alias_and_separate_feature_searches[offline stok lisans\u0131-PRD-SW-520] PASSED [ 68%]
+tests/test_reads.py::test_alias_and_separate_feature_searches[offline stok lisans\u0131-PRD-SW-520] PASSED [ 67%]
 tests/test_reads.py::test_alias_and_separate_feature_searches[\u015fube senkron-PRD-SW-530] PASSED [ 68%]
-tests/test_reads.py::test_alias_and_separate_feature_searches[koruyucu k\u0131l\u0131f-PRD-ACC-710] PASSED [ 69%]
-tests/test_reads.py::test_policy_includes_supplement_and_exact_source[return_policy-KNE-RET-001] PASSED [ 69%]
-tests/test_reads.py::test_policy_includes_supplement_and_exact_source[delivery_policy-KNE-SHIP-001] PASSED [ 70%]
-tests/test_reads.py::test_policy_includes_supplement_and_exact_source[service_policy-KNE-SVC-001] PASSED [ 70%]
-tests/test_reads.py::test_live_catalog_add_update_delete_and_knowledge_dates PASSED [ 71%]
-tests/test_reads.py::test_quote_snapshot_totals_and_reads_do_not_mutate PASSED [ 71%]
-tests/test_reads.py::test_read_http_gate_validation_and_canonical_quote PASSED [ 72%]
-tests/test_reads.py::test_explicit_model_over_budget_and_inactive_knowledge PASSED [ 72%]
-tests/test_stream.py::test_stream_retry_actual_wrapper_and_log_correlation[Q-1001-CUST-IST-001-Kablosuz barkod okuyucudan 1 tane daha ekle.-PRD-BC-110-2] PASSED [ 73%]
-tests/test_stream.py::test_stream_retry_actual_wrapper_and_log_correlation[Q-2001-CUST-EXT-001-BlueScan Air Plus modelinden 1 tane daha ekle.-PRD-BC-110-PLUS-2] PASSED [ 73%]
-tests/test_stream.py::test_stream_guard_error_no_success_or_partial_commit PASSED [ 74%]
-tests/test_stream.py::test_executor_emits_no_success_from_rolled_back_group PASSED [ 74%]
-tests/test_stream.py::test_disconnect_after_commit_and_reconnect_keeps_single_effect PASSED [ 75%]
-tests/test_stream.py::test_error_after_commit_reports_truth_and_masks_exception PASSED [ 75%]
-tests/unit/test_normalization.py::test_turkish_letters_and_feature_tokens PASSED [ 75%]
-tests/unit/test_normalization.py::test_money_formats[9.000-9000] PASSED  [ 76%]
-tests/unit/test_normalization.py::test_money_formats[9000-9000] PASSED   [ 76%]
-tests/unit/test_normalization.py::test_money_formats[8.500 TL-8500] PASSED [ 77%]
-tests/unit/test_normalization.py::test_money_formats[1.500 TL-1500] PASSED [ 77%]
-tests/unit/test_normalization.py::test_money_formats[1.500,50-1500.50] PASSED [ 78%]
-tests/unit/test_normalization.py::test_money_formats[1500,50-1500.50] PASSED [ 78%]
-tests/unit/test_normalization.py::test_ambiguous_money_rejected[1.50] PASSED [ 79%]
-tests/unit/test_normalization.py::test_ambiguous_money_rejected[9,000] PASSED [ 79%]
-tests/unit/test_normalization.py::test_ambiguous_money_rejected[-50] PASSED [ 80%]
-tests/unit/test_normalization.py::test_ambiguous_money_rejected[NaN] PASSED [ 80%]
-tests/unit/test_normalization.py::test_ambiguous_money_rejected[1.2.3] PASSED [ 81%]
-tests/unit/test_normalization.py::test_ambiguous_money_rejected[1e3] PASSED [ 81%]
-tests/unit/test_normalization.py::test_price_is_not_quantity PASSED      [ 82%]
-tests/unit/test_normalization.py::test_signed_or_fractional_quantities_rejected[-2 adet] PASSED [ 82%]
-tests/unit/test_normalization.py::test_signed_or_fractional_quantities_rejected[1,5 adet] PASSED [ 83%]
-tests/unit/test_normalization.py::test_signed_or_fractional_quantities_rejected[1.5 tane] PASSED [ 83%]
-tests/unit/test_normalization.py::test_signed_or_fractional_quantities_rejected[+3 adet] PASSED [ 84%]
-tests/unit/test_normalization.py::test_apostrophe_target_quantity PASSED [ 84%]
-tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[alt\u0131nda] PASSED [ 85%]
-tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[\xfcst\xfcne \xe7\u0131kmadan] PASSED [ 85%]
-tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[en fazla] PASSED [ 86%]
-tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[b\xfct\xe7e] PASSED [ 86%]
-tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[limit] PASSED [ 87%]
-tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[tavan] PASSED [ 87%]
-tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[kadar] PASSED [ 88%]
-tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[a\u015fmayan] PASSED [ 88%]
-tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[ge\xe7meyen] PASSED [ 89%]
-tests/unit/test_normalization.py::test_currency_without_supported_amount_requests_clarification[TL] PASSED [ 89%]
-tests/unit/test_normalization.py::test_currency_without_supported_amount_requests_clarification[\u20ba] PASSED [ 90%]
-tests/unit/test_normalization.py::test_currency_without_supported_amount_requests_clarification[lira] PASSED [ 90%]
-tests/unit/test_normalization.py::test_currency_without_supported_amount_requests_clarification[liraya] PASSED [ 91%]
-tests/unit/test_normalization.py::test_currency_without_supported_amount_requests_clarification[TRY] PASSED [ 91%]
+tests/test_reads.py::test_alias_and_separate_feature_searches[koruyucu k\u0131l\u0131f-PRD-ACC-710] PASSED [ 68%]
+tests/test_reads.py::test_policy_includes_supplement_and_exact_source[return_policy-KNE-RET-001] PASSED [ 68%]
+tests/test_reads.py::test_policy_includes_supplement_and_exact_source[delivery_policy-KNE-SHIP-001] PASSED [ 69%]
+tests/test_reads.py::test_policy_includes_supplement_and_exact_source[service_policy-KNE-SVC-001] PASSED [ 69%]
+tests/test_reads.py::test_live_catalog_add_update_delete_and_knowledge_dates PASSED [ 70%]
+tests/test_reads.py::test_quote_snapshot_totals_and_reads_do_not_mutate PASSED [ 70%]
+tests/test_reads.py::test_read_http_gate_validation_and_canonical_quote PASSED [ 71%]
+tests/test_reads.py::test_explicit_model_over_budget_and_inactive_knowledge PASSED [ 71%]
+tests/test_stream.py::test_stream_retry_actual_wrapper_and_log_correlation[Q-1001-CUST-IST-001-Kablosuz barkod okuyucudan 1 tane daha ekle.-PRD-BC-110-2] PASSED [ 72%]
+tests/test_stream.py::test_stream_retry_actual_wrapper_and_log_correlation[Q-2001-CUST-EXT-001-BlueScan Air Plus modelinden 1 tane daha ekle.-PRD-BC-110-PLUS-2] PASSED [ 72%]
+tests/test_stream.py::test_stream_guard_error_no_success_or_partial_commit PASSED [ 72%]
+tests/test_stream.py::test_executor_emits_no_success_from_rolled_back_group PASSED [ 73%]
+tests/test_stream.py::test_disconnect_after_commit_and_reconnect_keeps_single_effect PASSED [ 73%]
+tests/test_stream.py::test_error_after_commit_reports_truth_and_masks_exception PASSED [ 74%]
+tests/unit/test_normalization.py::test_turkish_letters_and_feature_tokens PASSED [ 74%]
+tests/unit/test_normalization.py::test_money_formats[9.000-9000] PASSED  [ 75%]
+tests/unit/test_normalization.py::test_money_formats[9000-9000] PASSED   [ 75%]
+tests/unit/test_normalization.py::test_money_formats[8.500 TL-8500] PASSED [ 76%]
+tests/unit/test_normalization.py::test_money_formats[1.500 TL-1500] PASSED [ 76%]
+tests/unit/test_normalization.py::test_money_formats[1.500,50-1500.50] PASSED [ 76%]
+tests/unit/test_normalization.py::test_money_formats[1500,50-1500.50] PASSED [ 77%]
+tests/unit/test_normalization.py::test_ambiguous_money_rejected[1.50] PASSED [ 77%]
+tests/unit/test_normalization.py::test_ambiguous_money_rejected[9,000] PASSED [ 78%]
+tests/unit/test_normalization.py::test_ambiguous_money_rejected[-50] PASSED [ 78%]
+tests/unit/test_normalization.py::test_ambiguous_money_rejected[NaN] PASSED [ 79%]
+tests/unit/test_normalization.py::test_ambiguous_money_rejected[1.2.3] PASSED [ 79%]
+tests/unit/test_normalization.py::test_ambiguous_money_rejected[1e3] PASSED [ 80%]
+tests/unit/test_normalization.py::test_price_is_not_quantity PASSED      [ 80%]
+tests/unit/test_normalization.py::test_signed_or_fractional_quantities_rejected[-2 adet] PASSED [ 80%]
+tests/unit/test_normalization.py::test_signed_or_fractional_quantities_rejected[1,5 adet] PASSED [ 81%]
+tests/unit/test_normalization.py::test_signed_or_fractional_quantities_rejected[1.5 tane] PASSED [ 81%]
+tests/unit/test_normalization.py::test_signed_or_fractional_quantities_rejected[+3 adet] PASSED [ 82%]
+tests/unit/test_normalization.py::test_apostrophe_target_quantity PASSED [ 82%]
+tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[alt\u0131nda] PASSED [ 83%]
+tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[\xfcst\xfcne \xe7\u0131kmadan] PASSED [ 83%]
+tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[en fazla] PASSED [ 84%]
+tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[b\xfct\xe7e] PASSED [ 84%]
+tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[limit] PASSED [ 84%]
+tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[tavan] PASSED [ 85%]
+tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[kadar] PASSED [ 85%]
+tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[a\u015fmayan] PASSED [ 86%]
+tests/unit/test_normalization.py::test_every_supported_ceiling_marker_has_matching_intent_detection[ge\xe7meyen] PASSED [ 86%]
+tests/unit/test_normalization.py::test_currency_without_supported_amount_requests_clarification[TL] PASSED [ 87%]
+tests/unit/test_normalization.py::test_currency_without_supported_amount_requests_clarification[\u20ba] PASSED [ 87%]
+tests/unit/test_normalization.py::test_currency_without_supported_amount_requests_clarification[lira] PASSED [ 88%]
+tests/unit/test_normalization.py::test_currency_without_supported_amount_requests_clarification[liraya] PASSED [ 88%]
+tests/unit/test_normalization.py::test_currency_without_supported_amount_requests_clarification[TRY] PASSED [ 88%]
+tests/unit/test_normalization.py::test_kadar_price_intent_distinguishes_time_and_amount[\u015fimdiye kadar ekle-False] PASSED [ 89%]
+tests/unit/test_normalization.py::test_kadar_price_intent_distinguishes_time_and_amount[\u015eimdiye kadar ekledi\u011fime 1 tane daha ekle-False] PASSED [ 89%]
+tests/unit/test_normalization.py::test_kadar_price_intent_distinguishes_time_and_amount[bug\xfcne kadar 2 adet ekle-False] PASSED [ 90%]
+tests/unit/test_normalization.py::test_kadar_price_intent_distinguishes_time_and_amount[5.000 TL'ye kadar-True] PASSED [ 90%]
+tests/unit/test_normalization.py::test_kadar_price_intent_distinguishes_time_and_amount[5.000 kadar-True] PASSED [ 91%]
+tests/unit/test_normalization.py::test_kadar_price_intent_distinguishes_time_and_amount[\u015eimdiye kadar eklemedim; 5.000 liraya kadar okuyucu ekle-True] PASSED [ 91%]
+tests/unit/test_normalization.py::test_kadar_price_intent_distinguishes_time_and_amount[B\xfct\xe7e s\u0131n\u0131rl\u0131, ucuz okuyucu ekle-True] PASSED [ 92%]
+tests/unit/test_normalization.py::test_kadar_currency_ceiling_is_parsed PASSED [ 92%]
 tests/unit/test_pricing.py::test_partner_threshold[2-0.00-15980.00] PASSED [ 92%]
-tests/unit/test_pricing.py::test_partner_threshold[3-1677.90-22292.10] PASSED [ 92%]
+tests/unit/test_pricing.py::test_partner_threshold[3-1677.90-22292.10] PASSED [ 93%]
 tests/unit/test_pricing.py::test_plus_is_specific_even_when_partner_rate_is_larger PASSED [ 93%]
-tests/unit/test_pricing.py::test_specificity_and_accessory_product_threshold[accessory-TBR-P-tags0-4-None-0] PASSED [ 93%]
+tests/unit/test_pricing.py::test_specificity_and_accessory_product_threshold[accessory-TBR-P-tags0-4-None-0] PASSED [ 94%]
 tests/unit/test_pricing.py::test_specificity_and_accessory_product_threshold[accessory-TBR-P-tags1-5-RUL-ACC-5-25] PASSED [ 94%]
-tests/unit/test_pricing.py::test_specificity_and_accessory_product_threshold[accessory-TBR-P-PLUS-tags2-5-RUL-PLUS-QTY-30] PASSED [ 94%]
+tests/unit/test_pricing.py::test_specificity_and_accessory_product_threshold[accessory-TBR-P-PLUS-tags2-5-RUL-PLUS-QTY-30] PASSED [ 95%]
 tests/unit/test_pricing.py::test_specificity_and_accessory_product_threshold[bundle-TBR-P-PLUS-tags3-5-RUL-BUNDLE-NO-STACK-0] PASSED [ 95%]
-tests/unit/test_pricing.py::test_specificity_and_accessory_product_threshold[service-TBR-P-PLUS-tags4-5-RUL-SVC-URGENT-0] PASSED [ 95%]
+tests/unit/test_pricing.py::test_specificity_and_accessory_product_threshold[service-TBR-P-PLUS-tags4-5-RUL-SVC-URGENT-0] PASSED [ 96%]
 tests/unit/test_pricing.py::test_software_pair_and_removed_item_restore_no_discount PASSED [ 96%]
 tests/unit/test_pricing.py::test_half_up_and_no_eval_unknown_rules PASSED [ 96%]
 tests/unit/test_pricing.py::test_partner_aggregates_category_but_accessories_require_same_product PASSED [ 97%]
@@ -343,10 +368,11 @@ tests/unit/test_templates.py::test_rendered_claim_requires_matching_tool_evidenc
 tests/unit/test_templates.py::test_rendered_claim_requires_matching_tool_evidence[get_quote-output3-product-P-1] PASSED [ 99%]
 tests/unit/test_templates.py::test_rendered_claim_requires_matching_tool_evidence[get_quote-output4-price_rule-R-1] PASSED [100%]
 
-============================= 204 passed in 41.65s =============================
+============================= 225 passed in 44.48s =============================
 Exit code: 0
 Command: docker compose run --rm --no-deps migrate-seed alembic check
- Container tbr-f09-clean-migrate-seed-run-d7dc8271809e Creating 
- Container tbr-f09-clean-migrate-seed-run-d7dc8271809e Created 
+time="2026-09-21T21:20:15+03:00" level=warning msg="volume \"tbr-f09-clean_pgdata\" carries the compose label \"pgdata\" but does not match the compose file (using \"tbr-f09-clean-v2-pgdata\"); it is left untouched — remove it manually if it is no longer needed"
+ Container tbr-f09-clean-migrate-seed-run-8f4cd2b2e73e Creating
+ Container tbr-f09-clean-migrate-seed-run-8f4cd2b2e73e Created
 No new upgrade operations detected.
 Exit code: 0

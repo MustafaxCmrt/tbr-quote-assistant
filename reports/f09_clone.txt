@@ -1,7 +1,26 @@
-UTC: 2026-09-21T17:40:01.854262+00:00
-Command: git clone --branch demo-candidate-20260921-v1 --single-branch <origin> <fresh-directory>
+UTC: 2026-09-21T18:18:51.446591+00:00
+Base commit (working tree may contain pending changes): 81765bda71c4dd819d2b8004cf15409c8b9537bf
+Command: python3 .git/p2-clean.py clone
 Exit code: 0
-Commit: f0febc4d1f536cec6e74a567537367665552e91d
-Fresh directory: /var/folders/qp/25bz40_x17x19kmh5g5rjb7m0000gn/T/tbr-f09-x14ijzwy/repo
-Ports 18001 and 15173 available. New Compose project: tbr-f09-clean.
-No local ignored files copied. Docker image/package caches remain available on this host.
+
+Command: git clone --branch demo-candidate-20260921-v2 --single-branch git@github.com:MustafaxCmrt/tbr-quote-assistant.git /var/folders/qp/25bz40_x17x19kmh5g5rjb7m0000gn/T/tbr-f09-v2-qaxmujkb/repo
+Cloning into '/var/folders/qp/25bz40_x17x19kmh5g5rjb7m0000gn/T/tbr-f09-v2-qaxmujkb/repo'...
+warning: refs/tags/demo-candidate-20260921-v2 505917c83ed2eaff45efae7d5c834da1f260e8b2 is not a commit!
+Note: switching to '81765bda71c4dd819d2b8004cf15409c8b9537bf'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Exit code: 0

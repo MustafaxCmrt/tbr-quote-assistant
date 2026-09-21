@@ -1,10 +1,14 @@
-UTC: 2026-09-21T17:40:34.902820+00:00
-Commit: f0febc4d1f536cec6e74a567537367665552e91d
-Cwd: fresh clone
+UTC: 2026-09-21T18:19:12.846186+00:00
+Base commit (working tree may contain pending changes): 81765bda71c4dd819d2b8004cf15409c8b9537bf
+Command: python3 .git/p2-clean.py clients
+Exit code: 0
+
+Clone: /var/folders/qp/25bz40_x17x19kmh5g5rjb7m0000gn/T/tbr-f09-v2-qaxmujkb/repo Commit: 81765bda71c4dd819d2b8004cf15409c8b9537bf
+Project tbr-f09-clean; loopback 18001/15173; fresh v2 named volumes; old volumes retained
 Command: npm ci
 npm warn deprecated uuid@7.0.3: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
 
-added 559 packages, and audited 562 packages in 4s
+added 559 packages, and audited 562 packages in 5s
 
 71 packages are looking for funding
   run `npm fund` for details
@@ -26,25 +30,25 @@ Command: npm test
 > tbr-quote-assistant@0.1.0 test
 > tsx --test packages/contracts/tests/*.test.ts apps/mobile/tests/*.test.ts apps/web/tests/*.test.ts
 
-✔ native transport posts identity and decodes every UTF-8 byte before terminal done (19.498583ms)
-✔ EOF without terminal rejects and preserves delivered partial text (0.499042ms)
-✔ controlled error is terminal, malformed content and native hostname never escape (0.777208ms)
-✔ retry preserves previous text and citations through reconnect and early error (0.788458ms)
-✔ retry replaces rather than duplicates text and uses new citations; successful empty answer clears old content (0.107708ms)
-✔ mobile canonical quote ignores stale versions and responses from another selection (0.407958ms)
-✔ late poll cannot replace new version or changed quote context (0.82675ms)
-✔ actual envelope survives every UTF-8 split and reducer completes once (18.815875ms)
-✔ replayed delta is never applied locally and duplicate event is ignored (0.139042ms)
-✔ error preserves partial text and signals committed-state refetch (0.290875ms)
-✔ unknown schema, mismatched type, impossible receipt flags and broken order rejected (0.208542ms)
-✔ utf8_multibyte_split (0.90975ms)
-✔ crlf_across_chunks (0.117458ms)
-✔ multiple_events_in_one_chunk (0.094667ms)
-✔ unfinished_final_event_is_discarded (0.257417ms)
-✔ all_byte_boundaries_preserve_frames (2.155583ms)
-✔ comments_multiline_data_and_persistent_id (0.099166ms)
-✔ empty_stream_and_bare_cr (0.070125ms)
-✔ truncated_utf8_is_rejected (0.077708ms)
+✔ native transport posts identity and decodes every UTF-8 byte before terminal done (35.172292ms)
+✔ EOF without terminal rejects and preserves delivered partial text (1.257541ms)
+✔ controlled error is terminal, malformed content and native hostname never escape (0.9175ms)
+✔ retry preserves previous text and citations through reconnect and early error (1.972375ms)
+✔ retry replaces rather than duplicates text and uses new citations; successful empty answer clears old content (0.149458ms)
+✔ mobile canonical quote ignores stale versions and responses from another selection (0.453167ms)
+✔ late poll cannot replace new version or changed quote context (0.409084ms)
+✔ actual envelope survives every UTF-8 split and reducer completes once (69.9355ms)
+✔ replayed delta is never applied locally and duplicate event is ignored (0.161459ms)
+✔ error preserves partial text and signals committed-state refetch (3.754666ms)
+✔ unknown schema, mismatched type, impossible receipt flags and broken order rejected (0.373792ms)
+✔ utf8_multibyte_split (1.850834ms)
+✔ crlf_across_chunks (0.181667ms)
+✔ multiple_events_in_one_chunk (0.10975ms)
+✔ unfinished_final_event_is_discarded (0.331208ms)
+✔ all_byte_boundaries_preserve_frames (3.722875ms)
+✔ comments_multiline_data_and_persistent_id (0.288667ms)
+✔ empty_stream_and_bare_cr (0.265917ms)
+✔ truncated_utf8_is_rejected (0.161708ms)
 ℹ tests 19
 ℹ suites 0
 ℹ pass 19
@@ -52,7 +56,7 @@ Command: npm test
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 174.740167
+ℹ duration_ms 456.514333
 Exit code: 0
 Command: npm run typecheck
 
@@ -76,7 +80,7 @@ Command: npm run lint
 Exit code: 0
 Command: npm --prefix apps/web ci
 
-added 23 packages, and audited 24 packages in 695ms
+added 23 packages, and audited 24 packages in 783ms
 
 8 packages are looking for funding
   run `npm fund` for details
@@ -101,7 +105,7 @@ dist/index.html                   0.37 kB │ gzip:  0.28 kB
 dist/assets/index-iOZ3khJf.css    8.77 kB │ gzip:  2.69 kB
 dist/assets/index-DblzcSJQ.js   216.41 kB │ gzip: 68.19 kB
 
-✓ built in 271ms
+✓ built in 346ms
 Exit code: 0
 Command: npm exec --workspace @tbr/mobile -- expo install --check
 Dependencies are up to date
