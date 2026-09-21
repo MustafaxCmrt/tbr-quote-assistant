@@ -1,0 +1,22 @@
+UTC: 2026-09-21T14:49:57.525399+00:00
+Base commit (working tree may contain pending changes): 89e9a021a2566562a39ce3308564a3cb7d110e36
+Command: uv add --directory apps/api --dev --bounds exact pytest pytest-asyncio httpx ruff
+Exit code: 0
+
+Resolved 31 packages in 21.77s
+Downloading pygments (1.2MiB)
+Downloading ruff (9.4MiB)
+ Downloaded pygments
+ Downloaded ruff
+Prepared 10 packages in 38.95s
+Installed 10 packages in 25ms
+ + certifi==2026.7.22
+ + httpcore==1.0.9
+ + httpx==0.28.1
+ + iniconfig==2.3.0
+ + packaging==26.3
+ + pluggy==1.6.0
+ + pygments==2.21.0
+ + pytest==9.1.1
+ + pytest-asyncio==1.4.0
+ + ruff==0.16.8

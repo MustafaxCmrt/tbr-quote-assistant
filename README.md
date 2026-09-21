@@ -1,8 +1,33 @@
 # The Blue Red — Teklif Asistanı
 
 Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
-**21 Eylül 2026: yalnız F01a uygulanmıştır.** FastAPI debug SSE, Expo test ekranı ve ortak
-parser hazırdır. iPhone debug streaming Mustafa tarafından doğrulandı; F01a tamamlandı. F01b ve tam F01 kapısı açıktır.
+**21 Eylül 2026: F01 tamamlandı.** PostgreSQL/Compose, Alembic, idempotent seed ve readiness doğrulandı.
+iPhone debug streaming Mustafa tarafından doğrulandı. Gerçek tool/chat/admin akışları sonraki fazlardır.
+
+## Docker ile yerel altyapı
+
+Docker Desktop çalışırken repo kökünde:
+
+```sh
+python3 scripts/init_env.py
+docker compose up --build -d --wait
+```
+
+İlk komut güçlü parolalarla ignored `.env` oluşturur; mevcut dosyayı değiştirmez. API
+`http://localhost:8001/health/ready`, web iskeleti `http://localhost:5173` adresindedir.
+PostgreSQL host portu açılmaz. API ve web varsayılan olarak yalnız Mac loopback'e bağlanır.
+Migration ve JSON seed başarılı olmadan API başlamaz. Runtime DB rolü şema değiştiremez.
+Web F01'de Vite geliştirme sunucusudur; public dağıtım için kullanılmaz.
+
+```sh
+docker compose --profile test run --build --rm test
+docker compose run --rm --no-deps migrate-seed alembic check
+```
+
+Testler ayrı test-db servisinde her test için yeni veritabanı oluşturur; teşhis için tutar.
+Seed yalnız eksik ID'leri ekler, mevcut kullanıcı düzenlemelerini değiştirmez; startup'ta DROP/reset yoktur.
+Tüm seed ve başarı işareti tek transaction içindedir. Named volume veriyi restart'ta korur.
+Kaynak `seed.sql` otomatik çalıştırılmaz. Kanıt: [F01b kabul raporu](reports/f01b_acceptance.md).
 
 ## Kurulum ve iPhone testi
 
@@ -68,9 +93,9 @@ iOS bundle üretimi native cihaz gözlemi yerine geçmez. Kanıt haritası: [F01
   değişiklik API yeniden başlatılınca geçerli olur. Kök `.env` otomatik yüklenmez.
 - `apps/mobile`: geçici Türkçe bağlantı ekranı, `expo/fetch`, ortak saf parser. Compose dışında çalışır.
 - `packages/contracts`: testli SSE parser; gerçek DTO/event sözleşmeleri F05'te sabitlenecek.
-- `apps/web`: henüz uygulanmadı. `data/source`: orijinal, değiştirilmedi.
-- F01b: SSD sonrasında Compose/PostgreSQL 16, migration, JSON seed, `/health/ready`, restart kalıcılığı.
-  **Bu oturumda Docker çalıştırılmadı ve F01b uygulanmadı.**
+- `apps/web`: React/TypeScript/Vite bağlantı iskeleti. Ayrı `apps/web/package-lock.json` ile kilitli; `npm --prefix apps/web ci` ve `npm --prefix apps/web run build`.
+- `apps/api/app/persistence`: SQLAlchemy async Core şema, Alembic, JSON seed ve readiness.
+- `data/source`: orijinal, değiştirilmedi. Kalıcılık ve 7 gerçek PostgreSQL testi passed.
 
 ADR-005 (indirimler toplanmaz, özel kural önceliği) ve ADR-007 (beklenen çağrı/kaynaklar minimum)
 firma cevabı bekleyen **geçici yorumlardır**; fiyat/tool motoru henüz uygulanmadı.

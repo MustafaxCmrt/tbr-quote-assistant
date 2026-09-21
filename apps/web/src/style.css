@@ -1,0 +1,10 @@
+:root { font-family: system-ui, sans-serif; color: #172840; background: #f4f7fa; }
+body { margin: 0; }
+main { max-width: 52rem; margin: 12vh auto; padding: 2rem; }
+.brand { font-weight: 750; letter-spacing: .12em; color: #b42336; }
+h1 { font-size: clamp(2rem, 5vw, 3.5rem); margin-block: 1rem; }
+p { line-height: 1.6; }
+section { border-top: 1px solid #ccd5e1; margin-top: 2rem; padding-top: 1rem; }
+button { background: #184ca3; color: white; border: none; border-radius: .5rem; padding: .8rem 1.2rem; font: inherit; cursor: pointer; }
+button:disabled { opacity: .65; cursor: wait; }
+button:focus-visible { outline: 3px solid #b42336; outline-offset: 4px; }

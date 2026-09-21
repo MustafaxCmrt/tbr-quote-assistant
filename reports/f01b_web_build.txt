@@ -1,0 +1,19 @@
+UTC: 2026-09-21T15:01:05.258214+00:00
+Base commit (working tree may contain pending changes): 89e9a021a2566562a39ce3308564a3cb7d110e36
+Command: npm --prefix apps/web run build
+Exit code: 0
+
+
+> @tbr/web@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.0 building client environment for production...
+transforming...
+✓ 15 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.37 kB │ gzip:  0.28 kB
+dist/assets/index-D1TBiEDB.css    0.56 kB │ gzip:  0.36 kB
+dist/assets/index-CMvrj5I-.js   191.07 kB │ gzip: 60.31 kB
+
+✓ built in 281ms

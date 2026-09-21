@@ -17,6 +17,7 @@ body = (
     f"Command: {shlex.join(command)}\nExit code: {result.returncode}\n\n{result.stdout}"
 )
 report.parent.mkdir(exist_ok=True)
+body = "\n".join(line.rstrip() for line in body.splitlines()).rstrip() + "\n"
 report.write_text(body)
 print(body)
 sys.exit(result.returncode)

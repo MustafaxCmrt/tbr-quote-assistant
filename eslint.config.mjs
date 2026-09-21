@@ -7,6 +7,6 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     files: ["**/*.ts", "**/*.tsx"],
-    languageOptions: { globals: { process: "readonly", TextEncoder: "readonly", TextDecoder: "readonly", setTimeout: "readonly", clearTimeout: "readonly" } },
+    languageOptions: { globals: { process: "readonly", document: "readonly", fetch: "readonly", AbortSignal: "readonly", TextEncoder: "readonly", TextDecoder: "readonly", setTimeout: "readonly", clearTimeout: "readonly" } },
   },
 );

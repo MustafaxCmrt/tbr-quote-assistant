@@ -1,0 +1,20 @@
+UTC: 2026-09-21T14:58:01.620264+00:00
+Base commit (working tree may contain pending changes): 89e9a021a2566562a39ce3308564a3cb7d110e36
+Command: docker compose up -d --wait api
+Exit code: 0
+
+ Container tbr-quote-assistant-db-1 Running
+ Container tbr-quote-assistant-db-1 Waiting
+ Container tbr-quote-assistant-db-1 Healthy
+ Container tbr-quote-assistant-migrate-seed-1 Starting
+ Container tbr-quote-assistant-migrate-seed-1 Started
+ Container tbr-quote-assistant-migrate-seed-1 Waiting
+ Container tbr-quote-assistant-migrate-seed-1 Exited
+ Container tbr-quote-assistant-api-1 Starting
+ Container tbr-quote-assistant-api-1 Started
+ Container tbr-quote-assistant-api-1 Waiting
+ Container tbr-quote-assistant-db-1 Waiting
+ Container tbr-quote-assistant-migrate-seed-1 Waiting
+ Container tbr-quote-assistant-migrate-seed-1 Exited
+ Container tbr-quote-assistant-db-1 Healthy
+ Container tbr-quote-assistant-api-1 Healthy

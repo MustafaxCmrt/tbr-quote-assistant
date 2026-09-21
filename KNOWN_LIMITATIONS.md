@@ -1,8 +1,9 @@
-# Bilinen sınırlamalar — F01a
+# Bilinen sınırlamalar — F01
 
 - Native debug stream testi **passed** (Mustafa onayı + ekran görüntüsü). Tam cihaz/iOS/Expo Go sürümü henüz bildirilmedi. Gerçek chat ve ortak teklif doğrulaması henüz yok.
-- F01b ve sonraki fazlar henüz uygulanmadı: DB, Compose, migration, seed, kalıcılık, altı tool,
-  gerçek chat/quote, web admin ve ortak teklif durumu yok. Golden/DB testleri **not_run**.
+- F01b DB/Compose/migration/seed/readiness/kalıcılık passed; 7 gerçek PostgreSQL testi geçti. Altı tool, gerçek chat/quote, web admin ve ortak teklif durumu henüz yok. Golden senaryolar **not_run**.
+- Web yalnız bağlantı iskeleti, yerel Vite sunucusudur. Auth/public deployment bu kapının kapsamı değildir.
+- Test veritabanları ve ayrı fresh-start volume teşhis için tutulur; zamanla yer kaplar. Otomatik yıkıcı temizlik yoktur.
 - Debug endpoint yalnız yerel bağlantı testi; `DEBUG_STREAM_SMOKE=1` ile açılır. Gerçek iş akışı değildir.
 - SSE parser UTF-8 ve SSE çerçevesini çözer; uygulama JSON şeması, reconnect/replay ve
   sınırsız kötü amaçlı akışa karşı buffer sınırı F05 sertleştirmesinin konusudur.

@@ -1,0 +1,97 @@
+UTC: 2026-09-21T14:57:03.090684+00:00
+Base commit (working tree may contain pending changes): 89e9a021a2566562a39ce3308564a3cb7d110e36
+Command: docker compose up --build -d --wait api
+Exit code: 1
+
+ Image tbr-quote-assistant-api Building
+ Image tbr-quote-assistant-migrate-seed Building
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.11kB done
+#1 DONE 0.0s
+
+#2 [api internal] load build definition from Dockerfile
+#2 transferring dockerfile: 948B done
+#2 DONE 0.0s
+
+#3 [api internal] load metadata for docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+#3 DONE 0.0s
+
+#4 [api internal] load .dockerignore
+#4 transferring context: 198B done
+#4 DONE 0.0s
+
+#5 [api base  1/10] FROM docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+#5 resolve docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e done
+#5 DONE 0.0s
+
+#6 [api internal] load build context
+#6 transferring context: 1.20kB done
+#6 DONE 0.0s
+
+#7 [api base  9/10] COPY data/source/products.json data/source/knowledge_entries.json data/source/customers.json data/source/quotes.json data/source/quote_items.json data/source/price_rules.json /app/data/source/
+#7 CACHED
+
+#8 [api base  2/10] RUN pip install --no-cache-dir uv==0.12.17
+#8 CACHED
+
+#9 [api base  7/10] COPY apps/api/alembic.ini ./
+#9 CACHED
+
+#10 [api base  8/10] COPY apps/api/migrations ./migrations
+#10 CACHED
+
+#11 [api base  6/10] COPY apps/api/app ./app
+#11 CACHED
+
+#12 [api base  3/10] WORKDIR /app/apps/api
+#12 CACHED
+
+#13 [api base  5/10] RUN uv sync --locked --no-dev
+#13 CACHED
+
+#14 [api base  4/10] COPY apps/api/pyproject.toml apps/api/uv.lock ./
+#14 CACHED
+
+#15 [api base 10/10] RUN useradd --uid 10001 --create-home appuser
+#15 CACHED
+
+#16 [migrate-seed] exporting to image
+#16 exporting layers done
+#16 exporting manifest sha256:599250a2909dfbf0ccb2ff41259dca3cecd85b9be9244db4a45ba5f07a5e43c6 0.0s done
+#16 exporting config sha256:a9a2d450c5965736a0112d2ab8b4b3beacec5bad06a65ca5dd8f26a6bcf1b74c 0.0s done
+#16 exporting attestation manifest sha256:00fbaa9cd8bc0eaf2a0fe22ad022b098fb6244ab0ada86b8c585cfb31f098606
+#16 exporting attestation manifest sha256:00fbaa9cd8bc0eaf2a0fe22ad022b098fb6244ab0ada86b8c585cfb31f098606 0.0s done
+#16 exporting manifest list sha256:a0ac09a24fa3c7404e3a4089faf84d61ca0c5118e761113aa6de60d5f54c50ff 0.0s done
+#16 naming to docker.io/library/tbr-quote-assistant-migrate-seed:latest done
+#16 unpacking to docker.io/library/tbr-quote-assistant-migrate-seed:latest done
+#16 DONE 0.1s
+
+#17 [api] exporting to image
+#17 exporting layers done
+#17 exporting manifest sha256:e7f877d257ca6e96587ed338ee32a0e8149f3e2288278b2988c597cbbd0e099d 0.0s done
+#17 exporting config sha256:c78e9054028631b221ab359826df013b49abaad836f31b306e874b961c9ad75c 0.0s done
+#17 exporting attestation manifest sha256:91c7b7e110252c1e8de7c94a538c7a6ac387b86397d57150e83c6a566ac3332a 0.0s done
+#17 exporting manifest list sha256:84e3d2e19831d6fd45de228c5b29c6b75e781e1397e0e54934289b3db5865db3 0.0s done
+#17 naming to docker.io/library/tbr-quote-assistant-api:latest done
+#17 unpacking to docker.io/library/tbr-quote-assistant-api:latest done
+#17 DONE 0.1s
+
+#18 [migrate-seed] resolving provenance for metadata file
+#18 DONE 0.0s
+
+#19 [api] resolving provenance for metadata file
+#19 DONE 0.0s
+ Image tbr-quote-assistant-migrate-seed Built
+ Image tbr-quote-assistant-api Built
+ Container tbr-quote-assistant-db-1 Running
+ Container tbr-quote-assistant-migrate-seed-1 Creating
+ Container tbr-quote-assistant-migrate-seed-1 Created
+ Container tbr-quote-assistant-api-1 Creating
+ Container tbr-quote-assistant-api-1 Created
+ Container tbr-quote-assistant-db-1 Waiting
+ Container tbr-quote-assistant-db-1 Healthy
+ Container tbr-quote-assistant-migrate-seed-1 Starting
+ Container tbr-quote-assistant-migrate-seed-1 Started
+ Container tbr-quote-assistant-migrate-seed-1 Waiting
+ Container tbr-quote-assistant-migrate-seed-1 Error service "migrate-seed" didn't complete successfully: exit 1
+service "migrate-seed" didn't complete successfully: exit 1

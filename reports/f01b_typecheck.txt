@@ -1,0 +1,16 @@
+UTC: 2026-09-21T15:03:37.865558+00:00
+Base commit (working tree may contain pending changes): d8102ee51640160c13eebe8adf567d2ed7aa895f
+Command: npm run typecheck
+Exit code: 0
+
+
+> tbr-quote-assistant@0.1.0 typecheck
+> npm run typecheck --workspaces
+
+
+> @tbr/mobile@0.1.0 typecheck
+> tsc --noEmit
+
+
+> @tbr/contracts@0.1.0 typecheck
+> tsc --noEmit

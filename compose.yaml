@@ -1,0 +1,99 @@
+name: tbr-quote-assistant
+x-db-env: &db-env
+  POSTGRES_USER: tbr_owner
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run python3 scripts/init_env.py first}
+  POSTGRES_DB: tbr_quotes
+  APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Run python3 scripts/init_env.py first}
+x-api-env: &api-env
+  DB_HOST: db
+  POSTGRES_USER: tbr_owner
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run python3 scripts/init_env.py first}
+  POSTGRES_DB: tbr_quotes
+  SEED_SOURCE_DIR: /app/data/source
+services:
+  db:
+    image: tbr-postgres:16.15
+    build: ./scripts/postgres
+    environment: *db-env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  migrate-seed:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: runtime
+    environment: *api-env
+    command: [sh, -c, 'alembic upgrade head && python -m app.persistence.seed']
+    depends_on:
+      db:
+        condition: service_healthy
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: runtime
+    environment:
+      <<: *api-env
+      POSTGRES_USER: tbr_runtime
+      POSTGRES_PASSWORD: ${APP_DB_PASSWORD:?Run python3 scripts/init_env.py first}
+      DEBUG_STREAM_SMOKE: ${DEBUG_STREAM_SMOKE:-0}
+    ports:
+      - '${API_BIND_HOST:-127.0.0.1}:${API_PORT:-8001}:8000'
+    depends_on:
+      migrate-seed:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, python, -c, 'import urllib.request; urllib.request.urlopen("http://127.0.0.1:8000/health/ready", timeout=3)']
+      interval: 5s
+      timeout: 4s
+      retries: 12
+    restart: unless-stopped
+  web:
+    build: ./apps/web
+    ports:
+      - '127.0.0.1:${WEB_PORT:-5173}:5173'
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, node, -e, 'fetch("http://127.0.0.1:5173").then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))']
+      interval: 5s
+      timeout: 3s
+      retries: 12
+  test-db:
+    profiles: [test]
+    image: tbr-postgres:16.15
+    build: ./scripts/postgres
+    environment:
+      <<: *db-env
+      POSTGRES_DB: tbr_test
+    volumes:
+      - test_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  test:
+    profiles: [test]
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: test
+    environment:
+      <<: *api-env
+      DB_HOST: test-db
+      POSTGRES_DB: tbr_test
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Run python3 scripts/init_env.py first}
+    depends_on:
+      test-db:
+        condition: service_healthy
+volumes:
+  pgdata:
+  test_pgdata:
