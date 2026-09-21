@@ -1,0 +1,47 @@
+Gerçek koşu indeksi — yeni bir test koşusu değildir. Tam çıktılar aşağıdaki dosyalardadır.
+
+
+f06_backend_final.txt
+UTC: 2026-09-21T16:01:33.468794+00:00
+Base commit (working tree may contain pending changes): 51bcd7cb0fbb6469b2b8d7543599c068eedc26bc
+Command: docker compose --profile test run --build --rm test
+Exit code: 0
+============================= 144 passed in 24.13s =============================
+
+f08_golden_evidence_run.txt
+UTC: 2026-09-21T16:40:14.610801+00:00
+Base commit (working tree may contain pending changes): 26f939dd302cf9067fe0ff2b0580f62677a55cb8
+Command: docker compose --profile test run --build --rm -e GOLDEN_REPORT_PATH=/evidence/golden_results.json -e EVIDENCE_COMMIT_SHA=26f939dd302cf9067fe0ff2b0580f62677a55cb8 -v /Users/comert/Desktop/tbr-quote-assistant/reports:/evidence test pytest -v tests/golden
+Exit code: 0
+============================== 22 passed in 5.17s ==============================
+
+f07_reading_stream_tests.txt
+UTC: 2026-09-21T16:47:00.193812+00:00
+Base commit (working tree may contain pending changes): 26bdb9b801787e4f50ad4aa5c036ff84c6c425e9
+Command: docker compose --profile test run --build --rm test pytest -q tests/test_stream.py
+Exit code: 0
+6 passed in 7.05s
+
+f07_retry_fix_tests.txt
+UTC: 2026-09-21T16:36:24.652009+00:00
+Base commit (working tree may contain pending changes): e311738347a8c168f48d15ef1bafb385ffdd036b
+Command: npm test
+Exit code: 0
+ℹ tests 19
+ℹ pass 19
+ℹ fail 0
+
+f07_reading_live_stream.txt
+UTC: 2026-09-21T16:47:59.403753+00:00
+Base commit (working tree may contain pending changes): 26bdb9b801787e4f50ad4aa5c036ff84c6c425e9
+Command: python3 scripts/smoke_stream.py
+Exit code: 0
+PASS incremental template stream: 16 text chunks over 0.782s; curl exit 0
+PASS incremental template stream: 16 text chunks over 0.784s; curl exit 0
+
+f08_git_history_scan.txt
+UTC: 2026-09-21T16:45:17.153340+00:00
+Base commit (working tree may contain pending changes): 26bdb9b801787e4f50ad4aa5c036ff84c6c425e9
+Command: python3 scripts/check_git_history.py
+Exit code: 0
+PASS recognized key patterns, current local secrets/LAN address and private paths absent from reachable history

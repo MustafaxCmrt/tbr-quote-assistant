@@ -13,7 +13,7 @@ Durum: **passed** — 2026-09-21, Mustafa fiziksel iPhone'da test edip “tamamd
 
 ## F07 tam uygulama — 2026-09-21
 
-Durum: **not_verified**. Expo sohbet, kaynak sheet, müşteri/teklif seçimi ve kanonik taslak uygulanıyor.
+Durum: **ana akış passed** — son kullanıcı gözlemi aşağıdaki tarihli kayıtta. Cihaz sürüm metadatası ve geniş erişilebilirlik kontrolleri ayrıca not_verified.
 iOS export/Doctor/typecheck ve Node transport testleri ayrı raporlanır; fiziksel cihaz sonucu sayılmaz.
 Mustafa'ya Q-1001 mevcut adet → “BlueScan Air 1 adet daha ekle.” → aynı isteği retry → web aynı
 adet/sürüm kontrolü gönderildi. Klavye, kaynak açma, kaydırma, karanlık mod ve cihaz sürüm bilgisi bekleniyor.
@@ -84,3 +84,16 @@ f07_reading_final_typecheck.txt, f07_reading_final_lint.txt, f07_reading_final_i
 API LAN demo bind korunarak yalnız API yeniden build/start edildi; DB reset/recreate yapılmadı.
 `python3 scripts/smoke_stream.py` exit0: curl-N doğrudan API'de16 text frame0.782sn, web proxy'de16 frame0.784sn.
 Canlı aktarım kanıtı reports/f07_reading_live_stream.txt; **yeni native okuma/akış gözlemi not_verified**.
+
+
+## F07 son fiziksel kontrol — passed, 2026-09-21
+Mustafa: “parça parça geldi ve sayfanın üstünde durdu lakin çok hızlı bir şekilde parça parça gelip tamamlandı”.
+Bu, 4e5cc2d kodundaki kademeli metin görünümü ve okuma konumunun korunmasının insan gözlemidir.
+Hız, hazır deterministik cevabın pacing ile aktarılmasından gelir; LLM token üretimi değildir.
+Klavye, kaynak aç/Kapat, native add/retry ve web ortak state önceki kanıtlarla birlikte **F07 ana akış kapısı passed**.
+Cihaz modeli/iOS/kurulu Expo Go sürümü kullanıcıdan istendi, henüz not_verified. Fiziksel VoiceOver,
+büyük yazı/tablet, başarısız retry sonrası içerik koruma gözlemi ayrıca not_verified; otomatik hata testleriyle karıştırılmaz.
+Yeni mesaj kimliği ea204128-43f4-456c-a509-6f66a3495678, önceki add/retry mesajından farklıdır;
+politika mesajında gerçek loglar yalnız read tools/mutation_applied0 gösterdi (önceki salt okunur kontrol).
+F07 done; F08 in_progress. Sonraki zorunlular: negatif hedef kanıt eşlemesi, bağımsız Claude review,
+son temiz kurulum/demo/erişim kapıları. Kullanıcı gözlemine process exit code uygulanmaz.
