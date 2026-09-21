@@ -1,0 +1,23 @@
+UTC: 2026-09-21T10:13:31.271057+00:00
+Base commit (working tree may contain pending changes): adc921df1d5f2ad4622b6eac329d13a9fa5c06b1
+Command: npm exec --workspace @tbr/mobile -- expo install react-native-safe-area-context
+Exit code: 0
+
+› Installing 1 SDK 57.0.0 compatible native module using npm
+> npm install
+
+added 1 package, and audited 483 packages in 2s
+
+45 packages are looking for funding
+  run `npm fund` for details
+
+10 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm warn install-scripts 1 package has install scripts not yet covered by allowScripts:
+npm warn install-scripts   esbuild@0.28.2 (postinstall: node install.js)
+npm warn install-scripts
+npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.

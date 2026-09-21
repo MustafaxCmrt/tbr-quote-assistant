@@ -8,11 +8,13 @@ PASS debug endpoint is POST-only
 Command: curl -N --silent --show-error --fail --max-time 10 -X POST -H Accept: text/event-stream http://127.0.0.1:8000/api/debug/stream-smoke
 0.055s event: text_delta
 0.055s data: {"debug": true, "event_seq": 1, "text": "Bağlantı çalışıyor ğüşiöç"}
-0.055s 
+0.055s
 1.056s event: text_delta
 1.056s data: {"debug": true, "event_seq": 2, "text": "İkinci parça ulaştı: ĞÜŞİÖÇ"}
-1.056s 
+1.056s
 2.057s event: done
 2.057s data: {"debug":true,"event_seq":3}
-2.057s 
+2.057s
 PASS two UTF-8 events and done arrived incrementally, gaps: [1.001, 1.001]
+
+Formatting note: trailing spaces on empty timestamped lines removed; timings/content unchanged.

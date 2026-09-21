@@ -1,0 +1,20 @@
+{
+  "name": "@tbr/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start --lan",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tbr/contracts": "0.1.0",
+    "expo": "57.0.24",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "5.7.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.4"
+  }
+}

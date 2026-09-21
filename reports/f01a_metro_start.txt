@@ -1,0 +1,20 @@
+UTC: 2026-09-21T10:21:47.968800+00:00
+Base commit (working tree may contain pending changes): adefc3967c95446584812d569bdfa308e413ace1
+Command: python3 scripts/smoke_metro.py
+Exit code: 1
+
+Command: node node_modules/expo/bin/cli start apps/mobile --localhost --port 8081
+Starting project at /Users/comert/Desktop/tbr-quote-assistant/apps/mobile
+Expo Autolinking module resolution enabled
+Metro is running in CI mode, reloads are disabled. Remove CI=true to enable watch mode.
+Starting Metro Bundler
+
+Waiting on http://localhost:8081
+
+Logs for your project will appear below.
+
+Metro process exit after requested shutdown: 0
+Traceback (most recent call last):
+  File "/Users/comert/Desktop/tbr-quote-assistant/scripts/smoke_metro.py", line 30, in <module>
+    raise RuntimeError("Metro readiness timeout")
+RuntimeError: Metro readiness timeout

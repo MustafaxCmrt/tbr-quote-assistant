@@ -1,0 +1,13 @@
+{
+  "name": "@tbr/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/sse.ts",
+  "types": "./src/sse.ts",
+  "exports": {".": "./src/sse.ts"},
+  "scripts": {
+    "test": "tsx --test tests/sse.test.ts",
+    "typecheck": "tsc --noEmit"
+  }
+}

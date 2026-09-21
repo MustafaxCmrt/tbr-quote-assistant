@@ -1,11 +1,13 @@
-# packages/contracts
+# Ortak sözleşmeler — F01a
 
-Web ve mobilin ortak kullandığı **tek sahipli** sözleşme paketi (F05'te sabitlenir):
+`@tbr/contracts` şu anda yalnız saf SSE aktarım parser'ını dışa verir. Mobil aynı paketi tüketir;
+web ileride aynı parser'ı kullanabilir. Quote DTO ve gerçek chat event zarfı F05'te sabitlenecek.
 
-- Quote DTO tipleri (`quote_id`, `version`, `items[]`, `gross_total_try`, `discount_total_try`, `net_total_try`, `applied_rules`)
-- SSE event zarfı (`schema_version`, `session_id`, `message_id`, `attempt_id`, `event_seq`, `type`, `payload`)
-  ve event tipleri: `message_start`, `tool_call_start`, `tool_call_result`, `sources`, `text_delta`, `done`, `error`
-- Saf SSE parser: incremental UTF-8 decode, buffer koruma, LF/CRLF çerçeve, bir chunk ≠ bir event; unit testli
+`createSseParser()` her HTTP akışı için ayrı örnek oluşturur. `push(Uint8Array)` tamamlanan
+`{event, data, id?}` olaylarını döndürür. Artımlı UTF-8 decode, LF/CRLF/CR, yorum satırları,
+çok satırlı data ve kalıcı SSE id desteklenir. `data` ham metindir; JSON/domain doğrulaması tüketicide yapılır.
+`finish()` decoder'ı kapatır; boş satırla bitmeyen son olay atılır. Eksik/geçersiz UTF-8 hata verir.
+Parser'ın `done` gibi uygulama olaylarına özel davranışı yoktur; bitiş ve hata durumları tüketiciye aittir.
 
-Kaynak doğruluğu: backend'in ürettiği `openapi.json` / JSON Schema. Python–TS alan uyumu testle denetlenir.
-İstemciler alan adlarını yeniden adlandırmaz.
+Repo kökünde `npm test`: 8 test, tüm byte sınırlarını deneyen test dahil. `npm run typecheck`
+ve `npm run lint` ortak paket ile mobil ekranı kontrol eder. Kanıtlar `reports/f01a_*.txt`.

@@ -30,7 +30,7 @@ arrival = []
 assert process.stdout is not None
 for line in process.stdout:
     elapsed = time.monotonic() - started
-    print(f"{elapsed:.3f}s {line.rstrip()}", flush=True)
+    print(f"{elapsed:.3f}s {line.rstrip()}".rstrip(), flush=True)
     if line.startswith("event: "):
         events.append(line.removeprefix("event: ").strip())
         arrival.append(elapsed)
