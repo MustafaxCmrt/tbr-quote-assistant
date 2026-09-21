@@ -1,0 +1,153 @@
+UTC: 2026-09-21T17:32:38.512527+00:00
+Base commit (working tree may contain pending changes): a7d4419102cc23e4d3ee1eb8b84b97164898b31c
+Command: docker compose --profile test run --build --rm test pytest -q tests/test_chat.py -k partial_removal
+Exit code: 1
+
+ Image tbr-postgres:16.15 Building
+#1 [internal] load local bake definitions
+#1 reading from stdin 587B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 212B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 40B done
+#5 DONE 0.1s
+
+#6 [1/2] FROM docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6
+#6 resolve docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6
+#6 resolve docker.io/library/postgres:16@sha256:a3b7f434b2dc57ce85a67e171163eb8ab1a1ebcb39d27484661f26b1dfbe30d6 0.1s done
+#6 DONE 0.1s
+
+#7 [2/2] COPY --chmod=0644 01-runtime-role.sh /docker-entrypoint-initdb.d/01-runtime-role.sh
+#7 CACHED
+
+#8 exporting to image
+#8 exporting layers done
+#8 exporting manifest sha256:a3d8f3bcba25a5a30190e32bf3194200b7d75a03c25fb645754f6418e96e9f54 done
+#8 exporting config sha256:01fa698c7eaaa64ef17a70439fd0d670f6f577d4d20422724dd23585d056e2c2 done
+#8 exporting attestation manifest sha256:37b51b2ea0ce6e06e03fe11e5d71e95441a688e5b5a5766e5df905f2092800bb done
+#8 exporting manifest list sha256:aea5f7430c3279d622440bdeee34143424b177220fdf6e0ba36b5952eb199d4d done
+#8 naming to docker.io/library/tbr-postgres:16.15 done
+#8 unpacking to docker.io/library/tbr-postgres:16.15 done
+#8 DONE 0.1s
+
+#9 resolving provenance for metadata file
+#9 DONE 0.0s
+ Image tbr-postgres:16.15 Built
+ Container tbr-quote-assistant-test-db-1 Running
+ Image tbr-quote-assistant-test Building
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.06kB done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.01kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 198B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 34.42kB done
+#5 DONE 0.0s
+
+#6 [base  1/10] FROM docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+#6 resolve docker.io/library/python:3.12.14-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e 0.0s done
+#6 DONE 0.0s
+
+#7 [base  5/10] RUN uv sync --locked --no-dev
+#7 CACHED
+
+#8 [base 10/10] RUN useradd --uid 10001 --create-home appuser
+#8 CACHED
+
+#9 [base  8/10] COPY apps/api/migrations ./migrations
+#9 CACHED
+
+#10 [base  9/10] COPY data/source/products.json data/source/knowledge_entries.json data/source/customers.json data/source/quotes.json data/source/quote_items.json data/source/price_rules.json /app/data/source/
+#10 CACHED
+
+#11 [base  6/10] COPY apps/api/app ./app
+#11 CACHED
+
+#12 [base  7/10] COPY apps/api/alembic.ini ./
+#12 CACHED
+
+#13 [base  2/10] RUN pip install --no-cache-dir uv==0.12.17
+#13 CACHED
+
+#14 [base  3/10] WORKDIR /app/apps/api
+#14 CACHED
+
+#15 [base  4/10] COPY apps/api/pyproject.toml apps/api/uv.lock ./
+#15 CACHED
+
+#16 [test 1/3] RUN uv sync --locked
+#16 CACHED
+
+#17 [test 2/3] COPY apps/api/tests ./tests
+#17 DONE 0.1s
+
+#18 [test 3/3] COPY data/source/golden_test_scenarios.json /app/test-source/
+#18 DONE 0.0s
+
+#19 exporting to image
+#19 exporting layers 0.0s done
+#19 exporting manifest sha256:228754e0635a772fb34fe746b26bd49763d42e1657f01031a1f3f806e7e86900 0.0s done
+#19 exporting config sha256:aec84051cd500ede4207a2e010c79e741423cbb23d821e7eb48c097818735fc2 done
+#19 exporting attestation manifest sha256:59530b9d3304e6411f285c2cee5eef1780fc009215c920ccad3dd399a85e3828 done
+#19 exporting manifest list sha256:3aa61046605d72489693628a6d1d5b94b14eea37f38f7471846e226ceccd17b0 done
+#19 naming to docker.io/library/tbr-quote-assistant-test:latest
+#19 naming to docker.io/library/tbr-quote-assistant-test:latest done
+#19 unpacking to docker.io/library/tbr-quote-assistant-test:latest 0.0s done
+#19 DONE 0.1s
+
+#20 resolving provenance for metadata file
+#20 DONE 0.0s
+ Image tbr-quote-assistant-test Built
+ Container tbr-quote-assistant-test-db-1 Waiting
+ Container tbr-quote-assistant-test-db-1 Healthy
+ Container tbr-quote-assistant-test-run-6e8219eb35a6 Creating
+ Container tbr-quote-assistant-test-run-6e8219eb35a6 Created
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_review_partial_removal_does_not_become_target_or_full_removal[de\u011fi\u015ftir] _
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa6601e50>
+verb = 'değiştir'
+
+    @pytest.mark.parametrize("verb", ["çıkar", "sil", "değiştir"])
+    async def test_review_partial_removal_does_not_become_target_or_full_removal(db, verb):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            session = await open_session(client)
+            setup = await client.post(
+                "/api/chat", json=message(session, "Kablosuz okuyucuyu 5 adede çıkar.")
+            )
+            assert setup.status_code == 200, setup.text
+            before = (await client.get("/api/quotes/Q-1001")).json()
+            assert before["items"][0]["quantity"] == 5
+            request = message(session, f"Kablosuz okuyucudan 2 adet {verb}.")
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+>           assert response.json()["notice"]
+E           AssertionError: assert ''
+
+tests/test_chat.py:533: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_chat.py::test_review_partial_removal_does_not_become_target_or_full_removal[de\u011fi\u015ftir]
+1 failed, 2 passed, 52 deselected in 1.27s

@@ -275,6 +275,9 @@ async def build_plan(conn, session, message_id, text, mode):
             notice = "Hangi ürün veya teklif işlemini istediğini biraz daha açık yazar mısın?"
         return finish()
     quantity = slots["quantity"]
+    if replace and quantity is not None and "tamamini" not in tokens(text):
+        notice = "Kısmi değişim mi, kalemin tamamının değişimi mi istediğin belirsiz. Tam değişim için kalemin tamamını ve hedef miktarı açıkça belirtir misin? Teklifi değiştirmedim."
+        return finish()
     if (
         quantity is not None
         and quantity > 0

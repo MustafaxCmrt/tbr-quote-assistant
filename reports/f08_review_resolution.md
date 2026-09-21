@@ -131,3 +131,20 @@ Kalan reviewer hipotezlerinin sözleşme kontrolü: replace quantity dış sözl
 önceki satır tamamen replaced olur. Bu tam satır değişimidir, kısmi split işlemi değildir.
 Doğal dilde kısmi değişim niyeti ayrıca netleştirilmelidir; kapsamlı semantik kabul henüz kapanmadı.
 Kaynak quote JSON'da validity alanı yok; var olmayan expiry kuralı uydurulmaz.
+
+### Miktarlı replace hipotezi
+
+HTTP regresyonu kısmi replace niyetinin tamamına uygulanmasını doğruladı (önce1failed/2passed;
+f08_partial_replace_before.txt). Miktarlı replace artık açık "tamamını" seçimi ister; miktarsız
+standart alternatif akışı korunur. Araç sözleşmesi değişmez, doğrudan wrapper pozitif quantity
+ile bütün satırı değiştirebilir.
+
+| Requirement | Evidence |
+|---|---|
+| Kısmi niyette yanlış tam replacement olmasın | `test_review_partial_removal_does_not_become_target_or_full_removal[değiştir]`: başlangıç5 korunur, aynıquote/version ve yalnız setup receipt. |
+| Açık tam değişim hedef miktarı çalışsın | `test_explicit_whole_line_replacement_can_set_target_quantity`: BC110qty5 historyreplaced; BC120qty2 active; version3 ve receipt2. |
+| Gerçek koşu | `pytest -q tests/test_chat.py -k 'partial_removal or explicit_whole_line'`:4passed/exit0; f08_partial_replace_after.txt. Ruff exit0. |
+
+Runtime satır yazma yolları kaynak taramasında `services/mutations.py` içindedir; admin ürün/knowledge
+yazar, teklif kalemi yazmaz. Seed yalnız eksik kimlik ekler ve kullanıcı satırlarını üzerine yazmaz.
+Yeni toplu koşu sonrası F08 kapısı tekrar değerlendirilecek; 179 eski tam koşu bu patch'i içermez.

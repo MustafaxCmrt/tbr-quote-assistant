@@ -516,7 +516,7 @@ async def test_review_unsupported_or_unmatched_intent_clarifies_without_mutation
         assert not names & {"add_to_quote", "update_quote_item", "replace_with_alternative"}
 
 
-@pytest.mark.parametrize("verb", ["çıkar", "sil"])
+@pytest.mark.parametrize("verb", ["çıkar", "sil", "değiştir"])
 async def test_review_partial_removal_does_not_become_target_or_full_removal(db, verb):
     app, client = await chat_client(db)
     async with app.router.lifespan_context(app), client:
@@ -726,3 +726,26 @@ async def test_feature_spelling_variants_accept_matching_products(db, text, prod
         assert quote["version"] == 2
     async with db.connect() as conn:
         assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 1
+
+
+async def test_explicit_whole_line_replacement_can_set_target_quantity(db):
+    app, client = await chat_client(db)
+    async with app.router.lifespan_context(app), client:
+        session = await open_session(client)
+        setup = await client.post(
+            "/api/chat", json=message(session, "Kablosuz okuyucuyu 5 adede çıkar.")
+        )
+        assert setup.status_code == 200
+        response = await client.post(
+            "/api/chat",
+            json=message(session, "PRD-BC-110 kaleminin tamamını değiştir; 2 adet PRD-BC-120"),
+        )
+        assert response.status_code == 200, response.text
+        quote = (await client.get("/api/quotes/Q-1001")).json()
+        assert [(p["product_id"], p["quantity"]) for p in quote["items"]] == [("PRD-BC-120", 2)]
+        assert [(p["product_id"], p["quantity"], p["status"]) for p in quote["history"]] == [
+            ("PRD-BC-110", 5, "replaced")
+        ]
+        assert quote["version"] == 3
+    async with db.connect() as conn:
+        assert await conn.scalar(sa.select(sa.func.count()).select_from(mutation_receipts)) == 2
