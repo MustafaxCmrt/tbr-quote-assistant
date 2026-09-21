@@ -75,9 +75,11 @@ def matches(expected, row, logs):
 
 
 @pytest.mark.parametrize("scenario", SCENARIOS, ids=lambda s: s["scenario_id"])
-async def test_golden_message_through_http(db, monkeypatch, scenario):
+async def test_golden_message_through_http(db, monkeypatch, scenario, request):
     monkeypatch.setenv("OPENAI_API_KEY", "")
     monkeypatch.setenv("LLM_MODE", "off")
+    evidence = request.node.golden_evidence
+    evidence["database"] = db.url.database
     await seed_database(db)
     app = create_app(db)
     async with db.connect() as conn:
@@ -93,6 +95,8 @@ async def test_golden_message_through_http(db, monkeypatch, scenario):
                 )
             )
         ).all()
+    evidence["before_rows"] = [dict(r) for r in original_rows]
+    evidence["before_stock"] = [dict(r._mapping) for r in original_stock]
     quote_id = scenario["quote_id"]
     before = {
         r["product_id"]: r["quantity"]
@@ -110,6 +114,7 @@ async def test_golden_message_through_http(db, monkeypatch, scenario):
         app.router.lifespan_context(app),
         httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client,
     ):
+        evidence["before"] = (await client.get("/api/quotes/" + quote_id)).json()
         response = await client.post(
             "/api/chat/sessions",
             json={key: scenario[key] for key in ("customer_id", "quote_id", "channel")},
@@ -127,7 +132,9 @@ async def test_golden_message_through_http(db, monkeypatch, scenario):
             response = await client.post("/api/chat", json=payload)
             assert response.status_code == 200, response.text
             responses.append(response.json())
+            evidence["responses"] = responses
         final = (await client.get("/api/quotes/" + quote_id)).json()
+        evidence["after"] = final
     async with db.connect() as conn:
         logs = (
             (
@@ -152,6 +159,10 @@ async def test_golden_message_through_http(db, monkeypatch, scenario):
                 )
             )
         ).all()
+    evidence["actual_tools"] = [dict(r) for r in logs]
+    evidence["after_rows"] = [dict(r) for r in all_rows]
+    evidence["after_stock"] = [dict(r._mapping) for r in final_stock]
+    evidence["source_ids"] = sorted({s["source_id"] for r in responses for s in r["sources"]})
     assert final_stock == original_stock
     assert {
         r["product_id"]: r["quantity"]
