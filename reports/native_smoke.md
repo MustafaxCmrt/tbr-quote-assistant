@@ -1,3 +1,12 @@
+# Güncel cihaz bilgisi — 2026-09-21
+
+Mustafa'nın doğrudan bildirimi: **iPhone 16e**, **iOS 26.6.2**;
+Expo Go ekranındaki **Client Version: 57.0.9**, **Supported SDK: 57.0.0**.
+Kaynak: kullanıcı bildirimi; cihaz ayarları ajan tarafından okunmadı. Client Version,
+projedeki expo paket sürümünden ayrı kaydedildi. Aşağıdaki geçmiş kayıtlardaki
+“cihaz sürümü bekleniyor/not_verified” notları bu bildirimle güncellendi.
+Bu bilgi yeni bir fiziksel test koşusu değildir; final video ve yeni clone native provası açık.
+
 # F01a native smoke
 
 Durum: **passed** — 2026-09-21, Mustafa fiziksel iPhone'da test edip “tamamdır dostum” diyerek ekran görüntüsü paylaştı.

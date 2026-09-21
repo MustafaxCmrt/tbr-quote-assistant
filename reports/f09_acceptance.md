@@ -24,7 +24,7 @@ Docker image/npm cache bu hostta mevcuttu; cache-free farklı makine iddiası yo
 
 Fiziksel iPhone ana demo kabulü [native_smoke](native_smoke.md) içinde. Yeni clone'a telefon
 bağlama testi **not_verified**; CLI typecheck/build native gözlemin yerine geçmez.
-Cihaz/iOS/Expo Go sürüm bilgisi, yeni final video, değerlendirici repo/video erişimi ve
+Cihaz bilgisi Mustafa tarafından bildirildi: iPhone16e, iOS26.6.2, Expo Go Client Version57.0.9/Supported SDK57.0.0 (yeni test koşusu değildir). Yeni final video, değerlendirici repo/video erişimi ve
 insan onaylı gönderim hâlâ açık. F09 bu kapılar tamamlanmadan done değildir.
 
 Git geçmişi taraması [f09_history.txt](f09_history.txt) exit0:555blob/33commit/1tag;
