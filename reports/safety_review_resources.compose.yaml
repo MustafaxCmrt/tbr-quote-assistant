@@ -1,0 +1,9 @@
+services:
+  test:
+    mem_limit: 512m
+    memswap_limit: 512m
+    cpus: 1.0
+    volumes:
+      - ./apps/api/app:/app/apps/api/app:ro
+      - ./apps/api/tests:/app/apps/api/tests:ro
+      - ./reports:/evidence

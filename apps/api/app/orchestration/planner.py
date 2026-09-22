@@ -8,7 +8,13 @@ import sqlalchemy as sa
 from app.persistence.models import customers, products
 from app.schemas.tools import ProductFilters, ProductSearchInput
 from app.services.execution_context import Constraints, action_key
-from app.services.normalization import has_price_intent, normalize, numeric_slots
+from app.services.normalization import (
+    has_backorder_consent,
+    has_price_ceiling_intent,
+    has_price_intent,
+    normalize,
+    numeric_slots,
+)
 from app.services.quotes import get_quote
 from app.services.retrieval import FEATURES, search_products, tokens
 
@@ -216,7 +222,9 @@ async def build_plan(conn, session, message_id, text, mode):
         notice = "Miktar veya fiyat biçimini kesinleştiremedim. Ürün başına miktarı ve TL limitini açık yazar mısın?"
         return finish()
     # Do not silently discard a constraint that the bounded parser cannot represent.
-    if mutating and has_price_intent(text) and slots["max_price_try"] is None:
+    if (has_price_ceiling_intent(text) or (mutating and has_price_intent(text))) and slots[
+        "max_price_try"
+    ] is None:
         notice = "Fiyat sınırını kesinleştiremedim. Örneğin 5.000 TL altında şeklinde yazar mısın? Teklifi değiştirmedim."
         return finish()
     # Stock absence describes the source of a supported substitution, not a negated feature.
@@ -264,16 +272,13 @@ async def build_plan(conn, session, message_id, text, mode):
     constraints = Constraints(
         max_price_try=slots["max_price_try"],
         explicit_plus=bool(explicit_plus),
-        explicit_backorder_consent=bool(
-            re.search(
-                r"\b(bekleyebilirim|beklemeyi kabul ediyorum|backorder kabul ediyorum)\b",
-                normalized,
-            )
-        ),
+        explicit_backorder_consent=has_backorder_consent(text),
     )
     if constraints.max_price_try is not None:
         knowledge("price_ceiling")
     if not mutating:
+        if "offline" in tokens(text) or any(t.startswith("senkron") for t in tokens(text)):
+            knowledge("compatibility")
         if "kurulum" in normalized:
             knowledge("service_policy")
         if "indirim" in normalized:
@@ -424,7 +429,7 @@ async def build_plan(conn, session, message_id, text, mode):
     # Each conjunction requirement gets its own search and guard tags, then one atomic group.
     content = (
         text.split(";", 1)[-1]
-        if ";" in text and "ekle" not in normalize(text.split(";", 1)[0])
+        if ";" in text and not re.search(r"\bekle(?:r|yin)?\b", normalize(text.split(";", 1)[0]))
         else text.split(";", 1)[0]
     )
     segments = re.split(r"\bve\b", content, flags=re.IGNORECASE)

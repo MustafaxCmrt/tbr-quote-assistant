@@ -6,6 +6,8 @@ from decimal import Decimal
 
 PRICE_CEILING_MARKERS = (
     "altinda",
+    "alti",
+    "ucuz",
     "ustune cikmadan",
     "en fazla",
     "butce",
@@ -17,13 +19,54 @@ PRICE_CEILING_MARKERS = (
 )
 
 
+def has_price_ceiling_intent(value: str) -> bool:
+    """Recognize a constraint even when its amount syntax is unsupported.
+
+    Currency alone is not a ceiling: 'kaç TL?' must remain a normal read.
+    Literal monetary amounts without a clear relation require clarification.
+    """
+    text = re.sub(r"\b(?:simdiye|bugune) kadar\b", "", normalize(value))
+    for marker in PRICE_CEILING_MARKERS:
+        suffix = r"\w*" if marker in {"butce", "limit", "tavan"} else ""
+        if re.search(r"\b" + re.escape(marker) + suffix + r"\b", text) and (
+            marker not in {"kadar", "ucuz"} or re.search(r"\d", text)
+        ):
+            return True
+    return bool(
+        re.search(r"\d[\d.,]*\s*(?:tl|try|lira\w*)\b|₺\s*\d|\d[\d.,]*\s*₺", value, re.IGNORECASE)
+    )
+
+
+def has_backorder_consent(value: str) -> bool:
+    """Accept a standalone affirmative clause, not reported/conditional consent.
+
+    Scope question punctuation to that clause, so 'ekler misin? Bekleyebilirim.'
+    stays valid. Ambiguous wording is deliberately not authorization.
+    """
+    phrase = r"(?:bekleyebilirim|beklemeyi kabul ediyorum|backorder kabul ediyorum)"
+    text = normalize(value)
+    if re.search(
+        r"\b(?:demiyorum|demedim|diyemem|degil\w*|istemiyorum|istemem|"
+        r"kabul etmiyorum|eger|ama|ancak|fakat|\w+(?:sa|se))\b",
+        text,
+    ):
+        return False
+    if re.search(r"""["“‘'`]\s*""" + phrase, value, re.IGNORECASE):
+        return False
+    # Keep each clause's terminator; only a question about consent invalidates it.
+    for match in re.finditer(r"([^.!?;,\n]+)([.!?;,\n]|$)", value):
+        clause = normalize(match[1])
+        if match[2] != "?" and re.fullmatch(r"(?:(?:evet|tamam) )?" + phrase, clause):
+            return True
+    return False
+
+
 def has_price_intent(value: str) -> bool:
     normalized = normalize(value)
     # Temporal "until now/today" is not a ceiling, even with an item quantity.
     price_text = re.sub(r"\b(?:simdiye|bugune) kadar\b", "", normalized)
     return bool(re.search(r"\b(?:tl|try|lira\w*)\b|₺", value, re.IGNORECASE)) or any(
-        marker in price_text
-        and (marker != "kadar" or bool(re.search(r"\d", price_text)))
+        marker in price_text and (marker != "kadar" or bool(re.search(r"\d", price_text)))
         for marker in PRICE_CEILING_MARKERS
     )
 
