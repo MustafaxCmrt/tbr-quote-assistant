@@ -165,3 +165,50 @@ async def test_unit_ceiling_with_quantity_still_adds(db, text, quote, expected):
     assert after["version"] == before["version"] + 1 and len(receipts) == 1
     adds = [log for log in logs if log["tool_name"] == "add_to_quote"]
     assert len(adds) == 1 and adds[0]["mutation_applied"]
+
+
+# B04: an explicit replacement target is honored exactly, or nothing changes.
+@pytest.mark.parametrize(
+    "text",
+    [
+        "BlueScan Pro ürününü GreenScan Eco ile değiştir.",
+        "PRD-BC-120 ürününü PRD-BC-140 ile değiştir.",
+        "Pahalı okuyucuyu GreenScan Eco'yla değiştir.",
+        "BlueScan Pro'yu değiştir, yerine GreenScan Eco ekle.",
+    ],
+)
+async def test_explicit_replace_target_is_the_exact_product(db, text):
+    data, before, after, logs, receipts, rows = await run(db, text, "Q-1004")
+    assert data["notice"] == ""
+    assert items(after) == [("PRD-BC-140", 1)]
+    assert [(p["product_id"], p["status"]) for p in after["history"]] == [("PRD-BC-120", "replaced")]
+    assert sorted((r["product_id"], r["status"]) for r in rows) == [
+        ("PRD-BC-120", "replaced"),
+        ("PRD-BC-140", "active"),
+    ]
+    assert after["version"] == before["version"] + 1 and len(receipts) == 1
+    replaces = [log for log in logs if log["tool_name"] == "replace_with_alternative"]
+    assert [(r["input"]["from_product_id"], r["input"]["to_product_id"]) for r in replaces] == [
+        ("PRD-BC-120", "PRD-BC-140")
+    ]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        # Not a registered substitute of PRD-BC-120.
+        "BlueScan Pro ürününü BlueScan Lite ile değiştir.",
+        # Out of stock, and not a registered substitute either.
+        "BlueScan Pro ürününü RedScan Mini ile değiştir.",
+        # Registered substitute, but above the explicit unit ceiling.
+        "BlueScan Pro ürününü 5.000 TL altında BlueScan Air ile değiştir.",
+        # Registered substitute, but lacks the required feature.
+        "BlueScan Pro ürününü QR'lı GreenScan Eco ile değiştir.",
+        # Two explicit targets.
+        "BlueScan Pro ürününü GreenScan Eco ile veya BlueScan Air ile değiştir.",
+    ],
+)
+async def test_unsatisfiable_or_ambiguous_explicit_target_never_substitutes(db, text):
+    data, before, after, logs, receipts, _ = await run(db, text, "Q-1004")
+    assert_unchanged(data, before, after, logs, receipts)
+    assert "değiştirmedim" in data["notice"]

@@ -108,6 +108,21 @@ def reference(text, quote, catalog):
     return scored[0][1]
 
 
+def product_mentions(normalized, catalog):
+    """Explicit IDs/SKUs and model names (with Plus) as ordered (start, end, product_id)."""
+    keys = {}
+    for row in catalog.values():
+        name = normalize(row["name_tr"])
+        model = " ".join(name.split()[:2]) + (" plus" if row["sku"].endswith("PLUS") else "")
+        for key in (normalize(row["product_id"]), normalize(row["sku"]), name, model):
+            keys.setdefault(key, row["product_id"])
+    pattern = "|".join(map(re.escape, sorted(keys, key=len, reverse=True)))
+    return [
+        (m.start(), m.end(), keys[m[0]])
+        for m in re.finditer(r"(?<![\w-])(?:" + pattern + r")(?![\w-])", normalized)
+    ]
+
+
 async def build_plan(conn, session, message_id, text, mode):
     normalized = normalize(text)
     steps = []
@@ -343,13 +358,61 @@ async def build_plan(conn, session, message_id, text, mode):
             source_text, target_text = (
                 (text[: split.start()], text[split.end() :]) if split else (text, "")
             )
-        source = reference(source_text, quote, catalog)
+        # "X'i Y ile değiştir": Y is marked by ile/-(y)la/-(y)le; otherwise a
+        # named product absent from the quote is the target.
+        mentions = product_mentions(normalized, catalog)
+        current = {item.product_id: item for item in quote.items}
+        targets = {
+            pid
+            for _, end, pid in mentions
+            if any(
+                w in {"ile", "la", "le"} or w.endswith(("yla", "yle"))
+                for w in normalized[end:].split()[:2]
+            )
+        } or {pid for _, _, pid in mentions if pid not in current}
+        if len(targets) > 1:
+            notice = "Hangi ürünle değiştirmek istediğin belirsiz. Tek bir hedef ürün adı veya kodu yazar mısın? Teklifi değiştirmedim."
+            return finish()
+        explicit = next(iter(targets), None)
+        named_sources = {pid for _, _, pid in mentions if pid in current and pid != explicit}
+        if explicit:
+            source_text = normalized
+            for start, end, pid in reversed(mentions):
+                if pid == explicit:
+                    source_text = source_text[:start] + " " + source_text[end:]
+        # A named current line is the source; target features must not filter it.
+        source = (
+            current[next(iter(named_sources))]
+            if explicit and len(named_sources) == 1
+            else reference(source_text, quote, catalog)
+        )
         if source is None:
             notice = "Değiştirilecek kalemi tek anlamlı seçemedim. Ürün kodunu belirtir misin?"
             return finish()
         row = catalog[source.product_id]
         if row["stock_qty"] == 0:
             knowledge("stock_rule")
+        if explicit:
+            # Features describing the replaced item do not bind its replacement.
+            required = (
+                tokens(target_text) if target_text else tokens(text) - set(map(normalize, row["tags"]))
+            ) & FEATURES
+            if explicit not in row["substitute_product_ids"]:
+                notice = "İstediğin hedef ürün bu kalem için kayıtlı alternatifler arasında değil. Teklifi değiştirmedim."
+                return finish()
+            result = await search(explicit, required=required, cat=catalog[explicit]["category"])
+            if explicit not in {p.product_id for p in result.recommendations}:
+                notice = "İstediğin hedef ürün fiyat, stok veya özellik koşullarını sağlamıyor. Teklifi değiştirmedim."
+                return finish()
+            mutation(
+                "replace_with_alternative",
+                from_product_id=source.product_id,
+                to_product_id=explicit,
+                quantity=quantity,
+                reason=text,
+                required=required,
+            )
+            return finish()
         required = tokens(target_text) & FEATURES
         # No explicit target: retain substitution order supplied by the current catalog.
         result = await search(
