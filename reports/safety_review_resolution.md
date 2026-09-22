@@ -106,3 +106,7 @@ sonrası API açıkça loopback'e döndürülür; repo/video erişimi doğrulan�
 ## v5 P2 eki
 
 `kadar/ucuz` yanlış fiyat alarmı dar kapsamda düzeltildi. Güncel kod, 335 backend testi ve 22 golden kanıtı: [P2 çözüm raporu](p2_price_intent_resolution.md). v4 sonuçları yukarıda tarihsel olarak korunur.
+
+## v6 bağımsız denetim eki
+
+Bağımsız Claude incelemesinde v5’in bin içeren bazı para sınırlarını öneri yolunda kaçırdığı bulundu. Önceki bin testleri yalnız altında işaretçisini kapsıyordu. Kırmızı/yeşil kanıt ve dar düzeltme: [v6 P1 çözüm raporu](p1_bin_ceiling_resolution.md). Önceki test sonuçları bütün dil biçimlerinin güvenli olduğunu kanıtlamaz.

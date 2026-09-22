@@ -61,3 +61,7 @@ vardır. Tam paket/export commit edilmiş v5 uygulama kodunda çalıştı; SHA g
   `has_price_intent` kontrolü değişmedi; karmaşık ekleme cümleleri hâlâ gereksiz soru üretebilir.
 - İstemci kodu/testleri bu dar değişiklikte yeniden çalıştırılmadı; v4’ün 22 istemci testi tarihsel kanıttır.
   Yeni temiz clone, fiziksel prova ve video yapılmadı. Kusursuz genel dil anlayışı iddiası yoktur.
+
+## v6 bağımsız denetim eki
+
+Bağımsız Claude incelemesinde v5’in bin içeren bazı para sınırlarını öneri yolunda kaçırdığı bulundu. Önceki bin testleri yalnız altında işaretçisini kapsıyordu. Kırmızı/yeşil kanıt ve dar düzeltme: [v6 P1 çözüm raporu](p1_bin_ceiling_resolution.md). Önceki test sonuçları bütün dil biçimlerinin güvenli olduğunu kanıtlamaz.

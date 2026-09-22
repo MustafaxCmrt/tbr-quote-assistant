@@ -88,3 +88,5 @@ ek kurulum yapılmadı. Test konteyneri 512 MB / 1 CPU ve swap kapalı ayarla, i
 Test DB servisi bitince durduruldu. Fiziksel prova/video Mustafa'ya aittir.
 
 2026-09-22 P2 (Codex, Mustafa talimatı): yalnız normalization.py içinde tutar/işaretçi ilişkisi daraltıldı; code-testing-agent odaklı akışıyla 41 ek parametrik örnek, kırmızı 17 failed → tam 335 passed/22 golden; demo DB’ye yazılmadı, testler sırayla çalıştı, push yapılmadı.
+
+2026-09-22 v6 (Codex, Mustafa talimatı): bağımsız Claude denetiminin bulduğu v5 bin-fiyat regresyonu doğrulandı; yalnız normalization.py düzeltildi, code-testing-agent odaklı akışıyla helper + izole HTTP/DB regresyonları eklendi; önceki testlerin bin/kadar birleşimini kaçırdığı çözüm raporunda açıklandı.

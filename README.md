@@ -3,11 +3,11 @@
 Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
 **22 Eylül 2026: video öncesi fiyat/onay düzeltmeleri doğrulandı; F09 fiziksel prova/video/teslim açık.**
 Altı gerçek araç, transaction/receipt, kaynaklı deterministik sohbet, SSE, web admin ve Expo
-uygulaması çalışıyor. Son tam backend koşusu **335 passed** (22 golden dahil):
-[komut/çıktı](reports/p2_price_intent_full.txt), [golden sonuçları](reports/p2_price_intent_golden.json).
+uygulaması çalışıyor. Son tam backend koşusu **370 passed** (22 golden dahil):
+[komut/çıktı](reports/p1_bin_ceiling_full.txt), [golden sonuçları](reports/p1_bin_ceiling_golden.json).
 Fiyat sınırı, bekleme onayı ve uyumluluk düzeltmeleri: [çözüm kaydı](reports/safety_review_resolution.md).
-Doğrulanan uygulama commit'i: `3a07ceceb07f16c4e2efb0c4998233032b294484`.
-Teslim adayı: `demo-candidate-20260922-v5`; etiketin uygulama kodu test edilen commit ile aynıdır.
+Doğrulanan uygulama commit'i: `fa3352b3d14cb5738166907eb673b3ae5f203284`.
+Teslim adayı: `demo-candidate-20260922-v6`; etiketin uygulama kodu test edilen commit ile aynıdır.
 Önceki v3 temiz clone'da 229 test geçmişti: [tarihsel temiz kurulum kanıtı](reports/hardening_resolution.md#v3-temiz-clone-provası).
 Bu düzeltmede yeni temiz clone açılmadı; mevcut izole PostgreSQL ve çalışan API doğrulandı.
 Mustafa fiziksel iPhone'da stream, ürün ekleme, web ile ortak teklif, aynı isteğin tekrarı,

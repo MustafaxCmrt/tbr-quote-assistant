@@ -59,7 +59,7 @@
 - F08 uygulama kabul kapısı tamamlandı; kapsam ve review disposition reports/f08_acceptance.md içindedir. F09 v3 clone bf92756 temiz kurulum ve otomatik kontrolleri geçti (reports/hardening_resolution.md); final video/erişim/gönderim kapıları tamamlanmadı. Public dağıtım, görünürlük değişikliği ve teslim mesajı için insan onayı gerekir.
 
 
-## 22 Eylül v4/v5 düzeltmelerinin sınırları
+## 22 Eylül v4/v5/v6 düzeltmelerinin sınırları
 
 - Para ayrıştırması hâlâ sınırlıdır. `TL altında`, `TL altı`, `TL’den ucuz` sayısal sınırları desteklenir;
   mevcut aday yorumu olan birim liste fiyatı `<=` korunur. `lira`, `₺`, `8 bin` gibi desteklenmeyen sınır
@@ -82,3 +82,11 @@
   değişmedi; karmaşık ekleme ifadelerinde gereksiz netleştirme hâlâ mümkündür.
 - v5 uygulama commit’i `3a07cec`: 335 backend testi (22 golden dahil) geçti;
   [P2 kanıtı](reports/p2_price_intent_resolution.md). Yeni fiziksel cihaz/video doğrulaması yapılmadı.
+
+- v6: bağımsız Claude denetimi, v5’in `bin` içeren bazı sınırları öneri yolunda kaçırdığını buldu.
+  Önceki testler `bin` sözcüğünü yalnız `altında` ile sınamıştı. `bin` artık para birimine veya
+  sınır işaretçisine doğrudan bağlı bir tutar parçası olarak tanınır: `8 bine kadar`, `on bin liraya
+  kadar`, `8 bin TL civarı` netleştirme ister; arama/öneri ve mutasyon yapılmaz. Değer ayrıştırması
+  genişletilmedi. `on güne kadar`, `8 bin adede kadar` ve v5 süre/adet/model kontrolleri korunur.
+  Genel yazıyla sayı/para anlayışı veya bütün doğal dil biçimlerinin kapsandığı iddia edilmez.
+- v6 uygulama commit’i `fa3352b`: 370 backend testi ve 22 golden geçti; [regresyon çözümü](reports/p1_bin_ceiling_resolution.md). Yeni fiziksel prova/video doğrulaması yapılmadı.
