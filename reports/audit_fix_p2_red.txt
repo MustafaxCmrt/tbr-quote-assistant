@@ -1,0 +1,44 @@
+UTC: 2026-09-22T21:31:04Z
+HEAD (working tree may contain pending changes): 362db82202990addc507788b385bac470dfae4c1
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test pytest -q tests/test_audit_regressions.py -k quantity
+
+    @pytest.mark.parametrize(
+        "text,quote",
+        [
+            ("BlueScan Air iki adet ekle.", "Q-1002"),
+            ("BlueScan Air birkaç tane ekle.", "Q-1002"),
+            ("BlueScan Air −2 adet ekle.", "Q-1002"),
+            ("BlueScan Air –2 adet ekle.", "Q-1002"),
+            ("BlueScan Air 2–3 adet ekle.", "Q-1002"),
+            ("BlueScan Air x2 adet ekle.", "Q-1002"),
+            ("Kablosuz okuyucudan iki tane daha ekle.", "Q-1001"),
+        ],
+    )
+    async def test_unresolved_quantity_never_mutates(db, text, quote):
+        data, before, after, logs, receipts, _ = await run(db, text, quote)
+>       assert_unchanged(data, before, after, logs, receipts)
+
+tests/test_audit_regressions.py:112: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = {'session_id': '538eaf4458d94c55a465246335c38b3a', 'message_id': '422376f310924738925d055d82373139', 'attempt_id': '00a913c933d1499c838a334833a5d73b', 'mode': 'fallback', ...}
+before = {'quote_id': 'Q-1002', 'customer_id': 'CUST-ANK-002', 'customer_name': 'Ankara Toptan Depo Ltd.', 'status': 'draft', ...}
+after = {'quote_id': 'Q-1002', 'customer_id': 'CUST-ANK-002', 'customer_name': 'Ankara Toptan Depo Ltd.', 'status': 'draft', ...}
+logs = [{'log_id': 1, 'session_id': '538eaf4458d94c55a465246335c38b3a', 'message_id': '422376f310924738925d055d82373139', 'at...alse, 'duration_ms': 0, 'created_at': datetime.datetime(2026, 9, 22, 21, 31, 8, 109101, tzinfo=datetime.timezone.utc)}]
+receipts = [{'quote_id': 'Q-1002', 'idempotency_key': 'b5806a98f0705fa000378e80e8a3d2f38b85d9c7239c0c85bced17ad7540c36f', 'sessio...'committed_version': 2, 'created_at': datetime.datetime(2026, 9, 22, 21, 31, 8, 109101, tzinfo=datetime.timezone.utc)}]
+
+    def assert_unchanged(data, before, after, logs, receipts):
+>       assert data["notice"]
+E       AssertionError: assert ''
+
+tests/test_audit_regressions.py:37: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_audit_regressions.py::test_unresolved_quantity_never_mutates[BlueScan Air iki adet ekle.-Q-1002]
+FAILED tests/test_audit_regressions.py::test_unresolved_quantity_never_mutates[BlueScan Air birka\xe7 tane ekle.-Q-1002]
+FAILED tests/test_audit_regressions.py::test_unresolved_quantity_never_mutates[BlueScan Air \u22122 adet ekle.-Q-1002]
+FAILED tests/test_audit_regressions.py::test_unresolved_quantity_never_mutates[BlueScan Air \u20132 adet ekle.-Q-1002]
+FAILED tests/test_audit_regressions.py::test_unresolved_quantity_never_mutates[BlueScan Air 2\u20133 adet ekle.-Q-1002]
+FAILED tests/test_audit_regressions.py::test_unresolved_quantity_never_mutates[BlueScan Air x2 adet ekle.-Q-1002]
+6 failed, 3 passed, 13 deselected in 2.71s
+
+Exit code: 1

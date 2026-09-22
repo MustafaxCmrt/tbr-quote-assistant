@@ -7,7 +7,12 @@ from app.persistence.models import mutation_receipts, quote_items, tool_call_log
 from tests.test_chat import chat_client, message, open_session
 
 MUTATIONS = {"add_to_quote", "update_quote_item", "replace_with_alternative"}
-CUSTOMERS = {"Q-1002": "CUST-ANK-002", "Q-1004": "CUST-IST-001", "Q-1005": "CUST-IST-001"}
+CUSTOMERS = {
+    "Q-1001": "CUST-IST-001",
+    "Q-1002": "CUST-ANK-002",
+    "Q-1004": "CUST-IST-001",
+    "Q-1005": "CUST-IST-001",
+}
 
 
 async def run(db, text, quote="Q-1002"):
@@ -91,4 +96,33 @@ async def test_direct_command_still_adds_once(db, text):
     data, before, after, _, receipts, _ = await run(db, text)
     assert data["notice"] == ""
     assert items(after) == [("PRD-BC-110", 1)]
+    assert after["version"] == before["version"] + 1 and len(receipts) == 1
+
+
+# B06: a stated but unresolved quantity is asked about, never defaulted or sign-flipped.
+@pytest.mark.parametrize(
+    "text,quote",
+    [
+        ("BlueScan Air iki adet ekle.", "Q-1002"),
+        ("BlueScan Air birkaç tane ekle.", "Q-1002"),
+        ("BlueScan Air −2 adet ekle.", "Q-1002"),
+        ("BlueScan Air –2 adet ekle.", "Q-1002"),
+        ("BlueScan Air 2–3 adet ekle.", "Q-1002"),
+        ("BlueScan Air x2 adet ekle.", "Q-1002"),
+        ("Kablosuz okuyucudan iki tane daha ekle.", "Q-1001"),
+    ],
+)
+async def test_unresolved_quantity_never_mutates(db, text, quote):
+    data, before, after, logs, receipts, _ = await run(db, text, quote)
+    assert_unchanged(data, before, after, logs, receipts)
+
+
+@pytest.mark.parametrize(
+    "text,quantity",
+    [("BlueScan Air 2 adet ekle.", 2), ("BlueScan Air bir tane ekle.", 1)],
+)
+async def test_resolved_quantity_still_adds(db, text, quantity):
+    data, before, after, _, receipts, _ = await run(db, text)
+    assert data["notice"] == ""
+    assert items(after) == [("PRD-BC-110", quantity)]
     assert after["version"] == before["version"] + 1 and len(receipts) == 1

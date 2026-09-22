@@ -13,6 +13,7 @@ from app.services.normalization import (
     has_price_ceiling_intent,
     has_price_intent,
     has_unauthorized_command,
+    has_unresolved_quantity,
     normalize,
     numeric_slots,
 )
@@ -225,6 +226,10 @@ async def build_plan(conn, session, message_id, text, mode):
         slots = numeric_slots(text)
     except ValueError:
         notice = "Miktar veya fiyat biçimini kesinleştiremedim. Ürün başına miktarı ve TL limitini açık yazar mısın?"
+        return finish()
+    # "Not stated" defaults to one; "stated but unreadable" (iki, -2, 2-3) never does.
+    if mutating and has_unresolved_quantity(text):
+        notice = "Miktarı kesinleştiremedim. Adedi rakamla yazar mısın? Örneğin 2 adet. Teklifi değiştirmedim."
         return finish()
     # Do not silently discard a constraint that the bounded parser cannot represent.
     if (has_price_ceiling_intent(text) or (mutating and has_price_intent(text))) and slots[

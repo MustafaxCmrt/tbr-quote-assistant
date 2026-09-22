@@ -144,12 +144,34 @@ def parse_money(value: str) -> Decimal:
     return Decimal(value.replace(".", "").replace(",", "."))
 
 
+# Typographic minus/dash/plus signs must not vanish in front of a quantity.
+SIGNS = str.maketrans(dict.fromkeys("‐‑‒–—−﹣－", "-") | {
+    "﹢": "+",
+    "＋": "+",
+})
+QUANTITY_UNIT = r"(?:adet|adede|tane|lokasyon|şube|lisans)\b"
+NUMBER_WORDS = {
+    "iki", "uc", "dort", "bes", "alti", "yedi", "sekiz", "dokuz", "on", "yirmi", "otuz",
+    "kirk", "elli", "altmis", "yetmis", "seksen", "doksan", "yuz", "bin", "birkac", "bircok",
+    "kac", "birer", "ikiser", "yarim", "cift", "duzine",
+}  # fmt: skip
+
+
+def has_unresolved_quantity(value: str) -> bool:
+    """A quantity was stated, but not as a plain integer: never default it to one."""
+    for match in re.finditer(r"(\S+)\s+" + QUANTITY_UNIT, value.translate(SIGNS).lower()):
+        word = normalize(match[1])
+        if re.fullmatch(r"\d+|bir|tek", word):
+            continue
+        if re.search(r"\d", word) or word in NUMBER_WORDS:
+            return True
+    return False
+
+
 def numeric_slots(value: str) -> dict:
-    lowered = value.lower()
+    lowered = value.translate(SIGNS).lower()
     amounts = re.findall(r"(?<![\w.,])([0-9][0-9.,]*)\s*tl\b", lowered)
-    raw_quantities = re.findall(
-        r"(?<![\w.,])([-+]?\d[\d.,]*)\s*(?:adet|adede|tane|lokasyon|şube|lisans)\b", lowered
-    )
+    raw_quantities = re.findall(r"(?<![\w.,+-])([-+]?\d[\d.,]*)\s*" + QUANTITY_UNIT, lowered)
     if any(not re.fullmatch(r"\d+", value) for value in raw_quantities):
         raise ValueError("Miktar negatif veya kesirli olamaz.")
     quantities = raw_quantities
