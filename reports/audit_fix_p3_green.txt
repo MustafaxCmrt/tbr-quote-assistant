@@ -1,0 +1,10 @@
+UTC: 2026-09-22T21:36:20Z
+HEAD (working tree may contain pending changes): 1981a19112b38e51bbcf68f26d781792312a1bb2
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test pytest -q tests/test_audit_regressions.py tests/test_safety_review.py tests/test_chat.py tests/unit tests/golden
+........................................................................ [ 20%]
+........................................................................ [ 40%]
+........................................................................ [ 61%]
+........................................................................ [ 81%]
+..................................................................       [100%]
+354 passed in 50.74s
+Exit code: 0

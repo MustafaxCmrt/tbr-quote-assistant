@@ -12,7 +12,9 @@ from app.services.normalization import (
     has_backorder_consent,
     has_price_ceiling_intent,
     has_price_intent,
+    has_total_budget_scope,
     has_unauthorized_command,
+    has_unparsed_money,
     has_unresolved_quantity,
     normalize,
     numeric_slots,
@@ -232,10 +234,20 @@ async def build_plan(conn, session, message_id, text, mode):
         notice = "Miktarı kesinleştiremedim. Adedi rakamla yazar mısın? Örneğin 2 adet. Teklifi değiştirmedim."
         return finish()
     # Do not silently discard a constraint that the bounded parser cannot represent.
-    if (has_price_ceiling_intent(text) or (mutating and has_price_intent(text))) and slots[
-        "max_price_try"
-    ] is None:
+    price_scope = has_price_ceiling_intent(text) or (mutating and has_price_intent(text))
+    if price_scope and slots["max_price_try"] is None:
         notice = "Fiyat sınırını kesinleştiremedim. Örneğin 5.000 TL altında şeklinde yazar mısın? Teklifi değiştirmedim."
+        return finish()
+    # A second, unparsed amount (bütçem 5.000 lira) may be the stricter limit.
+    if price_scope and has_unparsed_money(text):
+        notice = "Mesajdaki fiyat sınırlarından en az birini kesinleştiremedim. Tek bir birim fiyat sınırını örneğin 5.000 TL altında şeklinde yazar mısın? Teklifi değiştirmedim."
+        return finish()
+    # max_price_try is a unit list-price ceiling; a total budget is not supported (B04).
+    if price_scope and (
+        has_total_budget_scope(text)
+        or (re.search(r"\bbutce\w*", normalized) and (slots["quantity"] or 0) > 1)
+    ):
+        notice = "Toplam bütçeyi birim fiyat sınırı gibi uygulayamam. Birim fiyat üst sınırı istiyorsan örneğin birim fiyatı 9.000 TL altında şeklinde yazar mısın? Teklifi değiştirmedim."
         return finish()
     # Stock absence describes the source of a supported substitution, not a negated feature.
     attribute_text = re.sub(r"\bstokta olmayan\b", "", normalized)

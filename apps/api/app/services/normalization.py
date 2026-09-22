@@ -168,9 +168,28 @@ def has_unresolved_quantity(value: str) -> bool:
     return False
 
 
+TL_AMOUNT = r"(?<![\w.,])([0-9][0-9.,]*)\s*tl\b"
+
+
+def has_unparsed_money(value: str) -> bool:
+    """One parsed TL amount does not mean every money condition was understood."""
+    rest = re.sub(TL_AMOUNT, " ", value.translate(SIGNS).lower())
+    return bool(re.search(r"\b(?:tl|try|lira\w*)\b|₺", rest))
+
+
+def has_total_budget_scope(value: str) -> bool:
+    """Money 'toplam' is a total budget; 'toplam 4 adet' is a quantity target."""
+    return bool(
+        re.search(
+            r"\btoplam\w*\b(?!\s+\d+\s+(?:adet|adede|tane|lokasyon|sube|lisans)\b)",
+            normalize(value),
+        )
+    )
+
+
 def numeric_slots(value: str) -> dict:
     lowered = value.translate(SIGNS).lower()
-    amounts = re.findall(r"(?<![\w.,])([0-9][0-9.,]*)\s*tl\b", lowered)
+    amounts = re.findall(TL_AMOUNT, lowered)
     raw_quantities = re.findall(r"(?<![\w.,+-])([-+]?\d[\d.,]*)\s*" + QUANTITY_UNIT, lowered)
     if any(not re.fullmatch(r"\d+", value) for value in raw_quantities):
         raise ValueError("Miktar negatif veya kesirli olamaz.")

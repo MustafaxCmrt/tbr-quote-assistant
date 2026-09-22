@@ -126,3 +126,42 @@ async def test_resolved_quantity_still_adds(db, text, quantity):
     assert data["notice"] == ""
     assert items(after) == [("PRD-BC-110", quantity)]
     assert after["version"] == before["version"] + 1 and len(receipts) == 1
+
+
+PRICE_CLARIFICATIONS = [
+    # B01: every money expression must be understood, not just the first TL amount.
+    "BlueScan Air 8.500 TL altında 1 adet ekle; bütçem 5.000 lira.",
+    "BlueScan Air 8.500 TL altında öner; bütçem 5.000 lira.",
+    "BlueScan Air 8.500 TL altında 1 adet ekle, en fazla ₺5.000 olsun.",
+    "BlueScan Air 8.500 TL altında 1 adet ekle; 5 bin TL'yi geçmesin.",
+    # B02: an explicit total budget is not a unit-price ceiling.
+    "Toplam bütçem 9.000 TL, 2 adet BlueScan Air ekle.",
+    "2 adet BlueScan Air ekle, toplam tutar 9.000 TL'yi geçmesin.",
+    "Toplamda 9.000 TL altında 2 adet BlueScan Air öner.",
+    "Bütçem 9.000 TL, 2 adet BlueScan Air ekle.",
+]
+
+
+@pytest.mark.parametrize("text", PRICE_CLARIFICATIONS)
+async def test_unresolved_or_total_price_scope_never_recommends_or_mutates(db, text):
+    data, before, after, logs, receipts, _ = await run(db, text)
+    assert_unchanged(data, before, after, logs, receipts)
+    assert "değiştirmedim" in data["notice"]
+    assert data["recommended_product_ids"] == []
+    assert "search_products" not in {log["tool_name"] for log in logs}
+
+
+@pytest.mark.parametrize(
+    "text,quote,expected",
+    [
+        ("Birim fiyatı 9.000 TL altında 2 adet BlueScan Air ekle.", "Q-1002", 2),
+        ("BlueScan Air toplam 3 adet olsun, birim fiyatı 9.000 TL altında.", "Q-1001", 3),
+    ],
+)
+async def test_unit_ceiling_with_quantity_still_adds(db, text, quote, expected):
+    data, before, after, logs, receipts, _ = await run(db, text, quote)
+    assert data["notice"] == ""
+    assert items(after) == [("PRD-BC-110", expected)]
+    assert after["version"] == before["version"] + 1 and len(receipts) == 1
+    adds = [log for log in logs if log["tool_name"] == "add_to_quote"]
+    assert len(adds) == 1 and adds[0]["mutation_applied"]
