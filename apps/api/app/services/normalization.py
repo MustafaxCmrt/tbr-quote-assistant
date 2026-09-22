@@ -25,14 +25,19 @@ def has_price_ceiling_intent(value: str) -> bool:
     Currency alone is not a ceiling: 'kaç TL?' must remain a normal read.
     Literal monetary amounts without a clear relation require clarification.
     """
-    text = re.sub(r"\b(?:simdiye|bugune) kadar\b", "", normalize(value))
+    currency = bool(re.search(r"\b(?:tl|try|lira\w*)\b|₺", value, re.IGNORECASE))
+    text = normalize(value)
+    if not currency:
+        text = re.sub(r"\b(?:simdiye|bugune) kadar\b", "", text)
     # A magnitude word can end a numeric or written amount (8 bin / on bin).
     # Recognize that monetary fragment without pretending to parse its value.
     amount_tail = r"(?<![\w.,-])(?:\d[\d.,]*|bin)"
     for marker in PRICE_CEILING_MARKERS:
         suffix = r"\w*" if marker in {"butce", "limit", "tavan"} else ""
         if re.search(r"\b" + re.escape(marker) + suffix + r"\b", text) and (
-            marker not in {"kadar", "ucuz"}
+            # Conservative safety net: currency + a ceiling marker needs no parsed number.
+            currency
+            or marker not in {"kadar", "ucuz"}
             # Keep amount punctuation: normalization erases decimal/apostrophe boundaries.
             # Only an adjacent amount qualifies; time/quantity units and model codes do not.
             or re.search(

@@ -1,0 +1,25 @@
+UTC: 2026-09-22T15:12:23.271741+00:00
+Base commit (working tree may contain pending changes): 1bad1e4993e48f04b5bf250cb74521cc12eedbff
+Command: uv run --directory apps/api --locked ruff check app tests
+Exit code: 1
+
+FURB157 [*] Verbose expression in `Decimal` constructor
+   --> tests/test_safety_review.py:485:76
+    |
+483 |             assert after["items"][0]["product_id"] != "PRD-BC-120"
+484 |             assert after["items"][0]["quantity"] == 1
+485 |             assert Decimal(after["items"][0]["unit_price_try"]) <= Decimal("9000")
+    |                                                                            ^^^^^^
+486 |             assert any(
+487 |                 row["product_id"] == "PRD-BC-120" and row["status"] == "replaced" for row in rows
+    |
+help: Replace with `9000`
+    |
+484 |             assert after["items"][0]["quantity"] == 1
+    -             assert Decimal(after["items"][0]["unit_price_try"]) <= Decimal("9000")
+485 +             assert Decimal(after["items"][0]["unit_price_try"]) <= Decimal(9000)
+486 |             assert any(
+    |
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

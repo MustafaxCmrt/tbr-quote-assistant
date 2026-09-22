@@ -1,0 +1,154 @@
+UTC: 2026-09-22T15:11:42.396741+00:00
+Base commit (working tree may contain pending changes): 1bad1e4993e48f04b5bf250cb74521cc12eedbff
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml run --rm --no-deps test pytest -q tests/test_safety_review.py
+Exit code: 1
+
+ Container tbr-quote-assistant-test-run-3368455df238 Creating
+ Container tbr-quote-assistant-test-run-3368455df238 Created
+........................................................................ [ 43%]
+........................................................................ [ 87%]
+..FFF...FFFF.........                                                    [100%]
+=================================== FAILURES ===================================
+_ test_currency_marker_safety_net_prevents_unbounded_search[\xf6ner-8K TL'ye kadar-end\xfcstriyel barkod okuyucu] _
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff79bd7f90>
+ceiling = "8K TL'ye kadar", product = 'endüstriyel barkod okuyucu'
+action = 'öner'
+
+    @pytest.mark.parametrize("ceiling,product", UNPARSED_CURRENCY_CEILINGS)
+    @pytest.mark.parametrize("action", ["öner", "ekle"])
+    async def test_currency_marker_safety_net_prevents_unbounded_search(db, ceiling, product, action):
+        data, before, after, logs, receipts, _, rows, final = await exchange(
+            db, f"{ceiling} {product} {action}."
+        )
+>       assert "Fiyat sınırını kesinleştiremedim" in data["notice"]
+E       AssertionError: assert 'Fiyat sınırını kesinleştiremedim' in ''
+
+tests/test_safety_review.py:392: AssertionError
+_ test_currency_marker_safety_net_prevents_unbounded_search[\xf6ner-sekiz y\xfcz liraya kadar-k\u0131l\u0131f] _
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff7992e190>
+ceiling = 'sekiz yüz liraya kadar', product = 'kılıf', action = 'öner'
+
+    @pytest.mark.parametrize("ceiling,product", UNPARSED_CURRENCY_CEILINGS)
+    @pytest.mark.parametrize("action", ["öner", "ekle"])
+    async def test_currency_marker_safety_net_prevents_unbounded_search(db, ceiling, product, action):
+        data, before, after, logs, receipts, _, rows, final = await exchange(
+            db, f"{ceiling} {product} {action}."
+        )
+>       assert "Fiyat sınırını kesinleştiremedim" in data["notice"]
+E       AssertionError: assert 'Fiyat sınırını kesinleştiremedim' in ''
+
+tests/test_safety_review.py:392: AssertionError
+_ test_currency_marker_safety_net_prevents_unbounded_search[\xf6ner-be\u015f y\xfcz liradan ucuz-k\u0131l\u0131f] _
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff7b6e4590>
+ceiling = 'beş yüz liradan ucuz', product = 'kılıf', action = 'öner'
+
+    @pytest.mark.parametrize("ceiling,product", UNPARSED_CURRENCY_CEILINGS)
+    @pytest.mark.parametrize("action", ["öner", "ekle"])
+    async def test_currency_marker_safety_net_prevents_unbounded_search(db, ceiling, product, action):
+        data, before, after, logs, receipts, _, rows, final = await exchange(
+            db, f"{ceiling} {product} {action}."
+        )
+>       assert "Fiyat sınırını kesinleştiremedim" in data["notice"]
+E       AssertionError: assert 'Fiyat sınırını kesinleştiremedim' in ''
+
+tests/test_safety_review.py:392: AssertionError
+_ test_currency_word_and_marker_form_safety_net[8K TL'ye kadar end\xfcstriyel barkod okuyucu \xf6ner.] _
+
+text = "8K TL'ye kadar endüstriyel barkod okuyucu öner."
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            *[f"{ceiling} {product} öner." for ceiling, product in UNPARSED_CURRENCY_CEILINGS],
+            "Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.",
+            "TRY cinsinden, bütçem sınırlı.",
+            "₺ cinsinden limitim var.",
+            "Lirayla fiyat; tavanım belli değil.",
+        ],
+    )
+    def test_currency_word_and_marker_form_safety_net(text):
+        from app.services.normalization import has_price_ceiling_intent
+
+>       assert has_price_ceiling_intent(text) is True
+E       assert False is True
+E        +  where False = <function has_price_ceiling_intent at 0xffff8a6a1ee0>("8K TL'ye kadar endüstriyel barkod okuyucu öner.")
+
+tests/test_safety_review.py:416: AssertionError
+_ test_currency_word_and_marker_form_safety_net[sekiz y\xfcz liraya kadar k\u0131l\u0131f \xf6ner.] _
+
+text = 'sekiz yüz liraya kadar kılıf öner.'
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            *[f"{ceiling} {product} öner." for ceiling, product in UNPARSED_CURRENCY_CEILINGS],
+            "Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.",
+            "TRY cinsinden, bütçem sınırlı.",
+            "₺ cinsinden limitim var.",
+            "Lirayla fiyat; tavanım belli değil.",
+        ],
+    )
+    def test_currency_word_and_marker_form_safety_net(text):
+        from app.services.normalization import has_price_ceiling_intent
+
+>       assert has_price_ceiling_intent(text) is True
+E       AssertionError: assert False is True
+E        +  where False = <function has_price_ceiling_intent at 0xffff8a6a1ee0>('sekiz yüz liraya kadar kılıf öner.')
+
+tests/test_safety_review.py:416: AssertionError
+_ test_currency_word_and_marker_form_safety_net[be\u015f y\xfcz liradan ucuz k\u0131l\u0131f \xf6ner.] _
+
+text = 'beş yüz liradan ucuz kılıf öner.'
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            *[f"{ceiling} {product} öner." for ceiling, product in UNPARSED_CURRENCY_CEILINGS],
+            "Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.",
+            "TRY cinsinden, bütçem sınırlı.",
+            "₺ cinsinden limitim var.",
+            "Lirayla fiyat; tavanım belli değil.",
+        ],
+    )
+    def test_currency_word_and_marker_form_safety_net(text):
+        from app.services.normalization import has_price_ceiling_intent
+
+>       assert has_price_ceiling_intent(text) is True
+E       AssertionError: assert False is True
+E        +  where False = <function has_price_ceiling_intent at 0xffff8a6a1ee0>('beş yüz liradan ucuz kılıf öner.')
+
+tests/test_safety_review.py:416: AssertionError
+_ test_currency_word_and_marker_form_safety_net[Fiyat\u0131 TL ile s\xf6yl\xfcyorum; en ucuz k\u0131l\u0131f\u0131 \xf6ner.] _
+
+text = 'Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.'
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            *[f"{ceiling} {product} öner." for ceiling, product in UNPARSED_CURRENCY_CEILINGS],
+            "Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.",
+            "TRY cinsinden, bütçem sınırlı.",
+            "₺ cinsinden limitim var.",
+            "Lirayla fiyat; tavanım belli değil.",
+        ],
+    )
+    def test_currency_word_and_marker_form_safety_net(text):
+        from app.services.normalization import has_price_ceiling_intent
+
+>       assert has_price_ceiling_intent(text) is True
+E       AssertionError: assert False is True
+E        +  where False = <function has_price_ceiling_intent at 0xffff8a6a1ee0>('Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.')
+
+tests/test_safety_review.py:416: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_safety_review.py::test_currency_marker_safety_net_prevents_unbounded_search[\xf6ner-8K TL'ye kadar-end\xfcstriyel barkod okuyucu]
+FAILED tests/test_safety_review.py::test_currency_marker_safety_net_prevents_unbounded_search[\xf6ner-sekiz y\xfcz liraya kadar-k\u0131l\u0131f]
+FAILED tests/test_safety_review.py::test_currency_marker_safety_net_prevents_unbounded_search[\xf6ner-be\u015f y\xfcz liradan ucuz-k\u0131l\u0131f]
+FAILED tests/test_safety_review.py::test_currency_word_and_marker_form_safety_net[8K TL'ye kadar end\xfcstriyel barkod okuyucu \xf6ner.]
+FAILED tests/test_safety_review.py::test_currency_word_and_marker_form_safety_net[sekiz y\xfcz liraya kadar k\u0131l\u0131f \xf6ner.]
+FAILED tests/test_safety_review.py::test_currency_word_and_marker_form_safety_net[be\u015f y\xfcz liradan ucuz k\u0131l\u0131f \xf6ner.]
+FAILED tests/test_safety_review.py::test_currency_word_and_marker_form_safety_net[Fiyat\u0131 TL ile s\xf6yl\xfcyorum; en ucuz k\u0131l\u0131f\u0131 \xf6ner.]
+7 failed, 158 passed in 20.91s

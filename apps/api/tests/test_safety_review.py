@@ -52,6 +52,7 @@ CEILINGS = [
     ("8.500 TL'ye kadar", "8500"),
     ("8.500 TL üstü olmayan", None),
     ("8.500 TL altında", "8500"),
+    ("8.500 TL'nin altında", "8500"),
     ("8.500 TL altı", "8500"),
     ("8.500 TL'den ucuz", "8500"),
     ("8.500 lirayı geçmeyen", None),
@@ -252,6 +253,7 @@ def test_backorder_consent_is_an_affirmative_statement(text, expected):
 
 
 NON_MONETARY_READS = [
+    ("Bin adete kadar indirim var mı?", "discount_policy"),
     ("Yarına kadar 2 adet okuyucu teslim edilir mi?", "delivery_policy"),
     ("3 güne kadar teslim olur mu?", "delivery_policy"),
     ("Garanti 24 aya kadar mı?", "warranty"),
@@ -372,3 +374,115 @@ def test_written_number_with_non_money_unit_is_not_ceiling(text):
     from app.services.normalization import has_price_ceiling_intent
 
     assert has_price_ceiling_intent(text) is False
+
+
+UNPARSED_CURRENCY_CEILINGS = [
+    ("8K TL'ye kadar", "endüstriyel barkod okuyucu"),
+    ("sekiz yüz liraya kadar", "kılıf"),
+    ("beş yüz liradan ucuz", "kılıf"),
+]
+
+
+@pytest.mark.parametrize("ceiling,product", UNPARSED_CURRENCY_CEILINGS)
+@pytest.mark.parametrize("action", ["öner", "ekle"])
+async def test_currency_marker_safety_net_prevents_unbounded_search(db, ceiling, product, action):
+    data, before, after, logs, receipts, _, rows, final = await exchange(
+        db, f"{ceiling} {product} {action}."
+    )
+    assert "Fiyat sınırını kesinleştiremedim" in data["notice"]
+    assert data["recommended_product_ids"] == []
+    assert after == before and final == rows and receipts == []
+    assert not {
+        "search_products",
+        "add_to_quote",
+        "update_quote_item",
+        "replace_with_alternative",
+    } & {log["tool_name"] for log in logs}
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        *[f"{ceiling} {product} öner." for ceiling, product in UNPARSED_CURRENCY_CEILINGS],
+        "Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.",
+        "TRY cinsinden, bütçem sınırlı.",
+        "₺ cinsinden limitim var.",
+        "Lirayla fiyat; tavanım belli değil.",
+    ],
+)
+def test_currency_word_and_marker_form_safety_net(text):
+    from app.services.normalization import has_price_ceiling_intent
+
+    assert has_price_ceiling_intent(text) is True
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Kadaroglu marka kılıf kaç TL?",
+        "Altius kılıf kaç TL?",
+        "Delirasyon modelinin en ucuz çeşidi hangisi?",
+    ],
+)
+def test_safety_net_respects_word_boundaries(text):
+    from app.services.normalization import has_price_ceiling_intent
+
+    assert has_price_ceiling_intent(text) is False
+
+
+@pytest.mark.parametrize(
+    "quote,text,tool",
+    [
+        ("Q-1001", "BlueScan Air 1 adet daha ekle.", "add_to_quote"),
+        (
+            "Q-1004",
+            "Pahalı okuyucuyu 9.000 TL altında bir alternatifle değiştir.",
+            "replace_with_alternative",
+        ),
+        ("Q-1001", "İade süresi nedir?", None),
+    ],
+)
+async def test_frozen_parser_demo_messages(db, quote, text, tool):
+    app, client = await chat_client(db)
+    async with app.router.lifespan_context(app), client:
+        sid = await open_session(client, quote, "CUST-IST-001")
+        before = (await client.get(f"/api/quotes/{quote}")).json()
+        response = await client.post("/api/chat", json=message(sid, text, quote))
+        assert response.status_code == 200
+        data = response.json()
+        after = (await client.get(f"/api/quotes/{quote}")).json()
+    async with db.connect() as conn:
+        receipts = (await conn.execute(sa.select(mutation_receipts))).mappings().all()
+        logs = (await conn.execute(sa.select(tool_call_logs))).mappings().all()
+        rows = (
+            (await conn.execute(sa.select(quote_items).where(quote_items.c.quote_id == quote)))
+            .mappings()
+            .all()
+        )
+    mutations = [log for log in logs if log["mutation_applied"]]
+    assert data["notice"] == ""
+    if tool is None:
+        assert after == before and receipts == [] and mutations == []
+        policies = [
+            log
+            for log in logs
+            if log["tool_name"] == "get_knowledge_entries"
+            and log["input"]["topic"] == "return_policy"
+        ]
+        assert policies and policies[0]["output"]["entries"]
+        assert {e["knowledge_id"] for e in policies[0]["output"]["entries"]} <= {
+            source["source_id"] for source in data["sources"] if source["kind"] == "knowledge"
+        }
+    else:
+        assert after["version"] == before["version"] + 1 and len(receipts) == 1
+        assert [log["tool_name"] for log in mutations] == [tool]
+        if tool == "add_to_quote":
+            assert [(p["product_id"], p["quantity"]) for p in after["items"]] == [("PRD-BC-110", 2)]
+        else:
+            assert len(after["items"]) == 1
+            assert after["items"][0]["product_id"] != "PRD-BC-120"
+            assert after["items"][0]["quantity"] == 1
+            assert Decimal(after["items"][0]["unit_price_try"]) <= Decimal(9000)
+            assert any(
+                row["product_id"] == "PRD-BC-120" and row["status"] == "replaced" for row in rows
+            )
