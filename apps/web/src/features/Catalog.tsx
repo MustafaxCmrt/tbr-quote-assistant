@@ -246,14 +246,17 @@ export function Catalog({ kind }: { kind: "products" | "knowledge" }) {
                 {field("title", "Başlık")}
                 <label>
                   {title("Konu")}
-                  <input name="topic" list="topics" required />
-                  <datalist id="topics">
+                  {/* Chat retrieves only these topics; free text saved records it never cites. */}
+                  <select name="topic" required defaultValue="">
+                    <option value="" disabled>
+                      Konu seç
+                    </option>
                     {Object.entries(topics).map(([k, v]) => (
                       <option key={k} value={k}>
                         {v}
                       </option>
                     ))}
-                  </datalist>
+                  </select>
                   {fields.topic && (
                     <small className="error-text">{fields.topic}</small>
                   )}
