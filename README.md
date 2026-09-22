@@ -1,13 +1,14 @@
 # The Blue Red — Teklif Asistanı
 
 Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
-**22 Eylül 2026: video öncesi fiyat/onay düzeltmeleri doğrulandı; F09 fiziksel prova/video/teslim açık.**
+**23 Eylül 2026: tam denetimin P1/P2 bulguları düzeltildi ve doğrulandı; F09 fiziksel prova/video/teslim açık.**
 Altı gerçek araç, transaction/receipt, kaynaklı deterministik sohbet, SSE, web admin ve Expo
-uygulaması çalışıyor. Son tam backend koşusu **402 passed** (22 golden dahil):
-[komut/çıktı](reports/v8_ceiling_full.txt), [golden sonuçları](reports/v8_ceiling_golden.json).
-Fiyat sınırı, bekleme onayı ve uyumluluk düzeltmeleri: [çözüm kaydı](reports/safety_review_resolution.md).
-Doğrulanan uygulama commit'i: `0787bcb4a8df13c93cb527fd66c592511742e6e0`.
-Teslim adayı: `demo-candidate-20260922-v8`; etiketin uygulama kodu test edilen commit ile aynıdır.
+uygulaması çalışıyor. Son tam backend koşusu **451 passed** (22 golden dahil):
+[komut/çıktı](reports/audit_fix_final_backend.txt), [golden sonuçları](reports/audit_fix_final_golden.json).
+Tam denetim bulguları ve düzeltmeleri: [çözüm kaydı](reports/audit_fix_resolution.md);
+önceki fiyat/onay düzeltmeleri: [çözüm kaydı](reports/safety_review_resolution.md).
+Doğrulanan uygulama commit'i: `fde6015ba5b18772effcb480c4577e5f2cad46d9`.
+Teslim adayı: `demo-candidate-20260923-v9`; etiketin uygulama kodu test edilen commit ile aynıdır.
 Önceki v3 temiz clone'da 229 test geçmişti: [tarihsel temiz kurulum kanıtı](reports/hardening_resolution.md#v3-temiz-clone-provası).
 Bu düzeltmede yeni temiz clone açılmadı; mevcut izole PostgreSQL ve çalışan API doğrulandı.
 Mustafa fiziksel iPhone'da stream, ürün ekleme, web ile ortak teklif, aynı isteğin tekrarı,
@@ -57,7 +58,7 @@ docker compose --profile test up -d --wait test-db
 docker compose --profile test exec test-db sh -c "psql -U tbr_owner -d tbr_test -tAc \"select format('DROP DATABASE %I;', datname) from pg_database where datname like 'tbr\\_test\\_%'\" | psql -U tbr_owner -d tbr_test -q"
 ```
 
-Son onaylı temizlikte 2.163 geçici test DB’si silindi (sonuç 0); [önce/sonra kanıtı](reports/final_testdb_cleanup.txt). Sonraki test koşuları yeniden geçici DB oluşturur. Fiyat ayrıştırıcısı v8 ile yeniden **DONDURULDU**; [son doğrulama](reports/final_ceiling_resolution.md).
+Son onaylı temizlikte 4.319 geçici test DB’si silindi (sonuç 0); [önce/sonra kanıtı](reports/audit_fix_testdb_cleanup.txt). Sonraki test koşuları yeniden geçici DB oluşturur. Çok sayıda geçici DB test-db’nin 64 MB `/dev/shm` alanını doldurabilir; bu durumda önce bu temizlik yapılır, limit büyütülmez.
 
 Seed yalnız eksik ID'leri ekler, mevcut kullanıcı düzenlemelerini değiştirmez; startup'ta DROP/reset yoktur.
 Tüm seed ve başarı işareti tek transaction içindedir. Named volume veriyi restart'ta korur.

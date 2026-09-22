@@ -1,0 +1,7 @@
+UTC: 2026-09-22T21:58:42Z
+HEAD: fde6015ba5b18772effcb480c4577e5f2cad46d9
+Command: python3 scripts/check_delivery.py
+PASS original source bytes unchanged: 12 files
+PASS stageable files exclude local instructions, env, actual LAN address and scanned key patterns
+PASS iOS verification bundle uses placeholder address and contains no scanned provider key pattern
+Exit code: 0

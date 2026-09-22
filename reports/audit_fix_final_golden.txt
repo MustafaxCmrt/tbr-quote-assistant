@@ -1,0 +1,6 @@
+UTC: 2026-09-22T21:58:24Z
+HEAD: fde6015ba5b18772effcb480c4577e5f2cad46d9
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps -e EVIDENCE_COMMIT_SHA=fde6015ba5b18772effcb480c4577e5f2cad46d9 -e GOLDEN_REPORT_PATH=/evidence/audit_fix_final_golden.json test pytest -q tests/golden/test_chat_golden.py
+......................                                                   [100%]
+22 passed in 5.79s
+Exit code: 0

@@ -1,0 +1,6 @@
+UTC: 2026-09-22T21:58:51Z
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test stop test-db
+ Container tbr-quote-assistant-test-db-1 Stopping 
+ Container tbr-quote-assistant-test-db-1 Stopped 
+Exit code: 0
+running containers after: 0
