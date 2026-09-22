@@ -512,12 +512,27 @@ async def build_plan(conn, session, message_id, text, mode):
             notice = "Koşulları sağlayan tek anlamlı stoklu alternatif seçilemedi. Ürün kodunu belirtir misin?"
         return finish()
     # Each conjunction requirement gets its own search and guard tags, then one atomic group.
-    content = (
-        text.split(";", 1)[-1]
-        if ";" in text and not re.search(r"\bekle(?:r|yin)?\b", normalize(text.split(";", 1)[0]))
-        else text.split(";", 1)[0]
-    )
-    segments = re.split(r"\bve\b", content, flags=re.IGNORECASE)
+    parts = text.split(";")
+    if len(parts) > 1 and not re.search(r"\bekle(?:r|yin)?\b", normalize(parts[0])):
+        # A leading context clause ("Sahada internet olmayacak; ... ekle").
+        content = [text.split(";", 1)[-1]]
+    else:
+        # Later clauses keep their constraints: features bind the preceding
+        # product, another product needs its own add verb, notes are ignored.
+        content = [parts[0]]
+        for part in parts[1:]:
+            if (
+                category(part)
+                or named_catalog_match(part)
+                or any(w.startswith(("prd-", "tbr-")) for w in tokens(part))
+            ):
+                if not re.search(r"\bekle(?:r|yin)?\b", normalize(part)):
+                    notice = "Noktalı virgülden sonraki ürün için ne yapmamı istediğin belirsiz. Ekleme için ürünü ve ekle komutunu ayrı yazar mısın? Teklifi değiştirmedim."
+                    return finish()
+                content.append(part)
+            elif tokens(part) & FEATURES:
+                content.append(part)
+    segments = [s for part in content for s in re.split(r"\bve\b", part, flags=re.IGNORECASE)]
     requirements = []
     pending_features = []
     for segment in segments:

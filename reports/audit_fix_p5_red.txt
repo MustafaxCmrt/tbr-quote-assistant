@@ -1,0 +1,44 @@
+UTC: 2026-09-22T21:42:42Z
+HEAD (working tree may contain pending changes): e3a24807081dfc48ee6e49f0e40d42e35fe899e0
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test pytest -q tests/test_audit_regressions.py -k semicolon
+
+tests/test_audit_regressions.py:42: AssertionError
+________________ test_semicolon_feature_is_enforced_at_mutation ________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff7c5d7e10>
+
+    async def test_semicolon_feature_is_enforced_at_mutation(db):
+        data, before, after, logs, receipts, _ = await run(db, "BlueScan Air 1 adet ekle; QR zorunlu.")
+        assert data["notice"] == ""
+        assert items(after) == [("PRD-BC-110", 1)] and len(receipts) == 1
+        searches = [log for log in logs if log["tool_name"] == "search_products"]
+>       assert all("qr" in log["input"]["filters"]["required_tags"] for log in searches)
+E       assert False
+E        +  where False = all(<generator object test_semicolon_feature_is_enforced_at_mutation.<locals>.<genexpr> at 0xffff7a96ea80>)
+
+tests/test_audit_regressions.py:236: AssertionError
+_________________ test_semicolon_separated_adds_are_one_group __________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff7a99dd10>
+
+    async def test_semicolon_separated_adds_are_one_group(db):
+        data, before, after, logs, receipts, _ = await run(
+            db, "BlueScan Air 1 adet ekle; GreenScan Eco 1 adet ekle."
+        )
+        assert data["notice"] == ""
+>       assert sorted(items(after)) == [("PRD-BC-110", 1), ("PRD-BC-140", 1)]
+E       AssertionError: assert [('PRD-BC-110', 1)] == [('PRD-BC-110...D-BC-140', 1)]
+E         
+E         Right contains one more item: ('PRD-BC-140', 1)
+E         Use -v to get more diff
+
+tests/test_audit_regressions.py:244: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_audit_regressions.py::test_semicolon_clause_is_not_dropped[BlueScan Lite 1 adet ekle; QR zorunlu.]
+FAILED tests/test_audit_regressions.py::test_semicolon_clause_is_not_dropped[BlueScan Lite 1 adet ekle; kablosuz olmal\u0131.]
+FAILED tests/test_audit_regressions.py::test_semicolon_clause_is_not_dropped[BlueScan Air 1 adet ekle; GreenScan Eco'nun fiyat\u0131 ne?]
+FAILED tests/test_audit_regressions.py::test_semicolon_feature_is_enforced_at_mutation
+FAILED tests/test_audit_regressions.py::test_semicolon_separated_adds_are_one_group
+5 failed, 41 deselected in 1.78s
+
+Exit code: 1

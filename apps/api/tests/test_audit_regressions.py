@@ -212,3 +212,38 @@ async def test_unsatisfiable_or_ambiguous_explicit_target_never_substitutes(db, 
     data, before, after, logs, receipts, _ = await run(db, text, "Q-1004")
     assert_unchanged(data, before, after, logs, receipts)
     assert "değiştirmedim" in data["notice"]
+
+
+# B05: a clause after ';' keeps binding the product it follows.
+@pytest.mark.parametrize(
+    "text",
+    [
+        "BlueScan Lite 1 adet ekle; QR zorunlu.",
+        "BlueScan Lite 1 adet ekle; kablosuz olmalı.",
+        "BlueScan Air 1 adet ekle; GreenScan Eco'nun fiyatı ne?",
+    ],
+)
+async def test_semicolon_clause_is_not_dropped(db, text):
+    data, before, after, logs, receipts, _ = await run(db, text)
+    assert_unchanged(data, before, after, logs, receipts)
+
+
+async def test_semicolon_feature_is_enforced_at_mutation(db):
+    data, before, after, logs, receipts, _ = await run(db, "BlueScan Air 1 adet ekle; QR zorunlu.")
+    assert data["notice"] == ""
+    assert items(after) == [("PRD-BC-110", 1)] and len(receipts) == 1
+    assert after["version"] == before["version"] + 1
+    searches = [log for log in logs if log["tool_name"] == "search_products"]
+    assert all("qr" in log["input"]["filters"]["required_tags"] for log in searches)
+
+
+async def test_semicolon_separated_adds_are_one_group(db):
+    data, before, after, logs, receipts, _ = await run(
+        db, "BlueScan Air 1 adet ekle; GreenScan Eco 1 adet ekle."
+    )
+    assert data["notice"] == ""
+    assert sorted(items(after)) == [("PRD-BC-110", 1), ("PRD-BC-140", 1)]
+    assert len(receipts) == 2
+    assert after["version"] == before["version"] + 2  # one per applied mutation
+    adds = [log for log in logs if log["tool_name"] == "add_to_quote"]
+    assert [log["input"]["product_id"] for log in adds] == ["PRD-BC-110", "PRD-BC-140"]
