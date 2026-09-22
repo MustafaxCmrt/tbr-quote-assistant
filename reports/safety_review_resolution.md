@@ -110,3 +110,7 @@ sonrası API açıkça loopback'e döndürülür; repo/video erişimi doğrulan�
 ## v6 bağımsız denetim eki
 
 Bağımsız Claude incelemesinde v5’in bin içeren bazı para sınırlarını öneri yolunda kaçırdığı bulundu. Önceki bin testleri yalnız altında işaretçisini kapsıyordu. Kırmızı/yeşil kanıt ve dar düzeltme: [v6 P1 çözüm raporu](p1_bin_ceiling_resolution.md). Önceki test sonuçları bütün dil biçimlerinin güvenli olduğunu kanıtlamaz.
+
+## Son tur / v7
+
+Onaylı test DB temizliği, para sözcüğü + sınır işareti güvenlik ağı ve ayrıştırıcının dondurulması: [son doğrulama raporu](final_ceiling_resolution.md). Önceki kanıtlar tarihsel olarak korunur.

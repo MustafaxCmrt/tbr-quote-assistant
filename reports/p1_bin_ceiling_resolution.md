@@ -75,3 +75,7 @@ Kalan sınırlar: tutar çözümleyicisi hâlâ sınırlı; genel yazıyla sayı
 muhafazakâr kalır. Retry eski kalıcı planı korur; düzeltme yeni mesajlarda değerlendirilir.
 Yeni fiziksel telefon/video veya temiz clone doğrulaması yapılmadı. İstemci kodu değişmediği için
 bu tur istemci testleri yeniden çalıştırılmadı; eski sonuçlar tarihsel kanıttır.
+
+## Son tur / v7
+
+Onaylı test DB temizliği, para sözcüğü + sınır işareti güvenlik ağı ve ayrıştırıcının dondurulması: [son doğrulama raporu](final_ceiling_resolution.md). Önceki kanıtlar tarihsel olarak korunur.

@@ -59,34 +59,12 @@
 - F08 uygulama kabul kapısı tamamlandı; kapsam ve review disposition reports/f08_acceptance.md içindedir. F09 v3 clone bf92756 temiz kurulum ve otomatik kontrolleri geçti (reports/hardening_resolution.md); final video/erişim/gönderim kapıları tamamlanmadı. Public dağıtım, görünürlük değişikliği ve teslim mesajı için insan onayı gerekir.
 
 
-## 22 Eylül v4/v5/v6 düzeltmelerinin sınırları
+## Güncel dil davranışı ve dondurma
 
-- Para ayrıştırması hâlâ sınırlıdır. `TL altında`, `TL altı`, `TL’den ucuz` sayısal sınırları desteklenir;
-  mevcut aday yorumu olan birim liste fiyatı `<=` korunur. `lira`, `₺`, `8 bin` gibi desteklenmeyen sınır
-  biçimleri öneri ve mutasyonda netleştirme ister; sınırsız öneriye çevrilmez. `kaç TL?` ve adet içeren
-  normal fiyat soruları sınır sayılmaz. Her doğal dil biçiminin anlaşıldığı iddia edilmez.
-- Backorder onayı ayrı, açık bir olumlu cümlecik olmalıdır: `bekleyebilirim`, `beklemeyi kabul ediyorum`
-  veya `backorder kabul ediyorum`. Olumsuzlama, alıntı, soru ve koşul şüphesinde onay verilmiş sayılmaz.
-  Karmaşık ama olumlu ifadeler de güvenli biçimde reddedilebilir; müşteri uygunluğu ayrıca zorunludur.
-- Salt okunur offline/senkron soruları gerçek uyumluluk kayıtlarını getirir; kaynak yoksa kaynak uydurulmaz.
-- Düzeltmeler yeni mesaj planlarına uygulanır; retry mevcut kalıcı plan ve receipt davranışını korur.
-- v4 uygulama commit’i `902894a`: 294 backend ve 22 istemci testi geçti. İki P1 ve uyumluluk yönlendirmesi
-  kapatıldı; [çözüm raporu](reports/safety_review_resolution.md). v4 fiziksel prova/video/erişim/gönderim
-  henüz tamamlanmadı. Yeni temiz kurulum, v3'ün tarihsel temiz clone kanıtıyla karıştırılmaz.
+Fiyat ayrıştırıcısı bu son turdan sonra **DONDURULDU**. Sözcük sınırlı bir fiyat sınırı işaretiyle (`kadar`, `ucuz`, `altı`, `altında`, `geçmeyen`, `aşmayan`, `en fazla`, `bütçe*`, `limit*`, `tavan*`, `üstüne çıkmadan`) para sözcüğü (`TL`, `TRY`, `lira*`, `₺`) birlikteyse sınır niyeti kabul edilir; tutar çözülemiyorsa arama/öneri ve mutasyon yapılmadan netleştirme istenir. Bitişik sayısal tutar ve `bin` korumaları da sürer. `8.500 TL’ye kadar/altında/altı/TL’nin altında` 8500 birim liste fiyatı `<=` filtresini korur; `8K TL`, `sekiz yüz lira` ve `8 bin` gibi desteklenmeyen tutarlar ayrıştırılmaz. Para sözcüğü olmayan süre/adet/model örnekleri ve sınır işareti olmayan normal fiyat soruları korunur. Para sözcüğü ve bitişik rakam içermeyen yazıyla tutarlar (`sekiz yüze kadar`) hâlâ sınır olarak tanınmayabilir; genel doğal dil kapsamı iddia edilmez. Birbirinden bağımsız para ve süre ifadelerinin aynı mesajda bulunması güvenli tarafta gereksiz netleştirme üretebilir. Yazıyla miktar desteği eklenmedi: `Altı adet BlueScan Air ekle` mevcut güvenli retle hiçbir mutasyon yapmaz.
 
-- v5: `kadar/ucuz` için herhangi bir rakam yeterli değildir; tutar doğrudan işaretçiye bağlanır.
-  Süre/adet birimleri ve alfanümerik model kodları okuma sorularında yanlış fiyat uyarısı üretmez.
-  Para birimsiz `8.500’e kadar` / `8.500’den ucuz` hâlâ netleştirme ister; `TL’ye kadar` desteklenir.
-  Yazıyla miktar desteği eklenmedi: `Altı adet BlueScan Air ekle` hiçbir mutasyon yapmadan mevcut
-  fiyat netleştirmesine döner. Mutasyon yolundaki daha muhafazakâr `has_price_intent` koruması
-  değişmedi; karmaşık ekleme ifadelerinde gereksiz netleştirme hâlâ mümkündür.
-- v5 uygulama commit’i `3a07cec`: 335 backend testi (22 golden dahil) geçti;
-  [P2 kanıtı](reports/p2_price_intent_resolution.md). Yeni fiziksel cihaz/video doğrulaması yapılmadı.
-
-- v6: bağımsız Claude denetimi, v5’in `bin` içeren bazı sınırları öneri yolunda kaçırdığını buldu.
-  Önceki testler `bin` sözcüğünü yalnız `altında` ile sınamıştı. `bin` artık para birimine veya
-  sınır işaretçisine doğrudan bağlı bir tutar parçası olarak tanınır: `8 bine kadar`, `on bin liraya
-  kadar`, `8 bin TL civarı` netleştirme ister; arama/öneri ve mutasyon yapılmaz. Değer ayrıştırması
-  genişletilmedi. `on güne kadar`, `8 bin adede kadar` ve v5 süre/adet/model kontrolleri korunur.
-  Genel yazıyla sayı/para anlayışı veya bütün doğal dil biçimlerinin kapsandığı iddia edilmez.
-- v6 uygulama commit’i `fa3352b`: 370 backend testi ve 22 golden geçti; [regresyon çözümü](reports/p1_bin_ceiling_resolution.md). Yeni fiziksel prova/video doğrulaması yapılmadı.
+- Backorder onayı ayrı ve açık olumlu cümlecik olmalıdır; olumsuzlama, alıntı, soru ve koşul şüphesinde onay sayılmaz. Müşteri uygunluğu ayrıca zorunludur.
+- Offline/senkron soruları gerçek uyumluluk kayıtlarına dayanır. Kaynak uydurulmaz.
+- Düzeltme yeni mesaj planlarına uygulanır; retry eski kalıcı planı ve receipt davranışını korur.
+- Yeni fiziksel cihaz/video veya temiz clone doğrulaması bu tur yapılmadı. Tarihsel sonuçlar güncel fiziksel prova yerine geçmez.
+- Doğrulanan uygulama `9958477`: 394 backend testi (22 golden dahil), 0 error; [son rapor](reports/final_ceiling_resolution.md).

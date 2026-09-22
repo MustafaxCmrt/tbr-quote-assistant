@@ -1,8 +1,8 @@
 # Türkçe demo — yaklaşık 3 dakika 30 saniye
 
 Bu metin kayıt planıdır; video çekildi veya gönderildi anlamına gelmez.
-Doğrulanan kod: `demo-candidate-20260922-v6` (uygulama commit’i `fa3352b`).
-Test kanıtı: `reports/p1_bin_ceiling_full.txt` — izole PostgreSQL üzerinde 370 passed, 22 golden dahil.
+Doğrulanan kod: `demo-candidate-20260922-v7` (uygulama commit’i `9958477`).
+Test kanıtı: `reports/final_ceiling_full.txt` — izole PostgreSQL üzerinde 394 passed, 22 golden dahil.
 
 ## Hazırlık
 
@@ -19,7 +19,7 @@ Kayıtta `.env`, QR/LAN adresi, kişisel sekmeler veya parolalar görünmesin.
 | 1:10–1:35 | Aynı isteği tekrar gönder; web İşlem kayıtları | “Aynı mesaj kimliği receipt üzerinden tekrarlandı; yeni deneme var ama ikinci miktar artışı yok.” |
 | 1:35–2:05 | Q1004 mevcut kalemini göster; ilk durum uygunsa `Pahalı okuyucuyu 9.000 TL altında bir alternatifle değiştir.` | “Fiyat tavanı sunucuda tekrar kontrol ediliyor. Eski satır geçmişte, yeni satır aktif.” |
 | 2:05–2:35 | `İade süresi nedir?`; bilgi kaynağı aç/kapat | “Harici model adaptörü yok. Kaynaklı deterministik mod gerçek knowledge kimliğiyle cevap veriyor; bu soru teklifi değiştirmiyor.” |
-| 2:35–3:00 | p1_bin_ceiling_full.txt ve p1_bin_ceiling_golden.json | “370 backend testi ve 22 golden senaryo. Gerçek PostgreSQL; tool girdileri, yasak etkiler, kaynaklar ve DB sonucu birlikte kontrol edildi.” |
+| 2:35–3:00 | final_ceiling_full.txt ve final_ceiling_golden.json | “394 backend testi ve 22 golden senaryo. Gerçek PostgreSQL; tool girdileri, yasak etkiler, kaynaklar ve DB sonucu birlikte kontrol edildi.” |
 | 3:00–3:30 | README trade-off, KNOWN_LIMITATIONS, AI_USAGE | “Firma indirim çakışmasını adaya bıraktı; özel tek kural önceliğini belgeledim. Yerel demo auth/RBAC içermiyor; katalog yazma paylaşılan admin anahtarı ister, web bunu sunucu tarafında ekler. AI katkısı ve insan cihaz doğrulaması ayrı kaydedildi.” |
 
 Replace adımını mevcut Q1004'ü okuyarak prova et; daha önce değiştirilmişse reset yapma.
@@ -36,7 +36,9 @@ SSE, hazırlanmış fallback cevabının parçalanmasıdır; LLM token akışı 
 Replace cümlesi ayrı temiz kurulumda gerçek API üzerinden doğrulandı: Q1004 BC120/12.950 TL → BC110/7.990 TL, eski satır replaced, adet1/sürüm2. Kanıt: reports/f09_demo_replace.txt. Ana demo Q1004 prova sırasında değiştirilmedi.
 
 
-## v6 çekim öncesi kabul
+## v7 çekim öncesi kabul
+
+Fiyat ayrıştırıcısı v7 ile **DONDURULDU**. `8K TL’ye kadar endüstriyel barkod okuyucu öner.` ve `sekiz yüz liraya kadar kılıf öner.` netleştirme ister; öneri/arama yapılmaz.
 
 Bu sürüm için fiziksel prova henüz yapılmış sayılmaz. Mevcut PostgreSQL içinde ana demodan alınmış
 ayrı bir prova DB'si hazır; kopyalama sırasında 10 quote DTO'su aynı bulundu
