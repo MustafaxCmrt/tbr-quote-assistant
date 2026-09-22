@@ -45,7 +45,7 @@ def has_price_ceiling_intent(value: str) -> bool:
             return True
     return bool(
         re.search(
-            amount_tail + r"\s*(?:tl|try|lira\w*)\b|₺\s*\d|\d[\d.,]*\s*₺",
+            amount_tail + r"\s*(?:(?:tl|try|lira\w*)\b|₺)|₺\s*\d",
             value,
             re.IGNORECASE,
         )

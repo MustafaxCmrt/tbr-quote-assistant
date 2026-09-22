@@ -326,6 +326,7 @@ BIN_CEILINGS = [
     "10 bin liradan ucuz",
     "on bin liraya kadar",
     "8 bin TL civarı",
+    "8 bin ₺ civarı",
     "yüz bin liraya kadar",
     "sekiz bine kadar",
     "8 bin TRY kadar",
