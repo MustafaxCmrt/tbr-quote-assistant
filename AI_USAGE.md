@@ -92,3 +92,5 @@ Test DB servisi bitince durduruldu. Fiziksel prova/video Mustafa'ya aittir.
 2026-09-22 v6 (Codex, Mustafa talimatı): bağımsız Claude denetiminin bulduğu v5 bin-fiyat regresyonu doğrulandı; yalnız normalization.py düzeltildi, code-testing-agent odaklı akışıyla helper + izole HTTP/DB regresyonları eklendi; önceki testlerin bin/kadar birleşimini kaçırdığı çözüm raporunda açıklandı.
 
 2026-09-22 v7 (Codex, Mustafa talimatı): onaylı test-db temizliği 2163→0; yalnız normalization.py içinde para sözcüğü + sınır işareti güvenlik ağı eklendi, izole helper/HTTP/DB ve demo regresyonlarıyla doğrulandı; fiyat ayrıştırıcısı bu turdan sonra DONDURULDU.
+
+2026-09-22 v8 (Codex, Mustafa talimatı, Claude bağımsız denetim bulgusu): yalnız has_price_ceiling_intent içinde en ucuz/şimdiye kadar/bugüne kadar yanlış alarmı daraltıldı; True beklentisi düzeltilip helper ve izole HTTP/DB testleri eklendi, ayrıştırıcı yeniden DONDURULDU.

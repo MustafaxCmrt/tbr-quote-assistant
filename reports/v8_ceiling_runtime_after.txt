@@ -1,0 +1,10 @@
+UTC: 2026-09-22T15:35:52.440947+00:00
+Base commit (working tree may contain pending changes): 0787bcb4a8df13c93cb527fd66c592511742e6e0
+Command: python3 reports/p2_price_intent_runtime_check.py after
+Exit code: 0
+
+PASS 10 quote DTOs equal across direct API, web proxy, configured mobile API
+PASS all quote DTOs unchanged after rebuild, including Q-1001/Q-1004
+PASS all 27 API Python file hashes equal checkout
+normalization.py SHA256: dd6b06032dca172ad3b46b42bf3c5f8bd2b1ada0d93462a43ce6d6c128fca227
+vm.swapusage: total = 2048.00M  used = 849.31M  free = 1198.69M  (encrypted)

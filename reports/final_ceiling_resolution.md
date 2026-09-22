@@ -63,3 +63,35 @@ kaçabilir. Para ve süre ifadeleri aynı mesajdaysa muhafazakâr kural gereksiz
 Altı adet güvenli retle kalır; retry eski planı korur, düzeltme yeni mesajlara uygulanır.
 Yeni fiziksel prova/video/temiz clone veya istemci testi bu tur yapılmadı. Freeze gereği yeni
 ayrıştırıcı genişletmesi yapılmayacak; sonraki iş fiziksel demo ve teslimdir.
+
+## v8 eki — tek P2 yanlış alarm düzeltmesi
+
+Claude bağımsız denetiminin bulgusu doğrulandı: v7 para sözcüğü varken zaman ifadesini koruyor,
+`en ucuz` üstünlüğünü de tavan sayıyordu. Mustafa’nın açık talimatıyla yalnız
+`has_price_ceiling_intent` içinde `şimdiye/bugüne kadar` ve `en ucuz` koşulsuz temizlendi (+2/-3).
+Diğer üretim fonksiyonları değişmedi. Önceki yanlış True beklentisi istenen False listesine taşındı;
+iki karışık gerçek sınır True kontrolü eklendi. Net test sayısı +8. **Ayrıştırıcı yeniden DONDURULDU.**
+Kod SHA: `0787bcb4a8df13c93cb527fd66c592511742e6e0`; yerel aday `demo-candidate-20260922-v8`.
+
+| Gereksinim | Test |
+|---|---|
+| Altı üstünlük/zaman fiyat sorusu sınır değildir | `test_superlative_and_temporal_phrases_are_not_ceilings` |
+| Gerçek sınır + zaman/üstünlük cümlesi True kalır | `test_currency_word_and_marker_form_safety_net` |
+| En ucuz okuyucu kaç TL: boş notice, bir search/max None, DTO/sürüm/satır/receipt değişmez; sıralama assertion’ı yok | `test_cheapest_price_question_searches_without_ceiling_or_mutation` |
+| Önceki tutar/bin/para korumaları | `test_ceiling_never_disappears_from_read_or_write`, `test_bin_ceiling_never_becomes_unbounded_search`, `test_currency_marker_safety_net_prevents_unbounded_search` |
+| Demo cümleleri aynı kalır | `test_frozen_parser_demo_messages` |
+
+Kapılar sırayla: [dar kırmızı](v8_ceiling_red.txt) `pytest -q tests/test_safety_review.py tests/unit/test_normalization.py`
+**7 failed/207 passed, exit1** → [aynı dar koşu](v8_ceiling_green.txt) **214 passed/21.90s, exit0** →
+[tam Compose build + pytest -q](v8_ceiling_full.txt) **402 passed/72.71s, 0 error, exit0** →
+[ruff](v8_ceiling_ruff.txt) exit0 → [ayrı golden export koşusu](v8_ceiling_golden.txt)
+**22 passed/6.05s, exit0**; [JSON](v8_ceiling_golden.json) her senaryoda git’ten alınan yukarıdaki SHA,
+0 failed/error/skipped/not_run → [test-db stop](v8_ceiling_testdb_stop.txt) exit0.
+Tam argv/UTC/base SHA çıktılarda; dar koşular commit öncesi pending kodu, tam paket/export commit edilmiş kodu doğrular.
+
+DB temizliği yapılmadı, shm/mem ayarı değiştirilmedi. Mevcut 512MB/1CPU test override korundu,
+Docker test koşuları sırayla çalıştı. [Yalnız API LAN build](v8_ceiling_api_build.txt) exit0;
+[önce](v8_ceiling_runtime_before.txt)/[sonra](v8_ceiling_runtime_after.txt) 10 demo DTO’su (Q-1001/Q-1004 dahil)
+aynı, 27 API Python hash’i yerelle aynı; canlı DB’ye yazılmadı. [Source/teslim kontrolü](v8_ceiling_delivery.txt)
+exit0, orijinal12dosyabyteaynı. Başlangıç/ara/son swap849.31MB; test-db kapalı. Push yapılmadı.
+Önceki belgeli dil sınırları sürer; yeni cihaz/video doğrulaması yapılmadı.
