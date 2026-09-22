@@ -1,0 +1,6 @@
+{
+  "files_scanned": 8,
+  "private_local_values_checked": 3,
+  "findings": [],
+  "scope": "Current web build and existing mobile export; matched values never printed. Images are scanned as bytes, not OCR."
+}
