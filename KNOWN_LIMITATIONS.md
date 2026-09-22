@@ -59,7 +59,7 @@
 - F08 uygulama kabul kapısı tamamlandı; kapsam ve review disposition reports/f08_acceptance.md içindedir. F09 v3 clone bf92756 temiz kurulum ve otomatik kontrolleri geçti (reports/hardening_resolution.md); final video/erişim/gönderim kapıları tamamlanmadı. Public dağıtım, görünürlük değişikliği ve teslim mesajı için insan onayı gerekir.
 
 
-## 22 Eylül v4 düzeltmesinin sınırları
+## 22 Eylül v4/v5 düzeltmelerinin sınırları
 
 - Para ayrıştırması hâlâ sınırlıdır. `TL altında`, `TL altı`, `TL’den ucuz` sayısal sınırları desteklenir;
   mevcut aday yorumu olan birim liste fiyatı `<=` korunur. `lira`, `₺`, `8 bin` gibi desteklenmeyen sınır
@@ -73,3 +73,12 @@
 - v4 uygulama commit’i `902894a`: 294 backend ve 22 istemci testi geçti. İki P1 ve uyumluluk yönlendirmesi
   kapatıldı; [çözüm raporu](reports/safety_review_resolution.md). v4 fiziksel prova/video/erişim/gönderim
   henüz tamamlanmadı. Yeni temiz kurulum, v3'ün tarihsel temiz clone kanıtıyla karıştırılmaz.
+
+- v5: `kadar/ucuz` için herhangi bir rakam yeterli değildir; tutar doğrudan işaretçiye bağlanır.
+  Süre/adet birimleri ve alfanümerik model kodları okuma sorularında yanlış fiyat uyarısı üretmez.
+  Para birimsiz `8.500’e kadar` / `8.500’den ucuz` hâlâ netleştirme ister; `TL’ye kadar` desteklenir.
+  Yazıyla miktar desteği eklenmedi: `Altı adet BlueScan Air ekle` hiçbir mutasyon yapmadan mevcut
+  fiyat netleştirmesine döner. Mutasyon yolundaki daha muhafazakâr `has_price_intent` koruması
+  değişmedi; karmaşık ekleme ifadelerinde gereksiz netleştirme hâlâ mümkündür.
+- v5 uygulama commit’i `3a07cec`: 335 backend testi (22 golden dahil) geçti;
+  [P2 kanıtı](reports/p2_price_intent_resolution.md). Yeni fiziksel cihaz/video doğrulaması yapılmadı.

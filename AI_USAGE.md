@@ -86,3 +86,5 @@ test-gap-analysis yönergeleriyle aynı ajan tarafından yapıldı; bağımsız 
 skoru iddiası yoktur. Statik eşleme aracı tree-sitter-language-pack eksikliği nedeniyle çalışmadı;
 ek kurulum yapılmadı. Test konteyneri 512 MB / 1 CPU ve swap kapalı ayarla, işler sırayla çalıştırıldı.
 Test DB servisi bitince durduruldu. Fiziksel prova/video Mustafa'ya aittir.
+
+2026-09-22 P2 (Codex, Mustafa talimatı): yalnız normalization.py içinde tutar/işaretçi ilişkisi daraltıldı; code-testing-agent odaklı akışıyla 41 ek parametrik örnek, kırmızı 17 failed → tam 335 passed/22 golden; demo DB’ye yazılmadı, testler sırayla çalıştı, push yapılmadı.

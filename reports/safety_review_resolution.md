@@ -102,3 +102,7 @@ bellek bütçesi için yeni temiz clone açılmadı.
 Sonraki belge commit'i yalnız belge/kanıt değiştirir; v4 etiketi konmadan önce uygulama/test kodunun
 `902894a` ile aynı olduğu kontrol edilir. Push kullanıcının ayrı onayını bekler. Fiziksel prova ve video
 sonrası API açıkça loopback'e döndürülür; repo/video erişimi doğrulanınca teslim mesajı ayrıca onaylanır.
+
+## v5 P2 eki
+
+`kadar/ucuz` yanlış fiyat alarmı dar kapsamda düzeltildi. Güncel kod, 335 backend testi ve 22 golden kanıtı: [P2 çözüm raporu](p2_price_intent_resolution.md). v4 sonuçları yukarıda tarihsel olarak korunur.
