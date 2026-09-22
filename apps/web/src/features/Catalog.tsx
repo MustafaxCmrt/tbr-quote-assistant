@@ -130,6 +130,18 @@ export function Catalog({ kind }: { kind: "products" | "knowledge" }) {
       setPending(false);
     }
   }
+  // Inputs already carry `required`; the visual mark is hidden from screen readers.
+  const title = (label: string, required = true) => (
+    <span>
+      {label}
+      {required && (
+        <span className="required-mark" aria-hidden="true">
+          {" "}
+          *
+        </span>
+      )}
+    </span>
+  );
   const field = (
     name: string,
     label: string,
@@ -138,7 +150,7 @@ export function Catalog({ kind }: { kind: "products" | "knowledge" }) {
     required = true,
   ) => (
     <label key={name}>
-      {label}
+      {title(label, required)}
       <input
         name={name}
         type={type}
@@ -190,7 +202,9 @@ export function Catalog({ kind }: { kind: "products" | "knowledge" }) {
         <form className="editor" onSubmit={save}>
           <h2>{isProduct ? "Yeni ürün" : "Yeni bilgi kaydı"}</h2>
           <p className="muted">
-            Kayıt kimliğini sunucu oluşturur. Alanlar Türkçe girilmelidir.
+            Kayıt kimliğini sunucu oluşturur. Alanlar Türkçe girilmelidir.{" "}
+            <span className="required-mark">*</span>
+            {" "}işaretli alanlar zorunludur.
           </p>
           <div className="form-grid">
             {isProduct ? (
@@ -199,7 +213,7 @@ export function Catalog({ kind }: { kind: "products" | "knowledge" }) {
                 {field("sku", "SKU")}
                 {field("brand", "Marka")}
                 <label>
-                  Kategori
+                  {title("Kategori")}
                   <select name="category">
                     {Object.entries(categories).map(([k, v]) => (
                       <option key={k} value={k}>
@@ -231,7 +245,7 @@ export function Catalog({ kind }: { kind: "products" | "knowledge" }) {
               <>
                 {field("title", "Başlık")}
                 <label>
-                  Konu
+                  {title("Konu")}
                   <input name="topic" list="topics" required />
                   <datalist id="topics">
                     {Object.entries(topics).map(([k, v]) => (
@@ -259,7 +273,7 @@ export function Catalog({ kind }: { kind: "products" | "knowledge" }) {
                   false,
                 )}
                 <label className="wide">
-                  İçerik
+                  {title("İçerik")}
                   <textarea
                     name="body"
                     required

@@ -330,6 +330,9 @@ label {
   font-weight: 600;
   color: #42536b;
 }
+.required-mark {
+  color: var(--error-ink);
+}
 input,
 select,
 textarea {
