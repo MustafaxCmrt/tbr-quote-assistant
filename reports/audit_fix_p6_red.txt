@@ -1,0 +1,44 @@
+UTC: 2026-09-22T21:53:30Z
+HEAD (working tree may contain pending changes): 8ef5c517d61aecd2044fae341a08af4c13cbd131
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test pytest -q tests/test_audit_regressions.py -k stock_rule or latest_window
+                        dict(
+                            session_id=sid,
+                            message_id=mid,
+                            body=mid,
+                            payload_hash=mid,
+                            status="completed",
+                            created_at=start + timedelta(seconds=i),
+                        )
+                        for i, mid in enumerate(ids)
+                    ],
+                )
+                await conn.execute(
+                    tool_call_logs.insert(),
+                    [
+                        dict(
+                            session_id=sid,
+                            message_id=ids[-1],
+                            attempt_id="a",
+                            tool_sequence=n,
+                            tool_name="get_quote",
+                            success=True,
+                        )
+                        for n in range(1, 506)
+                    ],
+                )
+            rows = (await client.get(f"/api/chat/sessions/{sid}/messages")).json()
+            logs = (await client.get("/api/tool-calls", params={"session_id": sid})).json()
+>       assert [r["message_id"] for r in rows] == ids[-200:]
+E       AssertionError: assert ['m000', 'm00..., 'm005', ...] == ['m005', 'm00..., 'm010', ...]
+E         
+E         At index 0 diff: 'm000' != 'm005'
+E         Use -v to get more diff
+
+tests/test_audit_regressions.py:317: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_audit_regressions.py::test_out_of_stock_policy_question_cites_stock_rule[Stokta olmayan \xfcr\xfcnler i\xe7in bekleme kural\u0131 nedir?]
+FAILED tests/test_audit_regressions.py::test_out_of_stock_policy_question_cites_stock_rule[Stok d\u0131\u015f\u0131 \xfcr\xfcnlerde backorder politikas\u0131 nas\u0131l?]
+FAILED tests/test_audit_regressions.py::test_history_endpoints_return_latest_window
+3 failed, 46 deselected in 1.38s
+
+Exit code: 1

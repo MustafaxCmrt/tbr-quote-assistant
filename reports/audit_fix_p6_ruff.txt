@@ -1,0 +1,4 @@
+UTC: 2026-09-22T21:55:16Z
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test ruff check app tests
+All checks passed!
+Exit code: 0

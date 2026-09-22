@@ -247,3 +247,72 @@ async def test_semicolon_separated_adds_are_one_group(db):
     assert after["version"] == before["version"] + 2  # one per applied mutation
     adds = [log for log in logs if log["tool_name"] == "add_to_quote"]
     assert [log["input"]["product_id"] for log in adds] == ["PRD-BC-110", "PRD-BC-140"]
+
+
+# B07: an out-of-stock policy question is routed to the real stock policy.
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Stokta olmayan ürünler için bekleme kuralı nedir?",
+        "Stok dışı ürünlerde backorder politikası nasıl?",
+    ],
+)
+async def test_out_of_stock_policy_question_cites_stock_rule(db, text):
+    data, before, after, logs, receipts, _ = await run(db, text)
+    assert after == before and receipts == []
+    assert not MUTATIONS & {log["tool_name"] for log in logs}
+    entries = {
+        e["knowledge_id"]
+        for log in logs
+        if log["tool_name"] == "get_knowledge_entries" and log["input"]["topic"] == "stock_rule"
+        for e in log["output"]["entries"]
+    }
+    assert "KNE-STOCK-001" in entries
+    assert entries <= {s["source_id"] for s in data["sources"] if s["kind"] == "knowledge"}
+    assert data["notice"] == ""
+
+
+# B09: history endpoints return the newest window, oldest first.
+async def test_history_endpoints_return_latest_window(db):
+    from datetime import UTC, datetime, timedelta
+
+    from app.persistence.models import chat_messages
+
+    app, client = await chat_client(db)
+    async with app.router.lifespan_context(app), client:
+        sid = await open_session(client, "Q-1002", "CUST-ANK-002")
+        start = datetime.now(UTC) + timedelta(minutes=1)
+        ids = [f"m{i:03d}" for i in range(205)]
+        async with db.begin() as conn:
+            await conn.execute(
+                chat_messages.insert(),
+                [
+                    {
+                        "session_id": sid,
+                        "message_id": mid,
+                        "body": mid,
+                        "payload_hash": mid,
+                        "status": "completed",
+                        "created_at": start + timedelta(seconds=i),
+                    }
+                    for i, mid in enumerate(ids)
+                ],
+            )
+            await conn.execute(
+                tool_call_logs.insert(),
+                [
+                    {
+                        "session_id": sid,
+                        "message_id": ids[-1],
+                        "attempt_id": "a",
+                        "tool_sequence": n,
+                        "tool_name": "get_quote",
+                        "success": True,
+                    }
+                    for n in range(1, 506)
+                ],
+            )
+        rows = (await client.get(f"/api/chat/sessions/{sid}/messages")).json()
+        logs = (await client.get("/api/tool-calls", params={"session_id": sid})).json()
+    assert [r["message_id"] for r in rows] == ids[-200:]
+    assert [log["tool_sequence"] for log in logs] == list(range(6, 506))

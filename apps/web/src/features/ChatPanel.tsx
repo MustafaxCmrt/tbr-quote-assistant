@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { api, stream } from "../api/client";
+import { visibleAttemptContent } from "../api/retry";
 import { initialStream, reduceChatEvent, type Source } from "../contracts";
 interface Message {
   id: string;
@@ -77,10 +78,14 @@ export function ChatPanel({
     onBusy(true);
     setError("");
     const timer = setTimeout(() => controller.abort(), 45000);
-    setMessages((prev) => [
-      ...prev.filter((m) => m.id !== id),
-      { id, user, text: "", sources: [], status: "processing" },
-    ]);
+    // A retry keeps its place and its previous answer until new text arrives.
+    setMessages((prev) =>
+      prev.some((m) => m.id === id)
+        ? prev.map((m) =>
+            m.id === id ? { ...m, status: "processing", error: undefined } : m,
+          )
+        : [...prev, { id, user, text: "", sources: [], status: "processing" }],
+    );
     setText("");
     try {
       let currentSession = session;
@@ -114,8 +119,7 @@ export function ChatPanel({
               m.id === id
                 ? {
                     ...m,
-                    text: state.text,
-                    sources: state.sources,
+                    ...visibleAttemptContent(state),
                     status: state.status,
                     error: state.error,
                   }

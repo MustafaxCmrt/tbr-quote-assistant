@@ -320,6 +320,12 @@ async def build_plan(conn, session, message_id, text, mode):
             knowledge("service_policy")
         if "indirim" in normalized:
             knowledge("discount_policy")
+        # Out-of-stock/backorder rule questions cite the stock policy itself.
+        if re.search(
+            r"\b(?:stokta (?:olmayan|yok\w*)|stok disi\w*|stoksuz|backorder|bekleme\w*)\b",
+            normalized,
+        ) and re.search(r"\b(?:kural\w*|politika\w*|nedir|nasil|kosul\w*|izin\w*)\b", normalized):
+            knowledge("stock_rule")
         if not topics - {"price_ceiling"} and (
             category(text)
             or named_catalog_match(text)

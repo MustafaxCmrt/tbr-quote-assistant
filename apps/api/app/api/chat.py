@@ -73,13 +73,14 @@ async def messages(session_id: str, request: Request):
                         chat_messages.c.created_at,
                     )
                     .where(chat_messages.c.session_id == session_id)
-                    .order_by(chat_messages.c.created_at)
+                    # Newest window, returned oldest first for display.
+                    .order_by(chat_messages.c.created_at.desc(), chat_messages.c.message_id.desc())
                     .limit(200)
                 )
             )
             .mappings()
             .all()
-        )
+        )[::-1]
 
 
 @router.get("/tool-calls")
@@ -96,10 +97,10 @@ async def tool_calls(session_id: str, request: Request):
                 await conn.execute(
                     sa.select(tool_call_logs)
                     .where(tool_call_logs.c.session_id == session_id)
-                    .order_by(tool_call_logs.c.log_id)
+                    .order_by(tool_call_logs.c.log_id.desc())
                     .limit(500)
                 )
             )
             .mappings()
             .all()
-        )
+        )[::-1]
