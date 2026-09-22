@@ -6,6 +6,8 @@
   akışları gözlendi; açık tema, büyük yazı, tablet ve VoiceOver için fiziksel kabul iddiası yoktur.
 - Üretim authentication/RBAC yoktur. Müşteri seçimi demo bağlamıdır; kimlik doğrulama değildir.
   Uygulama yerel demo içindir. PostgreSQL host portu kapalıdır; API runtime DB rolü şema değiştiremez.
+- Web müşteri seçicisi yalnız ad ve şehri gösterir; fiyat seviyesi (`price_tier`) ve bekleme uygunluğu
+  (`allow_backorder`) ekranda görünmez. Bu kurallar sunucuda uygulanır ve sohbet cevabında kaynak kaydıyla açıklanır.
 - Ürün/bilgi yazma uçları (`POST/PATCH/DELETE /api/products|knowledge`) `.env` içindeki `ADMIN_API_KEY`
   değerini `X-Admin-Key` başlığında ister; anahtar yapılandırılmamışsa 503 döner. Web paneli başlığı Vite
   proxy'si üzerinden sunucu tarafında ekler; değer tarayıcı bundle'ına ve mobil uygulamaya girmez. Okuma,
