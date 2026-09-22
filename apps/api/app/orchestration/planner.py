@@ -12,6 +12,7 @@ from app.services.normalization import (
     has_backorder_consent,
     has_price_ceiling_intent,
     has_price_intent,
+    has_unauthorized_command,
     normalize,
     numeric_slots,
 )
@@ -207,6 +208,10 @@ async def build_plan(conn, session, message_id, text, mode):
     update = bool(re.search(r"\b(guncelle|cikar)\b", normalized))
     total = "toplam" in normalized and "olsun" in normalized
     add = bool(re.search(r"\bekle(?:r|yin)?\b", normalized))
+    # A quoted, hypothetical or approval-gated command is answered read-only.
+    if has_unauthorized_command(text):
+        read_only = True
+        notice = "Mesajdaki işlemi alıntı, varsayım veya onay bekleyen bir istek olarak anladım. Teklifi değiştirmedim; uygulamamı istersen komutu doğrudan yaz."
     mutating = (remove or replace or update or total or add) and not read_only
     for markers, topic in [
         (("iade",), "return_policy"),
@@ -290,7 +295,7 @@ async def build_plan(conn, session, message_id, text, mode):
         ):
             await search(text)
         if not topics and not category(text) and not named_catalog_match(text):
-            notice = "Hangi ürün veya teklif işlemini istediğini biraz daha açık yazar mısın?"
+            notice = notice or "Hangi ürün veya teklif işlemini istediğini biraz daha açık yazar mısın?"
         return finish()
     quantity = slots["quantity"]
     if replace and quantity is not None and "tamamini" not in tokens(text):

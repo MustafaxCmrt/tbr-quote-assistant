@@ -80,6 +80,40 @@ def has_backorder_consent(value: str) -> bool:
     return False
 
 
+COMMAND_VERB = r"\b(?:ekle(?:r|yin)?|degistir(?:ir|in)?|guncelle|cikar|kaldir|sil)\b"
+QUOTED_SPANS = r'"([^"]*)"|“([^”]*)”|«([^»]*)»|„([^“”]*)[“”]|‘([^’]*)’'
+
+
+def has_unauthorized_command(value: str) -> bool:
+    """A quoted, hypothetical or approval-gated command is talked about, not given."""
+    for span in re.finditer(QUOTED_SPANS, value):
+        if re.search(COMMAND_VERB, normalize(" ".join(g for g in span.groups() if g))):
+            return True
+    text = normalize(value)
+    return bool(
+        # Conditional verb forms: eklersem, eklesek, degistirirsen, silinirse...
+        re.search(
+            r"\b(?:ekle|degistir|guncelle|cikar|kaldir|sil)(?:i?n)?(?:ir|er|ar|r)?s[ae]"
+            r"(?:m|k|n|niz|ydi\w*)?\b",
+            text,
+        )
+        # Reported or supposed speech: "ekle dersem", "diyelim ki ekle".
+        or re.search(
+            r"\b(?:der(?:se|sem|sek|sen|seniz)|de(?:sem|sek|sen|seniz)|denirse|dedigimde|"
+            r"diyelim|varsayalim|farz\s+edelim)\b|\bne\s+(?:demek|anlam\w*)\b",
+            text,
+        )
+        # The user reserved approval for later.
+        or re.search(
+            r"\bonay\w*\s+(?:(?:iste|bekle|sor)\w*|al(?:in|iniz|madan)?\b)"
+            # "sormadan ekle" (add without asking) is itself the instruction.
+            r"|\b(?:bana|benden)\s+(?:once\s+)?(?:sor(?!madan|maksizin)|onay)\w*"
+            r"|\bonce\s+(?:bana\s+)?sor(?!madan|maksizin)\w*",
+            text,
+        )
+    )
+
+
 def has_price_intent(value: str) -> bool:
     normalized = normalize(value)
     # Temporal "until now/today" is not a ceiling, even with an item quantity.
