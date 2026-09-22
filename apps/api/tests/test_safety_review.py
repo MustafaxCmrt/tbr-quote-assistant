@@ -47,6 +47,10 @@ async def exchange(db, text, *, eligible=True, retry=False):
 
 
 CEILINGS = [
+    ("8.500'e kadar", None),
+    ("8.500'den ucuz", None),
+    ("8.500 TL'ye kadar", "8500"),
+    ("8.500 TL üstü olmayan", None),
     ("8.500 TL altında", "8500"),
     ("8.500 TL altı", "8500"),
     ("8.500 TL'den ucuz", "8500"),
@@ -245,3 +249,71 @@ def test_backorder_consent_is_an_affirmative_statement(text, expected):
     from app.services.normalization import has_backorder_consent
 
     assert has_backorder_consent(text) is expected
+
+
+NON_MONETARY_READS = [
+    ("Yarına kadar 2 adet okuyucu teslim edilir mi?", "delivery_policy"),
+    ("3 güne kadar teslim olur mu?", "delivery_policy"),
+    ("Garanti 24 aya kadar mı?", "warranty"),
+    ("En ucuz 2D okuyucu hangisi?", None),
+    ("3 tane ucuz okuyucu öner.", None),
+]
+
+
+@pytest.mark.parametrize("text,topic", NON_MONETARY_READS)
+async def test_non_monetary_read_has_no_ceiling_or_mutation(db, text, topic):
+    data, before, after, logs, receipts, stored, rows, final = await exchange(db, text)
+    assert data["notice"] == ""
+    assert after == before and final == rows and receipts == []
+    assert stored["trusted_constraints"]["max_price_try"] is None
+    assert not {"add_to_quote", "update_quote_item", "replace_with_alternative"} & {
+        log["tool_name"] for log in logs
+    }
+    if topic:
+        entries = [
+            entry
+            for log in logs
+            if log["tool_name"] == "get_knowledge_entries" and log["input"]["topic"] == topic
+            for entry in log["output"]["entries"]
+        ]
+        assert entries
+        ids = {s["source_id"] for s in data["sources"] if s["kind"] == "knowledge"}
+        assert {entry["knowledge_id"] for entry in entries} <= ids
+    else:
+        searches = [log for log in logs if log["tool_name"] == "search_products"]
+        assert searches and data["recommended_product_ids"]
+        assert all(log["input"]["filters"]["max_price_try"] is None for log in searches)
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        *[(text, False) for text, _ in NON_MONETARY_READS],
+        *[(f"{ceiling} okuyucu öner.", True) for ceiling, _ in CEILINGS],
+        ("En ucuz 4G terminal hangisi?", False),
+        ("En ucuz Model80 hangisi?", False),
+        ("En ucuz 80 mm yazıcı hangisi?", False),
+        ("2 haftaya kadar teslim edilir mi?", False),
+        ("48 saate kadar teslim olur mu?", False),
+        ("3 lisans ucuz olur mu?", False),
+        ("2D kadar ucuz okuyucu öner.", False),
+        ("8500’e kadar okuyucu öner.", True),
+        ("9000den ucuz okuyucu öner.", True),
+        ("Altı adet BlueScan Air ekle.", True),
+    ],
+)
+def test_ceiling_marker_requires_adjacent_amount(text, expected):
+    from app.services.normalization import has_price_ceiling_intent
+
+    assert has_price_ceiling_intent(text) is expected
+
+
+async def test_written_six_never_defaults_to_one(db):
+    data, before, after, logs, receipts, _, rows, final = await exchange(
+        db, "Altı adet BlueScan Air ekle."
+    )
+    assert after == before and final == rows and receipts == []
+    assert "değiştirmedim" in data["notice"]
+    assert not {"add_to_quote", "update_quote_item", "replace_with_alternative"} & {
+        log["tool_name"] for log in logs
+    }

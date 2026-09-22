@@ -29,7 +29,15 @@ def has_price_ceiling_intent(value: str) -> bool:
     for marker in PRICE_CEILING_MARKERS:
         suffix = r"\w*" if marker in {"butce", "limit", "tavan"} else ""
         if re.search(r"\b" + re.escape(marker) + suffix + r"\b", text) and (
-            marker not in {"kadar", "ucuz"} or re.search(r"\d", text)
+            marker not in {"kadar", "ucuz"}
+            # Keep amount punctuation: normalization erases decimal/apostrophe boundaries.
+            # Only an adjacent amount qualifies; time/quantity units and model codes do not.
+            or re.search(
+                r"(?<![\w.,-])\d[\d.,]*(?:\s*(?:TL|TRY|lira|₺))?"
+                r"\s*['’]?(?:ye|ya|e|a|den|dan|ten|tan)?\s+" + marker + r"\b",
+                value,
+                re.IGNORECASE,
+            )
         ):
             return True
     return bool(
