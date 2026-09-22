@@ -26,9 +26,8 @@ def has_price_ceiling_intent(value: str) -> bool:
     Literal monetary amounts without a clear relation require clarification.
     """
     currency = bool(re.search(r"\b(?:tl|try|lira\w*)\b|₺", value, re.IGNORECASE))
-    text = normalize(value)
-    if not currency:
-        text = re.sub(r"\b(?:simdiye|bugune) kadar\b", "", text)
+    # Temporal "until now/today" and superlative "en ucuz" (cheapest) are not ceilings.
+    text = re.sub(r"\b(?:(?:simdiye|bugune) kadar|en ucuz)\b", "", normalize(value))
     # A magnitude word can end a numeric or written amount (8 bin / on bin).
     # Recognize that monetary fragment without pretending to parse its value.
     amount_tail = r"(?<![\w.,-])(?:\d[\d.,]*|bin)"

@@ -404,7 +404,8 @@ async def test_currency_marker_safety_net_prevents_unbounded_search(db, ceiling,
     "text",
     [
         *[f"{ceiling} {product} öner." for ceiling, product in UNPARSED_CURRENCY_CEILINGS],
-        "Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.",
+        "Şimdiye kadar almadık; sekiz yüz liraya kadar kılıf öner.",
+        "sekiz yüz liradan ucuz, en ucuz kılıfı öner.",
         "TRY cinsinden, bütçem sınırlı.",
         "₺ cinsinden limitim var.",
         "Lirayla fiyat; tavanım belli değil.",
@@ -486,3 +487,35 @@ async def test_frozen_parser_demo_messages(db, quote, text, tool):
             assert any(
                 row["product_id"] == "PRD-BC-120" and row["status"] == "replaced" for row in rows
             )
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.",
+        "En ucuz barkod okuyucu kaç TL?",
+        "En ucuz kılıf kaç TL?",
+        "En ucuz 2D okuyucu hangisi, fiyatı kaç lira?",
+        "BlueScan Air kaç TL? Şimdiye kadar hiç almadık.",
+        "Bugüne kadar kaç TL'lik teklif verdik?",
+    ],
+)
+def test_superlative_and_temporal_phrases_are_not_ceilings(text):
+    from app.services.normalization import has_price_ceiling_intent
+
+    assert has_price_ceiling_intent(text) is False
+
+
+async def test_cheapest_price_question_searches_without_ceiling_or_mutation(db):
+    data, before, after, logs, receipts, stored, rows, final = await exchange(
+        db, "En ucuz barkod okuyucu kaç TL?"
+    )
+    assert data["notice"] == ""
+    assert after == before and final == rows and receipts == []
+    assert stored["trusted_constraints"]["max_price_try"] is None
+    searches = [log for log in logs if log["tool_name"] == "search_products"]
+    assert len(searches) == 1
+    assert searches[0]["input"]["filters"]["max_price_try"] is None
+    assert not {"add_to_quote", "update_quote_item", "replace_with_alternative"} & {
+        log["tool_name"] for log in logs
+    }

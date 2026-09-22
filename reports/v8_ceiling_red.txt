@@ -1,0 +1,172 @@
+UTC: 2026-09-22T15:32:35.278182+00:00
+Base commit (working tree may contain pending changes): 3ad58ca514b57e70c25fd5704cba7e092a6e099f
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml run --rm --no-deps test pytest -q tests/test_safety_review.py tests/unit/test_normalization.py
+Exit code: 1
+
+ Container tbr-quote-assistant-test-run-4dd80bc7dc46 Creating
+ Container tbr-quote-assistant-test-run-4dd80bc7dc46 Created
+........................................................................ [ 33%]
+........................................................................ [ 67%]
+......................FFFFFFF.........................................   [100%]
+=================================== FAILURES ===================================
+_ test_superlative_and_temporal_phrases_are_not_ceilings[Fiyat\u0131 TL ile s\xf6yl\xfcyorum; en ucuz k\u0131l\u0131f\u0131 \xf6ner.] _
+
+text = 'Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.'
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.",
+            "En ucuz barkod okuyucu kaç TL?",
+            "En ucuz kılıf kaç TL?",
+            "En ucuz 2D okuyucu hangisi, fiyatı kaç lira?",
+            "BlueScan Air kaç TL? Şimdiye kadar hiç almadık.",
+            "Bugüne kadar kaç TL'lik teklif verdik?",
+        ],
+    )
+    def test_superlative_and_temporal_phrases_are_not_ceilings(text):
+        from app.services.normalization import has_price_ceiling_intent
+
+>       assert has_price_ceiling_intent(text) is False
+E       AssertionError: assert True is False
+E        +  where True = <function has_price_ceiling_intent at 0xffffaa712160>('Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.')
+
+tests/test_safety_review.py:506: AssertionError
+_ test_superlative_and_temporal_phrases_are_not_ceilings[En ucuz barkod okuyucu ka\xe7 TL?] _
+
+text = 'En ucuz barkod okuyucu kaç TL?'
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.",
+            "En ucuz barkod okuyucu kaç TL?",
+            "En ucuz kılıf kaç TL?",
+            "En ucuz 2D okuyucu hangisi, fiyatı kaç lira?",
+            "BlueScan Air kaç TL? Şimdiye kadar hiç almadık.",
+            "Bugüne kadar kaç TL'lik teklif verdik?",
+        ],
+    )
+    def test_superlative_and_temporal_phrases_are_not_ceilings(text):
+        from app.services.normalization import has_price_ceiling_intent
+
+>       assert has_price_ceiling_intent(text) is False
+E       AssertionError: assert True is False
+E        +  where True = <function has_price_ceiling_intent at 0xffffaa712160>('En ucuz barkod okuyucu kaç TL?')
+
+tests/test_safety_review.py:506: AssertionError
+_ test_superlative_and_temporal_phrases_are_not_ceilings[En ucuz k\u0131l\u0131f ka\xe7 TL?] _
+
+text = 'En ucuz kılıf kaç TL?'
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.",
+            "En ucuz barkod okuyucu kaç TL?",
+            "En ucuz kılıf kaç TL?",
+            "En ucuz 2D okuyucu hangisi, fiyatı kaç lira?",
+            "BlueScan Air kaç TL? Şimdiye kadar hiç almadık.",
+            "Bugüne kadar kaç TL'lik teklif verdik?",
+        ],
+    )
+    def test_superlative_and_temporal_phrases_are_not_ceilings(text):
+        from app.services.normalization import has_price_ceiling_intent
+
+>       assert has_price_ceiling_intent(text) is False
+E       AssertionError: assert True is False
+E        +  where True = <function has_price_ceiling_intent at 0xffffaa712160>('En ucuz kılıf kaç TL?')
+
+tests/test_safety_review.py:506: AssertionError
+_ test_superlative_and_temporal_phrases_are_not_ceilings[En ucuz 2D okuyucu hangisi, fiyat\u0131 ka\xe7 lira?] _
+
+text = 'En ucuz 2D okuyucu hangisi, fiyatı kaç lira?'
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.",
+            "En ucuz barkod okuyucu kaç TL?",
+            "En ucuz kılıf kaç TL?",
+            "En ucuz 2D okuyucu hangisi, fiyatı kaç lira?",
+            "BlueScan Air kaç TL? Şimdiye kadar hiç almadık.",
+            "Bugüne kadar kaç TL'lik teklif verdik?",
+        ],
+    )
+    def test_superlative_and_temporal_phrases_are_not_ceilings(text):
+        from app.services.normalization import has_price_ceiling_intent
+
+>       assert has_price_ceiling_intent(text) is False
+E       AssertionError: assert True is False
+E        +  where True = <function has_price_ceiling_intent at 0xffffaa712160>('En ucuz 2D okuyucu hangisi, fiyatı kaç lira?')
+
+tests/test_safety_review.py:506: AssertionError
+_ test_superlative_and_temporal_phrases_are_not_ceilings[BlueScan Air ka\xe7 TL? \u015eimdiye kadar hi\xe7 almad\u0131k.] _
+
+text = 'BlueScan Air kaç TL? Şimdiye kadar hiç almadık.'
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.",
+            "En ucuz barkod okuyucu kaç TL?",
+            "En ucuz kılıf kaç TL?",
+            "En ucuz 2D okuyucu hangisi, fiyatı kaç lira?",
+            "BlueScan Air kaç TL? Şimdiye kadar hiç almadık.",
+            "Bugüne kadar kaç TL'lik teklif verdik?",
+        ],
+    )
+    def test_superlative_and_temporal_phrases_are_not_ceilings(text):
+        from app.services.normalization import has_price_ceiling_intent
+
+>       assert has_price_ceiling_intent(text) is False
+E       AssertionError: assert True is False
+E        +  where True = <function has_price_ceiling_intent at 0xffffaa712160>('BlueScan Air kaç TL? Şimdiye kadar hiç almadık.')
+
+tests/test_safety_review.py:506: AssertionError
+_ test_superlative_and_temporal_phrases_are_not_ceilings[Bug\xfcne kadar ka\xe7 TL'lik teklif verdik?] _
+
+text = "Bugüne kadar kaç TL'lik teklif verdik?"
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Fiyatı TL ile söylüyorum; en ucuz kılıfı öner.",
+            "En ucuz barkod okuyucu kaç TL?",
+            "En ucuz kılıf kaç TL?",
+            "En ucuz 2D okuyucu hangisi, fiyatı kaç lira?",
+            "BlueScan Air kaç TL? Şimdiye kadar hiç almadık.",
+            "Bugüne kadar kaç TL'lik teklif verdik?",
+        ],
+    )
+    def test_superlative_and_temporal_phrases_are_not_ceilings(text):
+        from app.services.normalization import has_price_ceiling_intent
+
+>       assert has_price_ceiling_intent(text) is False
+E       assert True is False
+E        +  where True = <function has_price_ceiling_intent at 0xffffaa712160>("Bugüne kadar kaç TL'lik teklif verdik?")
+
+tests/test_safety_review.py:506: AssertionError
+______ test_cheapest_price_question_searches_without_ceiling_or_mutation _______
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff99492bd0>
+
+    async def test_cheapest_price_question_searches_without_ceiling_or_mutation(db):
+        data, before, after, logs, receipts, stored, rows, final = await exchange(
+            db, "En ucuz barkod okuyucu kaç TL?"
+        )
+>       assert data["notice"] == ""
+E       AssertionError: assert 'Fiyat sınırı...eğiştirmedim.' == ''
+E
+E         + Fiyat sınırını kesinleştiremedim. Örneğin 5.000 TL altında şeklinde yazar mısın? Teklifi değiştirmedim.
+
+tests/test_safety_review.py:513: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_safety_review.py::test_superlative_and_temporal_phrases_are_not_ceilings[Fiyat\u0131 TL ile s\xf6yl\xfcyorum; en ucuz k\u0131l\u0131f\u0131 \xf6ner.]
+FAILED tests/test_safety_review.py::test_superlative_and_temporal_phrases_are_not_ceilings[En ucuz barkod okuyucu ka\xe7 TL?]
+FAILED tests/test_safety_review.py::test_superlative_and_temporal_phrases_are_not_ceilings[En ucuz k\u0131l\u0131f ka\xe7 TL?]
+FAILED tests/test_safety_review.py::test_superlative_and_temporal_phrases_are_not_ceilings[En ucuz 2D okuyucu hangisi, fiyat\u0131 ka\xe7 lira?]
+FAILED tests/test_safety_review.py::test_superlative_and_temporal_phrases_are_not_ceilings[BlueScan Air ka\xe7 TL? \u015eimdiye kadar hi\xe7 almad\u0131k.]
+FAILED tests/test_safety_review.py::test_superlative_and_temporal_phrases_are_not_ceilings[Bug\xfcne kadar ka\xe7 TL'lik teklif verdik?]
+FAILED tests/test_safety_review.py::test_cheapest_price_question_searches_without_ceiling_or_mutation
+7 failed, 207 passed in 21.39s
