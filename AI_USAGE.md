@@ -75,3 +75,14 @@ V2 remote clone81765bd/tagdemo-candidate-20260921-v2:225passed44.48s;19istemci t
 2026-09-21 teslim öncesi sertleştirme (Claude Opus 5, Mustafa'nın açık uygulama talimatıyla): salt okunur mimari/güvenlik denetiminin 14 bulgusu önce kodda doğrulandı. B1 (yazma uçlarına admin anahtarı) ADR-012'den sapma olduğu için Mustafa onayıyla uygulandı; B5/D4/D5 önerileri gerekçeyle reddedildi (sıra boşluğu, çift uygulama riski, admin log regresyonu). Regresyonlar önce 4+3 failed, sonra geçti; tam 229 passed; v3 clone bf92756 temiz kurulum/runtime/istemci exit0. Kayıt: reports/hardening_resolution.md. Fiziksel iPhone add + tekrar gönderimi Mustafa doğruladı (22 Eylül); DB'de tek etki (reports/hardening_native_smoke_db.txt).
 
 2026-09-22 görsel düzenleme (Claude, Mustafa'nın isteği; kapsamı Mustafa daralttı: karanlık tema web'e eklenmedi, kütüphane/animasyon yok): firma logosu Mustafa'nın indirdiği dosyadan işlendi, palet logoya hizalandı, dar ekran gezinme/tablo düzeltildi, mobil kart tutarlılığı. Doğrulama: web build/typecheck/lint/22 istemci testi/Expo iOS export/teslim taraması exit0; Playwright + yerel Chrome ile 4 genişlik × 4 sayfa taşma ölçümü. Kayıt: reports/design_polish.md. Mobil görünüm cihazda henüz görülmedi (not_verified).
+
+
+2026-09-22 video öncesi düzeltme (Codex, Mustafa'nın onayladığı dar plan): iki P1 ve uyumluluk
+okuma yönlendirmesi iki üretim dosyasında düzeltildi. İlk denemede 19 HTTP/DB regresyonu başarısız,
+16 henüz eklenmemiş yardımcı işlev testi import hatalı, 21 kontrol başarılıydı; çıktı korundu.
+Son durumda 65 yeni parametrik örnek dahil 294 backend testi ve 22 istemci testi geçti.
+Test yazımı code-testing-agent; son assertion/boşluk değerlendirmesi assertion-quality ve
+test-gap-analysis yönergeleriyle aynı ajan tarafından yapıldı; bağımsız inceleme veya ampirik mutation
+skoru iddiası yoktur. Statik eşleme aracı tree-sitter-language-pack eksikliği nedeniyle çalışmadı;
+ek kurulum yapılmadı. Test konteyneri 512 MB / 1 CPU ve swap kapalı ayarla, işler sırayla çalıştırıldı.
+Test DB servisi bitince durduruldu. Fiziksel prova/video Mustafa'ya aittir.

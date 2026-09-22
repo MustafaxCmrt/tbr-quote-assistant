@@ -42,3 +42,12 @@ anahtarı ister, gövde 256 KiB ile sınırlı, SSE terminal hatası DB erişile
 [tam backend 229 passed](hardening_full_backend.txt), [çalışan stack kontrolü](hardening_runtime_after.txt)
 (önce: [anahtarsız LAN yazması doğrulamaya ulaşıyordu](hardening_runtime_before.txt)). Bu koşu için yeni
 fiziksel iPhone add + aynı istek tekrarı Mustafa tarafından doğrulandı; DB'de tek etki: [kayıt](hardening_native_smoke_db.txt).
+
+
+## 22 Eylül 2026 — v4 video öncesi düzeltme
+
+Uygulama `902894a`: iki P1 ve uyumluluk yönlendirmesi kapandı. Tam backend **294 passed**,
+22 golden (doğru SHA ile ayrı export), 22 istemci testi, typecheck/lint/webbuild passed.
+[Çözüm ve gereksinim-test eşlemesi](safety_review_resolution.md). Canlı API dosyaları ve 10 ortak
+quote DTO doğrulandı; demo teklifleri korundu. Test-db servisi durduruldu; yeni fiziksel v4 prova,
+video, push onayı ve gönderim henüz tamamlanmadı. Eski v3 temiz clone kanıtı tarihsel olarak korunur.

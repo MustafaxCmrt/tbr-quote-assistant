@@ -1,13 +1,15 @@
 # The Blue Red — Teklif Asistanı
 
 Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
-**21 Eylül 2026: F00–F07 ana akışları doğrulandı; F08 kabul kapısı geçti; F09 temiz kurulum/teslim açık.**
+**22 Eylül 2026: video öncesi fiyat/onay düzeltmeleri doğrulandı; F09 fiziksel prova/video/teslim açık.**
 Altı gerçek araç, transaction/receipt, kaynaklı deterministik sohbet, SSE, web admin ve Expo
-uygulaması çalışıyor. Son tam backend koşusu **229 passed** (22 golden dahil):
-[komut/çıktı](reports/hardening_full_backend.txt), [golden sonuçları](reports/golden_results.json).
-Teslim öncesi güvenlik sertleştirmesi: [çözüm kaydı](reports/hardening_resolution.md).
-Doğrulanan aday: `demo-candidate-20260921-v3` / `bf92756`.
-Yeni clone’da da 229 test geçti: [v3 temiz kurulum kanıtı](reports/hardening_resolution.md#v3-temiz-clone-provası).
+uygulaması çalışıyor. Son tam backend koşusu **294 passed** (22 golden dahil):
+[komut/çıktı](reports/safety_review_full_backend.txt), [golden sonuçları](reports/safety_review_golden.json).
+Fiyat sınırı, bekleme onayı ve uyumluluk düzeltmeleri: [çözüm kaydı](reports/safety_review_resolution.md).
+Doğrulanan uygulama commit'i: `902894acc073d3e8a7cc61244a98c799070d6e41`.
+Teslim adayı: `demo-candidate-20260922-v4`; etiketin uygulama kodu test edilen commit ile aynıdır.
+Önceki v3 temiz clone'da 229 test geçmişti: [tarihsel temiz kurulum kanıtı](reports/hardening_resolution.md#v3-temiz-clone-provası).
+Bu düzeltmede yeni temiz clone açılmadı; mevcut izole PostgreSQL ve çalışan API doğrulandı.
 Mustafa fiziksel iPhone'da stream, ürün ekleme, web ile ortak teklif, aynı isteğin tekrarı,
 klavye ve kaynak aç/kapat akışlarını doğruladı. Kullanıcı bildirimi: iPhone 16e / iOS 26.6.2; Expo Go Client Version 57.0.9, Supported SDK 57.0.0.
 [Kabul kanıtları](reports/acceptance.md) kapsamı ve kalan teslim kapılarını ayırır.
@@ -37,6 +39,16 @@ docker compose run --rm --no-deps migrate-seed alembic check
 ```
 
 Testler ayrı test-db servisinde her test için yeni veritabanı oluşturur; teşhis için tutar.
+Belleği sınırlamak için mevcut test image/DB hazırken aşağıdaki ek Compose dosyası kullanılabilir.
+Bu dosya test sürecini 512 MB / 1 CPU ile sınırlar, konteyner swap'ını kapatır ve güncel kaynak/testleri
+salt okunur bağlar. PostgreSQL ayrı servistir; bu sınır bütün makinenin bellek sınırı değildir.
+
+```sh
+docker compose --profile test up -d --wait test-db
+docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml run --rm --no-deps test pytest -v
+docker compose --profile test stop test-db
+```
+
 Çok sayıda tam koşudan sonra testler `DiskFullError` verirse eski test veritabanlarını yalnız test-db'de sil
 (demo veritabanına ve volume'lara dokunmaz):
 
@@ -84,8 +96,8 @@ Expo SDK 57, FastAPI 0.141.1 ve uvicorn 0.53.0 kurulup doğrulandı.
    ```
 
    Bu adım API'yi aynı Wi-Fi'daki cihazlara açar. Ürün/bilgi yazma anahtar ister; okuma ve sohbet açıktır.
-   Yalnız güvenilen ağda ve demo süresince kullan. Bitince `docker compose up -d --wait api` ile API'yi
-   `.env` içindeki loopback adresine döndür. Demo sırasında başka bir servisi yeniden build ederken
+   Yalnız güvenilen ağda ve demo süresince kullan. Bitince `API_BIND_HOST=127.0.0.1 docker compose up -d --no-deps --wait api` ile API'yi
+   açıkça loopback adresine döndür. Demo sırasında başka bir servisi yeniden build ederken
    (örn. `docker compose up -d --build web`) aynı `API_BIND_HOST=0.0.0.0` önekini tekrar ver; yoksa
    Compose API'yi loopback ayarıyla yeniden oluşturur ve telefon "sunucuya ulaşılamadı" der.
 

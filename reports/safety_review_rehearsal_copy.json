@@ -1,0 +1,7 @@
+{
+  "database": "tbr_rehearsal_81b268bc4ce4",
+  "quote_dtos_match_original": 10,
+  "restore_target": "new database on existing db service",
+  "new_containers": 0,
+  "physical_rehearsal": "pending Mustafa"
+}

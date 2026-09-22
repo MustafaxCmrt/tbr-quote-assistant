@@ -1,0 +1,8 @@
+{
+  "kind": "resolved Compose configuration",
+  "limits": {
+    "mem_limit": "536870912",
+    "memswap_limit": "536870912",
+    "cpus": 1
+  }
+}

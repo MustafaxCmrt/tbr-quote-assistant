@@ -2,7 +2,7 @@
 
 - F00–F06 tamamlandı. F07'de iPhone açılışı, ürün ekleme, web ile ortak teklif, aynı isteğin tekrarı,
   kaynak aç/kapat ve klavye erişimi doğrulandı. Son okuma konumu ve parça parça aktarım da Mustafa tarafından doğrulandı. Güncel kanıt: [kabul tablosu](reports/acceptance.md).
-- Cihaz modeli, iOS ve kurulu Expo Go sürümü henüz kaydedilmedi. Karanlık modda temel iPhone
+- Mustafa’nın bildirimiyle cihaz iPhone 16e, iOS 26.6.2 ve Expo Go 57.0.9 / SDK 57.0.0 olarak kaydedildi. Karanlık modda temel iPhone
   akışları gözlendi; açık tema, büyük yazı, tablet ve VoiceOver için fiziksel kabul iddiası yoktur.
 - Üretim authentication/RBAC yoktur. Müşteri seçimi demo bağlamıdır; kimlik doğrulama değildir.
   Uygulama yerel demo içindir. PostgreSQL host portu kapalıdır; API runtime DB rolü şema değiştiremez.
@@ -57,3 +57,19 @@
 - Secret taramaları tanınan anahtar biçimlerini ve mevcut yerel hassas değerleri kontrol eder;
   her olası secret biçiminin bulunacağı garantisi değildir. Git taraması erişilebilir yerel ref'lerle sınırlıdır.
 - F08 uygulama kabul kapısı tamamlandı; kapsam ve review disposition reports/f08_acceptance.md içindedir. F09 v3 clone bf92756 temiz kurulum ve otomatik kontrolleri geçti (reports/hardening_resolution.md); final video/erişim/gönderim kapıları tamamlanmadı. Public dağıtım, görünürlük değişikliği ve teslim mesajı için insan onayı gerekir.
+
+
+## 22 Eylül v4 düzeltmesinin sınırları
+
+- Para ayrıştırması hâlâ sınırlıdır. `TL altında`, `TL altı`, `TL’den ucuz` sayısal sınırları desteklenir;
+  mevcut aday yorumu olan birim liste fiyatı `<=` korunur. `lira`, `₺`, `8 bin` gibi desteklenmeyen sınır
+  biçimleri öneri ve mutasyonda netleştirme ister; sınırsız öneriye çevrilmez. `kaç TL?` ve adet içeren
+  normal fiyat soruları sınır sayılmaz. Her doğal dil biçiminin anlaşıldığı iddia edilmez.
+- Backorder onayı ayrı, açık bir olumlu cümlecik olmalıdır: `bekleyebilirim`, `beklemeyi kabul ediyorum`
+  veya `backorder kabul ediyorum`. Olumsuzlama, alıntı, soru ve koşul şüphesinde onay verilmiş sayılmaz.
+  Karmaşık ama olumlu ifadeler de güvenli biçimde reddedilebilir; müşteri uygunluğu ayrıca zorunludur.
+- Salt okunur offline/senkron soruları gerçek uyumluluk kayıtlarını getirir; kaynak yoksa kaynak uydurulmaz.
+- Düzeltmeler yeni mesaj planlarına uygulanır; retry mevcut kalıcı plan ve receipt davranışını korur.
+- v4 uygulama commit’i `902894a`: 294 backend ve 22 istemci testi geçti. İki P1 ve uyumluluk yönlendirmesi
+  kapatıldı; [çözüm raporu](reports/safety_review_resolution.md). v4 fiziksel prova/video/erişim/gönderim
+  henüz tamamlanmadı. Yeni temiz kurulum, v3'ün tarihsel temiz clone kanıtıyla karıştırılmaz.
