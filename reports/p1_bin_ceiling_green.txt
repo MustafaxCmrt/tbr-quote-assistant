@@ -1,0 +1,11 @@
+UTC: 2026-09-22T14:47:33.198864+00:00
+Base commit (working tree may contain pending changes): 8ed8af84a7e175c44538fed3894d8c28dd9985c4
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml run --rm --no-deps test pytest -q tests/test_safety_review.py tests/unit/test_normalization.py
+Exit code: 0
+
+ Container tbr-quote-assistant-test-run-00938a5f9524 Creating
+ Container tbr-quote-assistant-test-run-00938a5f9524 Created
+........................................................................ [ 40%]
+........................................................................ [ 80%]
+...................................                                      [100%]
+179 passed in 18.92s

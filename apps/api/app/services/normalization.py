@@ -26,6 +26,9 @@ def has_price_ceiling_intent(value: str) -> bool:
     Literal monetary amounts without a clear relation require clarification.
     """
     text = re.sub(r"\b(?:simdiye|bugune) kadar\b", "", normalize(value))
+    # A magnitude word can end a numeric or written amount (8 bin / on bin).
+    # Recognize that monetary fragment without pretending to parse its value.
+    amount_tail = r"(?<![\w.,-])(?:\d[\d.,]*|bin)"
     for marker in PRICE_CEILING_MARKERS:
         suffix = r"\w*" if marker in {"butce", "limit", "tavan"} else ""
         if re.search(r"\b" + re.escape(marker) + suffix + r"\b", text) and (
@@ -33,7 +36,7 @@ def has_price_ceiling_intent(value: str) -> bool:
             # Keep amount punctuation: normalization erases decimal/apostrophe boundaries.
             # Only an adjacent amount qualifies; time/quantity units and model codes do not.
             or re.search(
-                r"(?<![\w.,-])\d[\d.,]*(?:\s*(?:TL|TRY|lira|₺))?"
+                amount_tail + r"(?:\s*(?:TL|TRY|lira|₺))?"
                 r"\s*['’]?(?:ye|ya|e|a|den|dan|ten|tan)?\s+" + marker + r"\b",
                 value,
                 re.IGNORECASE,
@@ -41,7 +44,11 @@ def has_price_ceiling_intent(value: str) -> bool:
         ):
             return True
     return bool(
-        re.search(r"\d[\d.,]*\s*(?:tl|try|lira\w*)\b|₺\s*\d|\d[\d.,]*\s*₺", value, re.IGNORECASE)
+        re.search(
+            amount_tail + r"\s*(?:tl|try|lira\w*)\b|₺\s*\d|\d[\d.,]*\s*₺",
+            value,
+            re.IGNORECASE,
+        )
     )
 
 

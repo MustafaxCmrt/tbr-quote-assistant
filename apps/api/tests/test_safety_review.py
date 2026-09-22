@@ -317,3 +317,57 @@ async def test_written_six_never_defaults_to_one(db):
     assert not {"add_to_quote", "update_quote_item", "replace_with_alternative"} & {
         log["tool_name"] for log in logs
     }
+
+
+BIN_CEILINGS = [
+    "8 bine kadar",
+    "8 bin liraya kadar",
+    "8 bin TL'ye kadar",
+    "10 bin liradan ucuz",
+    "on bin liraya kadar",
+    "8 bin TL civarı",
+    "yüz bin liraya kadar",
+    "sekiz bine kadar",
+    "8 bin TRY kadar",
+]
+
+
+@pytest.mark.parametrize("ceiling", BIN_CEILINGS)
+@pytest.mark.parametrize("action", ["öner", "ekle"])
+async def test_bin_ceiling_never_becomes_unbounded_search(db, ceiling, action):
+    data, before, after, logs, receipts, stored, rows, final = await exchange(
+        db, f"{ceiling} endüstriyel barkod okuyucu {action}."
+    )
+    assert "Fiyat sınırını kesinleştiremedim" in data["notice"]
+    assert data["recommended_product_ids"] == []
+    assert after == before and final == rows and receipts == []
+    assert stored["trusted_constraints"]["max_price_try"] is None
+    assert not {
+        "search_products",
+        "add_to_quote",
+        "update_quote_item",
+        "replace_with_alternative",
+    } & {log["tool_name"] for log in logs}
+
+
+@pytest.mark.parametrize("ceiling", BIN_CEILINGS)
+def test_bin_money_expression_has_ceiling_intent(ceiling):
+    from app.services.normalization import has_price_ceiling_intent
+
+    assert has_price_ceiling_intent(f"{ceiling} okuyucu öner.") is True
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "8 bin adede kadar teslim olur mu?",
+        "On güne kadar teslim olur mu?",
+        "Yüz lisans ucuz olur mu?",
+        "En ucuz BIN8 okuyucu hangisi?",
+        "Garanti iki yıla kadar mı?",
+    ],
+)
+def test_written_number_with_non_money_unit_is_not_ceiling(text):
+    from app.services.normalization import has_price_ceiling_intent
+
+    assert has_price_ceiling_intent(text) is False
