@@ -139,6 +139,12 @@ OWN_PROBES = [
     ("own_permission_later", "Q-1002", "BlueScan Air 1 adet ekle, müdürün izni gelince.", NO_CHANGE, {}),
     ("own_permission_granted", "Q-1002", "İzin verildi, BlueScan Air 1 adet ekle.", {"PRD-BC-110": 1}, {}),
     ("own_permission_have", "Q-1002", "İznim var, BlueScan Air 1 adet ekle.", {"PRD-BC-110": 1}, {}),
+    ("own_replace_bare_model_head", "Q-1001", "BlueScan Air'i QR'lı model olan GreenScan Eco ile değiştir.", NO_CHANGE, {}),
+    ("own_replace_source_model_head", "Q-1001", "BlueScan Air QR'lı modelini GreenScan Eco ile değiştir.", {"PRD-BC-140": 1}, {}),
+    ("own_replace_free_clause_generic", "Q-1001", "QR zorunlu, okuyucuyu uygun alternatifle değiştir.", NO_CHANGE, {}),
+    ("own_replace_unnamed_source_adj", "Q-1001", "QR'lı okuyucuyu GreenScan Eco ile değiştir.", {"PRD-BC-140": 1}, {}),
+    ("own_replace_unbound_feature", "Q-1001", "QR zorunlu okuyucuyu GreenScan Eco ile değiştir.", NO_CHANGE, {}),
+    ("own_replace_unnamed_target_adj", "Q-1001", "Okuyucuyu kablosuz GreenScan Eco ile değiştir.", {"PRD-BC-140": 1}, {}),
 ]
 
 

@@ -169,20 +169,28 @@ NAME_SUFFIXES = {
 }  # fmt: skip
 
 
+# Case-marked head nouns that close a source phrase ("Air QR'lı ürününü"); a bare
+# "ürün/cihaz" (QR'lı cihaz olan Eco) belongs to a relative clause about the target.
+SOURCE_HEADS = {"urunu", "urununu", "modeli", "modelini", "cihazi", "cihazini"}
+
+
 def source_phrase(normalized, start, end):
     """Span of a replaced item's own noun phrase around its mention.
 
     Adjectives right before it, its case ending, and a following feature run
-    closed by a head noun ("BlueScan Air QR'lı ürününü") describe the source.
+    closed by a case-marked head noun ("BlueScan Air QR'lı ürününü") describe
+    the source.
     """
     after = list(re.finditer(r"\S+", normalized[end:]))
     k = 0
     while k < len(after) and after[k][0] in NAME_SUFFIXES:
         k += 1
+    # A case ending (Air'i) closes the phrase: what follows describes the next
+    # noun, e.g. the target in "Air'i QR destekli cihaz olan Eco ile".
     j = k
-    while j < len(after) and after[j][0] in FEATURES | ADJECTIVE_LINKS:
+    while not k and j < len(after) and after[j][0] in FEATURES | ADJECTIVE_LINKS:
         j += 1
-    if j < len(after) and re.fullmatch(r"(?:urun|model|cihaz)\w*", after[j][0]):
+    if not k and j < len(after) and after[j][0] in SOURCE_HEADS:
         k = j + 1
     return adjective_start(normalized, start), end + (after[k - 1].end() if k else 0)
 
@@ -241,6 +249,18 @@ async def build_plan(conn, session, message_id, text, mode):
                 *row["aliases"].get("tr", []),
             ]
         )
+
+    def names_product(part):
+        return (
+            category(part)
+            or named_catalog_match(part)
+            or any(w.startswith(("prd-", "tbr-")) for w in tokens(part))
+        )
+
+    def free_features(value):
+        # A feature clause naming no product ("QR zorunlu;") constrains the result.
+        clauses = re.split(r";|[.!?,](?=\s|$)", value)
+        return set().union(*(features(c) for c in clauses if not names_product(c)))
 
     def unique_choice(options, query):
         if len(options) < 2:
@@ -512,8 +532,21 @@ async def build_plan(conn, session, message_id, text, mode):
             # Position, not catalog tags, decides whose feature a word is: a feature
             # the source also has may still be required of the target (QR'lı Eco).
             region = target_region(normalized, mentions, explicit, named_sources)
-            # Without a named source, a ";"/"stoklu" target clause may sit before it.
-            required = features(region) | (set() if named_sources else features(target_text))
+            required = features(region)
+            if not named_sources:
+                # Without a named source the target's own words, a ";"/"stoklu" target
+                # clause and free feature clauses ("QR zorunlu;") are its requirements;
+                # any other feature before it is ambiguous.
+                required |= features(target_text) | free_features(text)
+                cut = adjective_start(normalized, min(s for s, _, p in mentions if p == explicit))
+                before = normalized[:cut]
+                # The unnamed source's own adjectives ("Kablosuz okuyucuyu") describe it.
+                for match in reversed(list(re.finditer(r"\S+", before))):
+                    if category(match[0]):
+                        before = before[: adjective_start(before, match.start())] + before[match.end() :]
+                if features(before) - required:
+                    notice = "Özelliğin değiştirilecek ürüne mi yeni ürüne mi ait olduğunu kesinleştiremedim. Değiştirilecek ürünün adını veya kodunu yazar mısın? Teklifi değiştirmedim."
+                    return finish()
             if explicit not in row["substitute_product_ids"]:
                 notice = "İstediğin hedef ürün bu kalem için kayıtlı alternatifler arasında değil. Teklifi değiştirmedim."
                 return finish()
@@ -530,7 +563,7 @@ async def build_plan(conn, session, message_id, text, mode):
                 required=required,
             )
             return finish()
-        required = tokens(target_text) & FEATURES
+        required = features(target_text) | free_features(text)
         # No explicit target: retain substitution order supplied by the current catalog.
         result = await search(
             target_text
@@ -635,13 +668,6 @@ async def build_plan(conn, session, message_id, text, mode):
         return finish()
     # Each conjunction requirement gets its own search and guard tags, then one atomic group.
     add_verb = r"\bekle(?:r|yin)?\b"
-
-    def names_product(part):
-        return (
-            category(part)
-            or named_catalog_match(part)
-            or any(w.startswith(("prd-", "tbr-")) for w in tokens(part))
-        )
 
     # Sentences and ";" clauses have the same scope: a note or example sentence
     # naming a product is not an add request ("... örnek üründür. Air ekle.").

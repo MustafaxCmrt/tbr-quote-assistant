@@ -1,0 +1,84 @@
+UTC: 2026-09-23T13:54:51Z
+HEAD (working tree may contain pending changes): fb1021ad447d2727355ec9412418a857f62b14cf
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test pytest -q tests/test_reaudit_matrix.py tests/test_reaudit2_matrix.py tests/test_reaudit3_matrix.py tests/test_audit_regressions.py tests/test_chat.py tests/golden
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+            assert items == expected and not unchanged, (items, body["notice"])
+        if not unchanged:
+            # One receipt and one quote version per applied mutation, nothing else.
+            assert applied and receipts == len(applied) == after["version"] - before["version"]
+        if no_recommendations:
+>           assert body["recommended_product_ids"] == [], body["recommended_product_ids"]
+E           AssertionError: ['PRD-PRN-320']
+E           assert ['PRD-PRN-320'] == []
+E             
+E             Left contains one more item: 'PRD-PRN-320'
+E             Use -v to get more diff
+
+tests/test_reaudit_matrix.py:197: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[c_name_then_command]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[c_name_question_then_command]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[c_context_joint]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[c_need_joint] - A...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[c_ile_joint] - As...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[c_017_context] - ...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[n_width_prefix]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[n_width_suffix]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[n_width_and] - As...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[n_dpi_suffix] - A...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[n_width_replace_generic]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[f_generic_size_target]
+12 failed, 565 passed in 149.83s (0:02:29)
+
+Exit code: 1

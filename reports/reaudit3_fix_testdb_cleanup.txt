@@ -11,3 +11,14 @@ After disposable DB count: 0
 PASS non-target database list unchanged; db service and volumes never targeted
 Exit code: 0
 shm after test-db restart: shm              64M  1.1M   63M   2% /dev/shm
+
+UTC: 2026-09-23T13:50:26Z  HEAD: fb1021ad447d2727355ec9412418a857f62b14cf
+Reason: disposable test DBs (leftover or this round's runs); shm before: shm              64M   46M   19M  71% /dev/shm
+Command: python3 reports/final_testdb_cleanup.py
+Target service: test-db; literal disposable prefix: tbr_test_
+Before disposable DB count: 1224
+Preserved DB names: ['postgres', 'tbr_test', 'template0', 'template1']
+After disposable DB count: 0
+PASS non-target database list unchanged; db service and volumes never targeted
+Exit code: 0
+shm after test-db restart: shm              64M  1.1M   63M   2% /dev/shm
