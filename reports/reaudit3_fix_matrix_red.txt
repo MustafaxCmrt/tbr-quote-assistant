@@ -1,0 +1,84 @@
+UTC: 2026-09-23T13:42:11Z
+HEAD (working tree may contain pending changes): 3fa6fcdd3d1a58b6372cf45a47bd4ccd758dc021
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test pytest -q tests/test_reaudit3_matrix.py
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+>           assert unchanged, (items, body["notice"])
+E           AssertionError: ({'PRD-BC-140-PLUS': 1}, '')
+E           assert False
+
+tests/test_reaudit_matrix.py:185: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_upper_read] - A...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_azami_read] - A...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_max_read] - Ass...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_encok_read] - A...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_maksimum_read]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_words_read] - A...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_words_write] - ...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_bin_read] - Ass...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_bin_write] - As...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_mixed_read] - A...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_wordbin_read]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_wordbin_write]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_second_spend_read]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[p_unit_price_amount]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[q_approval_existing]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[q_approval_full]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[q_approval_provided]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[q_permission_first]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[q_permission_after]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[q_approval_question]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[c_name_then_command]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[c_name_question_then_command]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[c_context_joint]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[c_need_joint] - A...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[c_ile_joint] - As...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[c_017_context] - ...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[n_width_prefix]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[n_width_suffix]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[n_width_and] - As...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[n_dpi_suffix] - A...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[n_width_replace_generic]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[r_target_head] - ...
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[r_target_head_product]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[r_unnamed_prefix]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[f_azami_currency]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[f_generic_size_target]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[f_approval_question_clause]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[f_head_natural]
+FAILED tests/test_reaudit3_matrix.py::test_reaudit3_variant[f_plus_head_id]
+39 failed, 70 passed in 24.43s
+
+Exit code: 1

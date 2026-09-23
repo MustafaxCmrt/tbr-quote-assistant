@@ -53,6 +53,11 @@ def has_price_ceiling_intent(value: str) -> bool:
             value,
             re.IGNORECASE,
         )
+        # Written amounts with a currency (beş yüz TL) and any number bound to a
+        # limit word (azami 500, üst sınır bin, 500 ödeyebilirim) are money
+        # conditions too, in reads as well as writes.
+        or re.search(rf"\b(?:{MONEY_WORDS}) (?:tl|try|lira\w*)\b", text)
+        or has_limit_bound_number(text)
     )
 
 
@@ -285,8 +290,13 @@ LIMIT_BEFORE = (
     r"(?:limit\w*|butce\w*|tavan\w*|sinir\w*|masraf\w*|harca\w*|maksimum\w*|max|azami"
     r"|en (?:fazla|cok))"
 )
-LIMIT_AFTER = r"(?:altinda\w*|alti|asmayan|gecmeyen|ustune\w*|kadar|limit\w*|butce\w*|tavan\w*)"
+LIMIT_AFTER = (
+    r"(?:altinda\w*|alti|asma\w*|asmayan|gecme\w*|ustune\w*|kadar|limit\w*|butce\w*|tavan\w*"
+    r"|ode\w*|harca\w*|ayir\w*)"
+)
 SPOKEN_NUMBER = rf"(?:\d+(?: \d{{3}})*|(?:{MONEY_WORDS})(?: (?:{MONEY_WORDS}))*)"
+# Case ending split off a number by an apostrophe: 500'ün altında, 500'e kadar.
+CASE_ENDING = r"(?:u|un|in|nin|e|a|ye|ya|i|yi|den|dan|ten|tan)"
 NON_MONEY_UNIT_NORMALIZED = (
     r"(?:adet|adede|tane|lokasyon|sube|lisans|gun|hafta|ay|saat|yil|dakika|mm|x)\w*"
 )
@@ -295,7 +305,7 @@ NON_MONEY_UNIT_NORMALIZED = (
 def has_limit_bound_number(text: str) -> bool:
     """A number tied to a limit word in normalized text (currency-free money)."""
     for match in re.finditer(
-        rf"\b(?:{LIMIT_BEFORE} (?:\w+ )?({SPOKEN_NUMBER})|({SPOKEN_NUMBER}) (?:\w{{1,3}} )?"
+        rf"\b(?:{LIMIT_BEFORE} (?:\w+ )?({SPOKEN_NUMBER})|({SPOKEN_NUMBER}) (?:{CASE_ENDING} )?"
         rf"{LIMIT_AFTER})\b(?! {NON_MONEY_UNIT_NORMALIZED}\b)",
         text,
     ):
@@ -361,8 +371,10 @@ def price_limit_scope(value: str) -> str | None:
     "birim fiyatı 9.000 TL altında; bütçem 9.000 TL" still has an open budget.
     """
     text = normalize(value)
-    # "Birim bütçem", "birim tutarı", "fiyat tutarı" name one unit's price.
-    unqualified = re.sub(r"\bbirim\s+\w+|\bfiyat\w*\s+tutar\w*", " ", text)
+    # "Birim bütçem", "birim tutarı", "(birim) fiyat(ının) tutarı" name one unit's price.
+    unqualified = re.sub(
+        r"\bbirim\s+fiyat\w*\s+tutar\w*|\bbirim\s+\w+|\bfiyat\w*\s+tutar\w*", " ", text
+    )
     if re.search(TOTAL_SCOPE, unqualified):
         return "total"
     if re.search(BUDGET_SCOPE, unqualified):

@@ -1,0 +1,142 @@
+"""Third independent re-audit probes (reports/reaudit3_20260923_{new,followup}_cases.json) as HTTP/DB tests.
+
+Oracles are the auditor's, written before the run; `read` only marks a plain recommendation
+request, which needs no refusal notice. Same strict shared check as the earlier matrices.
+"""
+
+import pytest
+
+from tests.test_reaudit_matrix import NO_CHANGE, check_variant
+
+CASES = [
+    ('p_upper_read', 'Q-1002', 'BlueScan Air öner; fiyat için üst sınır 500.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('p_upper_write', 'Q-1002', 'BlueScan Air 1 adet ekle; fiyat için üst sınır 500.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_azami_read', 'Q-1002', 'BlueScan Air öner; fiyat için azami 500.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('p_azami_write', 'Q-1002', 'BlueScan Air 1 adet ekle; fiyat için azami 500.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_max_read', 'Q-1002', 'BlueScan Air öner; fiyat için max 500.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('p_max_write', 'Q-1002', 'BlueScan Air 1 adet ekle; fiyat için max 500.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_encok_read', 'Q-1002', 'BlueScan Air öner; fiyat için en çok 500.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('p_encok_write', 'Q-1002', 'BlueScan Air 1 adet ekle; fiyat için en çok 500.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_maksimum_read', 'Q-1002', 'BlueScan Air öner; fiyat için maksimum 500.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('p_maksimum_write', 'Q-1002', 'BlueScan Air 1 adet ekle; fiyat için maksimum 500.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_limit_read', 'Q-1002', 'BlueScan Air öner; fiyat için limitim 500.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('p_limit_write', 'Q-1002', 'BlueScan Air 1 adet ekle; fiyat için limitim 500.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_words_read', 'Q-1002', 'BlueScan Air öner; fiyat için azami beş yüz.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('p_words_write', 'Q-1002', 'BlueScan Air 1 adet ekle; fiyat için azami beş yüz.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_bin_read', 'Q-1002', 'BlueScan Air öner; fiyat için üst sınır bin.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('p_bin_write', 'Q-1002', 'BlueScan Air 1 adet ekle; fiyat için üst sınır bin.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_mixed_read', 'Q-1002', 'BlueScan Air öner; fiyat için max 5 bin.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('p_mixed_write', 'Q-1002', 'BlueScan Air 1 adet ekle; fiyat için max 5 bin.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_wordbin_read', 'Q-1002', 'BlueScan Air öner; fiyat için en çok beş bin.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('p_wordbin_write', 'Q-1002', 'BlueScan Air 1 adet ekle; fiyat için en çok beş bin.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_second_spend_read', 'Q-1002', 'BlueScan Air 8.500 TL altında öner; ancak 500 ödeyebilirim.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('p_second_spend_write', 'Q-1002', 'BlueScan Air 8.500 TL altında 1 adet ekle; ancak 500 ödeyebilirim.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_second_lira', 'Q-1002', 'BlueScan Air 8.500 TL altında öner; elimde sadece beş yüz lira var.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('p_placeholder_80', 'Q-1002', 'BluePrint 80 7.500 TL altında 1 adet ekle.', {'PRD-PRN-320': 1}, {}),
+    ('p_placeholder_80_low', 'Q-1002', 'BluePrint 80 5.000 TL altında 1 adet ekle.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_placeholder_203', 'Q-1002', 'BlueLabel 203 12.000 TL altında 1 adet ekle.', {'PRD-LBL-410': 1}, {}),
+    ('p_budget_before_unit', 'Q-1002', 'Masrafım 9.000 TL; birim fiyatı 9.000 TL altında BlueScan Air 2 adet ekle.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_budget_after_unit', 'Q-1002', 'Birim fiyatı 9.000 TL altında BlueScan Air 2 adet ekle; 9.000 TL ayırdım.', NO_CHANGE, {'no_recommendations': True}),
+    ('p_unit_only', 'Q-1002', 'Birim bütçem 9.000 TL; BlueScan Air 2 adet ekle.', {'PRD-BC-110': 2}, {}),
+    ('p_unit_price_amount', 'Q-1002', 'BlueScan Air birim fiyatının tutarı 8.500 TL altında 1 adet ekle.', {'PRD-BC-110': 1}, {}),
+    ('q_name_suffix', 'Q-1002', "'BlueScan Air'ı 1 adet ekle.", {'PRD-BC-110': 1}, {}),
+    ('q_curly_name_suffix', 'Q-1002', '‘BlueScan Air’ı 1 adet ekle.', {'PRD-BC-110': 1}, {}),
+    ('q_nested_report', 'Q-1002', '«"BlueScan Air\'i 1 adet ekle" örneği» ne demek?', NO_CHANGE, {}),
+    ('q_nested_then_action', 'Q-1002', "Örnek: «'GreenScan Eco 1 adet ekle'». BlueScan Air 1 adet ekle.", {'PRD-BC-110': 1}, {}),
+    ('q_open_straight', 'Q-1002', "Örnek metin: 'BlueScan Air 1 adet ekle", NO_CHANGE, {}),
+    ('q_open_double', 'Q-1002', 'Örnek metin: "BlueScan Air 1 adet ekle', NO_CHANGE, {}),
+    ('q_open_curly', 'Q-1002', 'Örnek metin: ‘BlueScan Air 1 adet ekle', NO_CHANGE, {}),
+    ('q_open_guillemets', 'Q-1002', 'Örnek metin: «BlueScan Air 1 adet ekle', NO_CHANGE, {}),
+    ('q_open_backtick', 'Q-1002', 'Örnek metin: `BlueScan Air 1 adet ekle', NO_CHANGE, {}),
+    ('q_approval_existing', 'Q-1002', 'İşleme onayım mevcut, BlueScan Air 1 adet ekle.', {'PRD-BC-110': 1}, {}),
+    ('q_approval_full', 'Q-1002', 'Onayım tamdır, BlueScan Air 1 adet ekle.', {'PRD-BC-110': 1}, {}),
+    ('q_approval_provided', 'Q-1002', 'Gereken onayı sağladım, BlueScan Air 1 adet ekle.', {'PRD-BC-110': 1}, {}),
+    ('q_approval_plain', 'Q-1002', 'Tamamdır, BlueScan Air 1 adet ekle.', {'PRD-BC-110': 1}, {}),
+    ('q_permission_first', 'Q-1002', 'BlueScan Air 1 adet ekle; önce iznimi iste.', NO_CHANGE, {}),
+    ('q_permission_after', 'Q-1002', 'İznimi aldıktan sonra BlueScan Air 1 adet ekle.', NO_CHANGE, {}),
+    ('q_approval_question', 'Q-1002', 'Onay var mı kontrol ettikten sonra BlueScan Air 1 adet ekle.', NO_CHANGE, {}),
+    ('q_approval_conditional', 'Q-1002', 'Onay verilmişse BlueScan Air 1 adet ekle.', NO_CHANGE, {}),
+    ('q_approval_negative', 'Q-1002', 'Onay vermedim, BlueScan Air 1 adet ekleme.', NO_CHANGE, {}),
+    ('q_quoted_total', 'Q-1001', "'BlueScan Air toplam 4 adet olsun' ifadesini açıkla.", NO_CHANGE, {}),
+    ('q_external_total', 'Q-1001', 'Örnekte "GreenScan Eco 1 adet ekle" yazıyor. BlueScan Air toplam 4 adet olsun.', {'PRD-BC-110': 4}, {}),
+    ('c_name_then_command', 'Q-1002', 'BlueScan Air. Bundan 1 adet ekle.', {'PRD-BC-110': 1}, {}),
+    ('c_name_question_then_command', 'Q-1002', 'BlueScan Air? Evet, 1 adet ekle.', {'PRD-BC-110': 1}, {}),
+    ('c_context_joint', 'Q-1002', 'Müşteriye BlueScan Air ve GreenScan Eco 1 adet ekle.', {'PRD-BC-110': 1, 'PRD-BC-140': 1}, {}),
+    ('c_need_joint', 'Q-1002', 'İhtiyacımız olan BlueScan Air ve GreenScan Eco 1 adet ekle.', {'PRD-BC-110': 1, 'PRD-BC-140': 1}, {}),
+    ('c_ile_joint', 'Q-1002', 'BlueScan Air ile GreenScan Eco 1 adet ekle.', {'PRD-BC-110': 1, 'PRD-BC-140': 1}, {}),
+    ('c_exclamation', 'Q-1002', 'BlueScan Air 1 adet ekle! GreenScan Eco 1 adet ekle.', {'PRD-BC-110': 1, 'PRD-BC-140': 1}, {}),
+    ('c_question_request', 'Q-1002', 'BlueScan Air 1 adet ekler misin? GreenScan Eco 1 adet ekle.', {'PRD-BC-110': 1, 'PRD-BC-140': 1}, {}),
+    ('c_note_existing', 'Q-1002', 'BlueScan Air 1 adet ekle ve not: GreenScan Eco müşterinin mevcut cihazı.', NO_CHANGE, {}),
+    ('c_quoted_example', 'Q-1002', 'Örnekte "GreenScan Eco" geçiyor. BlueScan Air 1 adet ekle.', NO_CHANGE, {}),
+    ('c_negation', 'Q-1002', 'BlueScan Air 1 adet ekle. GreenScan Eco ekleme.', NO_CHANGE, {}),
+    ('c_008_period', 'Q-1002', "Sahada internet olmayacak. 4G'li el terminali ve offline senkron için gereken lisansı ekle.", {'PRD-POS-210': 1, 'PRD-SW-520': 1}, {'knowledge': 'KNE-COMP-001'}),
+    ('c_011_period', 'Q-1002', 'Depo için 3 adet BlueScan Air ekle. Partner indirimini de göster.', {'PRD-BC-110': 3}, {'knowledge': 'KNE-DIS-001'}),
+    ('c_012_period', 'Q-2003', '1.500 TL altında stokta olan koruyucu kılıf ekle. Kaynağını göster.', {'PRD-ACC-710-PLUS': 4, 'PRD-ACC-710': 1}, {}),
+    ('c_017_context', 'Q-1002', 'Müşteriye offline senkron ve şube senkronu için gerekli yazılımları ekle.', {'PRD-SW-520': 1, 'PRD-SW-530': 1}, {'knowledge': 'KNE-COMP-001'}),
+    ('n_mixed_bare', 'Q-1002', 'BlueScan Air 2 adet ve GreenScan Eco 3 ekle.', NO_CHANGE, {}),
+    ('n_mixed_x', 'Q-1002', 'BlueScan Air 2 adet ve GreenScan Eco x3 ekle.', NO_CHANGE, {}),
+    ('n_mixed_words', 'Q-1002', 'BlueScan Air 2 adet ve GreenScan Eco üç tane ekle.', NO_CHANGE, {}),
+    ('n_distinct', 'Q-1002', 'BlueScan Air 2 adet ve GreenScan Eco 3 adet ekle.', NO_CHANGE, {}),
+    ('n_same_two', 'Q-1002', 'BlueScan Air 2 adet ve GreenScan Eco 2 adet ekle.', {'PRD-BC-110': 2, 'PRD-BC-140': 2}, {}),
+    ('n_percent_context', 'Q-1002', '%7 partner indirimi var mı? BlueScan Air 3 adet ekle.', {'PRD-BC-110': 3}, {}),
+    ('n_date_context', 'Q-1002', '24/09/2026 tarihinde teslim istiyorum; BlueScan Air 1 adet ekle.', {'PRD-BC-110': 1}, {}),
+    ('n_year_context', 'Q-1002', '2026 kampanyası için BlueScan Air 1 adet ekle.', {'PRD-BC-110': 1}, {}),
+    ('n_id_context', 'Q-1002', 'Müşteri numarası 500; BlueScan Air 1 adet ekle.', {'PRD-BC-110': 1}, {}),
+    ('n_model_context', 'Q-1002', 'Model numarası 80, BluePrint 80 1 adet ekle.', {'PRD-PRN-320': 1}, {}),
+    ('n_width_read_bad', 'Q-1002', '58mm BluePrint 80 öner.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('n_dpi_read_bad', 'Q-1002', '300dpi BlueLabel 203 öner.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('n_width_write_bad', 'Q-1002', '58mm BluePrint 80 1 adet ekle.', NO_CHANGE, {'no_recommendations': True}),
+    ('n_dpi_write_bad', 'Q-1002', '300dpi BlueLabel 203 1 adet ekle.', NO_CHANGE, {'no_recommendations': True}),
+    ('n_width_prefix', 'Q-1002', '58mm zorunlu; BluePrint 80 1 adet ekle.', NO_CHANGE, {'no_recommendations': True}),
+    ('n_width_suffix', 'Q-1002', 'BluePrint 80 1 adet ekle; 58mm zorunlu.', NO_CHANGE, {'no_recommendations': True}),
+    ('n_width_and', 'Q-1002', 'BluePrint 80 1 adet ekle ve 58mm zorunlu.', NO_CHANGE, {'no_recommendations': True}),
+    ('n_dpi_suffix', 'Q-1002', 'BlueLabel 203 1 adet ekle; 300dpi zorunlu.', NO_CHANGE, {'no_recommendations': True}),
+    ('n_width_update', 'Q-1002', '58mm BluePrint 80 miktarını 2 adede güncelle.', NO_CHANGE, {'preludes': ('BluePrint 80 1 adet ekle.',)}),
+    ('n_width_total', 'Q-1002', '58mm BluePrint 80 toplam 2 adet olsun.', NO_CHANGE, {'preludes': ('BluePrint 80 1 adet ekle.',)}),
+    ('n_width_more', 'Q-1002', '58mm BluePrint 80 1 adet daha ekle.', NO_CHANGE, {'preludes': ('BluePrint 80 1 adet ekle.',)}),
+    ('n_width_replace_generic', 'Q-1002', 'BluePrint 80 ürününü 80mm stoklu alternatifle değiştir.', NO_CHANGE, {'no_recommendations': True, 'preludes': ('BluePrint 80 1 adet ekle.',)}),
+    ('n_width_write_good', 'Q-1002', '80mm BluePrint 80 1 adet ekle.', {'PRD-PRN-320': 1}, {}),
+    ('n_dpi_write_good', 'Q-1002', '203dpi BlueLabel 203 1 adet ekle.', {'PRD-LBL-410': 1}, {}),
+    ('r_source_head', 'Q-1001', "BlueScan Air QR'lı ürününü GreenScan Eco ile değiştir.", {'PRD-BC-140': 1}, {}),
+    ('r_target_head', 'Q-1001', "BlueScan Air'i QR'lı cihaz GreenScan Eco ile değiştir.", NO_CHANGE, {'no_recommendations': True}),
+    ('r_target_head_product', 'Q-1001', "BlueScan Air'i QR'lı ürün olan GreenScan Eco ile değiştir.", NO_CHANGE, {'no_recommendations': True}),
+    ('r_target_adj', 'Q-1001', "BlueScan Air'i QR'lı GreenScan Eco ile değiştir.", NO_CHANGE, {'no_recommendations': True}),
+    ('r_unnamed_prefix', 'Q-1001', 'QR zorunlu; okuyucuyu GreenScan Eco ile değiştir.', NO_CHANGE, {'no_recommendations': True}),
+    ('r_unnamed_target', 'Q-1001', "Okuyucuyu QR'lı GreenScan Eco ile değiştir.", NO_CHANGE, {'no_recommendations': True}),
+    ('r_unnamed_suffix', 'Q-1001', 'Okuyucuyu GreenScan Eco ile değiştir; QR zorunlu.', NO_CHANGE, {'no_recommendations': True}),
+    ('r_unnamed_good', 'Q-1001', 'Okuyucuyu GreenScan Eco ile değiştir.', {'PRD-BC-140': 1}, {}),
+    ('r_target_reverse', 'Q-1001', "GreenScan Eco ile BlueScan Air'i değiştir; 2D zorunlu.", NO_CHANGE, {'no_recommendations': True}),
+    ('r_plus_id', 'Q-2001', 'PRD-BC-110-PLUS ürününü GreenScan Eco Plus ile değiştir.', {'PRD-BC-140-PLUS': 1}, {}),
+    ('r_plus_target_id', 'Q-2001', 'BlueScan Air Plus ürününü PRD-BC-140-PLUS ile değiştir.', {'PRD-BC-140-PLUS': 1}, {}),
+    ('r_plus_feature', 'Q-2001', "PRD-BC-110-PLUS ürününü QR'lı GreenScan Eco Plus ile değiştir.", NO_CHANGE, {'no_recommendations': True}),
+    ('r_plus_cross', 'Q-2001', 'PRD-BC-110-PLUS ürününü GreenScan Eco ile değiştir.', NO_CHANGE, {}),
+    ('r_plus_target_head', 'Q-2001', "PRD-BC-110-PLUS ürününü QR'lı cihaz GreenScan Eco Plus ile değiştir.", NO_CHANGE, {'no_recommendations': True}),
+    ('f_azami_currency', 'Q-1002', 'BlueScan Air öner; azami beş yüz TL.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('f_max_currency', 'Q-1002', 'BlueScan Air öner; max beş bin TL.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
+    ('f_generic_size_target', 'Q-1002', 'BluePrint 80 ürününü stoklu 80mm alternatifle değiştir.', NO_CHANGE, {'no_recommendations': True, 'preludes': ('BluePrint 80 1 adet ekle.',)}),
+    ('f_approval_question_clause', 'Q-1002', 'Onay var mı? Önce bunu doğrula, sonra BlueScan Air 1 adet ekle.', NO_CHANGE, {}),
+    ('f_head_natural', 'Q-1001', "BlueScan Air'i QR destekli cihaz olan GreenScan Eco ile değiştir.", NO_CHANGE, {'no_recommendations': True}),
+    ('f_plus_head_id', 'Q-2001', "PRD-BC-110-PLUS'ı QR destekli cihaz olan GreenScan Eco Plus ile değiştir.", NO_CHANGE, {'no_recommendations': True}),
+    ('f_approval_positive', 'Q-1002', 'Onay var, BlueScan Air 1 adet ekle.', {'PRD-BC-110': 1}, {}),
+]
+
+
+@pytest.mark.parametrize("case,quote,text,expected,options", CASES, ids=[c[0] for c in CASES])
+async def test_reaudit3_variant(db, case, quote, text, expected, options):
+    await check_variant(db, quote, text, expected, **options)
+
+
+# Own probes beyond the audit, per finding class.
+OWN_PROBES = [
+    ("own_price_tavan_filler", "Q-1002", "BlueScan Air öner; tavan fiyat 500.", NO_CHANGE, {"no_recommendations": True}),
+    ("own_price_suffix_gecme", "Q-1002", "BlueScan Air 1 adet ekle; 500'ü geçmesin.", NO_CHANGE, {"no_recommendations": True}),
+    ("own_price_spend_words", "Q-1002", "BlueScan Air öner; harcayabileceğim en fazla altı yüz.", NO_CHANGE, {"no_recommendations": True}),
+    ("own_price_bin_lira", "Q-1002", "BlueScan Air öner; azami bin lira.", NO_CHANGE, {"no_recommendations": True}),
+    ("own_price_quantity_cap", "Q-1002", "BlueScan Air birim fiyatı 9.000 TL altında, en fazla 2 adet ekle.", {"PRD-BC-110": 2}, {}),
+    ("own_price_months_payment", "Q-1002", "12 ay ödeme ile BlueStock Pro Lisans 12 Ay ekle.", {"PRD-SW-520": 1}, {}),
+]
+
+
+@pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+async def test_own_probe(db, case, quote, text, expected, options):
+    await check_variant(db, quote, text, expected, **options)
