@@ -134,6 +134,15 @@ QUESTION_WORDS = (
 )
 # Words that may sit inside a feature adjective run: "QR'lı", "2D ve kablosuz", "QR destekli".
 ADJECTIVE_LINKS = {"li", "lu", "destekli", "ozellikli", "olan", "ve"}
+# Words a coordinated object may carry besides catalog words: quantity, category
+# and generic nouns, and suffix fragments left by apostrophes (Eco'dan, 4G'li).
+OBJECT_WORDS = {
+    "adet", "tane", "bir", "tek", "da", "de", "ayrica", "urun", "urunu", "urunden", "model",
+    "modeli", "modelinden", "plus", "stokta", "stoklu", "uygun", "gerekli", "gereken", "ile",
+    "okuyucu", "yazici", "terminal", "kilif", "lisans", "yazilim", "kurulum", "hizmet", "kit",
+    "i", "u", "yi", "yu", "in", "un", "nin", "nun", "den", "dan", "ten", "tan", "e", "a",
+    "ye", "ya", "si", "su", "yla", "yle", "la", "le",
+}  # fmt: skip
 
 
 def adjective_start(normalized, position):
@@ -511,6 +520,11 @@ async def build_plan(conn, session, message_id, text, mode):
                 required=required,
             )
         return finish()
+    # "X yerine Y ekle" asks for a substitution, never for more X (the conditional
+    # "yoksa ... yerine" form is handled below).
+    if re.search(r"\byerine\b", normalized) and "yoksa" not in normalized:
+        notice = "Bir ürünün yerine başka ürün istediğini anladım. Değişim için örneğin 'BlueScan Air ürününü GreenScan Eco ile değiştir' şeklinde yazar mısın? Teklifi değiştirmedim."
+        return finish()
     reference_intent = (
         remove
         or update
@@ -592,7 +606,26 @@ async def build_plan(conn, session, message_id, text, mode):
             or any(w.startswith(("prd-", "tbr-")) for w in tokens(part))
         )
 
-    parts = text.split(";")
+    # Sentences and ";" clauses have the same scope: a note or example sentence
+    # naming a product is not an add request ("... örnek üründür. Air ekle.").
+    vocabulary = FEATURES | ADJECTIVE_LINKS | OBJECT_WORDS
+    for row in catalog.values():
+        vocabulary |= tokens(
+            " ".join([row["name_tr"], *row["aliases"].get("tr", []), *row["tags"]])
+        )
+    stems = {w for w in vocabulary if len(w) >= 4}
+
+    def bare_object(segment):
+        # Only product, feature, quantity and linking words: no other content.
+        words = normalize(re.sub(r"\b\w+\s+i[çc]in\b", " ", segment, flags=re.IGNORECASE))
+        return all(
+            w in vocabulary
+            or re.fullmatch(r"\d+|prd-\S+|tbr-\S+", w)
+            or any(w.startswith(stem) for stem in stems)
+            for w in words.split()
+        )
+
+    parts = re.split(r";|[.!?](?=\s|$)", text)
     first = next((i for i, p in enumerate(parts) if re.search(add_verb, normalize(p))), 0)
     # Clauses before the command: a feature binds every requested product
     # ("QR zorunlu; Lite ekle"), a product there is ambiguous, the rest is
@@ -609,7 +642,7 @@ async def build_plan(conn, session, message_id, text, mode):
     for part in parts[first + 1 :]:
         if names_product(part):
             if not re.search(add_verb, normalize(part)):
-                notice = "Noktalı virgülden sonraki ürün için ne yapmamı istediğin belirsiz. Ekleme için ürünü ve ekle komutunu ayrı yazar mısın? Teklifi değiştirmedim."
+                notice = "Komuttan sonraki ürün için ne yapmamı istediğin belirsiz. Ekleme için ürünü ve ekle komutunu ayrı yazar mısın? Teklifi değiştirmedim."
                 return finish()
             content.append(part)
         elif tokens(part) & FEATURES:
@@ -624,6 +657,15 @@ async def build_plan(conn, session, message_id, text, mode):
                 "?" in segment or re.search(QUESTION_WORDS, normalize(segment))
             ):
                 notice = "Mesajda ekleme ile birlikte bir soru var; hangi ürünün ekleneceğini kesinleştiremedim. Soruyu ve eklemeyi ayrı yazar mısın? Teklifi değiştirmedim."
+                return finish()
+            # A product sharing another segment's verb ("Air ve Eco ekle") is a
+            # bare object; a note or example ("not: Eco mevcut cihaz") is not.
+            if not re.search(add_verb, normalize(segment)) and not bare_object(segment):
+                notice = "Mesajda eklenecek ürünün yanında not veya örnek olarak geçen bir ürün var; hangisinin ekleneceğini kesinleştiremedim. Eklenecek ürünleri ekle komutuyla açıkça yazar mısın? Teklifi değiştirmedim."
+                return finish()
+            # One requirement is one product: two named models there are ambiguous.
+            if len({pid for _, _, pid in product_mentions(normalize(segment), catalog)}) > 1:
+                notice = "Aynı ifadede birden çok ürün geçiyor; hangisini eklemem gerektiğini kesinleştiremedim. Ürünleri ve ile ayırarak yazar mısın? Teklifi değiştirmedim."
                 return finish()
             requirements.append(" ".join(pending_features + [segment]))
             pending_features = []

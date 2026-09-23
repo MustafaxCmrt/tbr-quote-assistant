@@ -161,6 +161,13 @@ OWN_PROBES = [
     ("own_approval_future", "Q-1002", "BlueScan Air 1 adet ekle; önce müdürden onay alacağım.", NO_CHANGE, {}),
     ("own_approval_consult", "Q-1002", "BlueScan Air 1 adet ekle ama önce bana danış.", NO_CHANGE, {}),
     ("own_approval_granted_passive", "Q-1002", "Onaylandı, BlueScan Air 1 adet ekle.", {"PRD-BC-110": 1}, {}),
+    ("own_scope_note_colon", "Q-1002", 'Not: "GreenScan Eco" müşteride var, BlueScan Air 1 adet ekle.', NO_CHANGE, {}),
+    ("own_scope_note_sentence", "Q-1002", "BlueScan Air 1 adet ekle. Müşteride GreenScan Eco zaten var.", NO_CHANGE, {}),
+    ("own_scope_ile_pair", "Q-1002", "GreenScan Eco ile BlueScan Air ekle.", NO_CHANGE, {}),
+    ("own_scope_context_pair", "Q-1002", "Depo için BlueScan Air ve GreenScan Eco 1 adet ekle.", {"PRD-BC-110": 1, "PRD-BC-140": 1}, {}),
+    ("own_scope_two_sentences", "Q-1002", "BlueScan Air 1 adet ekle. GreenScan Eco 1 adet ekle.", {"PRD-BC-110": 1, "PRD-BC-140": 1}, {}),
+    ("own_yerine_target_feature", "Q-1001", "BlueScan Air yerine QR'lı GreenScan Eco ekle.", NO_CHANGE, {}),
+    ("own_yerine_object_first", "Q-1001", "GreenScan Eco'yu BlueScan Air yerine ekle.", NO_CHANGE, {}),
 ]
 
 
