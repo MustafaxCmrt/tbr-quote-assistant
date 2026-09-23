@@ -228,13 +228,25 @@ async def test_semicolon_clause_is_not_dropped(db, text):
     assert_unchanged(data, before, after, logs, receipts)
 
 
-async def test_semicolon_feature_is_enforced_at_mutation(db):
-    data, before, after, logs, receipts, _ = await run(db, "BlueScan Air 1 adet ekle; QR zorunlu.")
+@pytest.mark.parametrize(
+    "text", ["BlueScan Air 1 adet ekle; QR zorunlu.", "QR zorunlu; BlueScan Air 1 adet ekle."]
+)
+async def test_semicolon_feature_is_enforced_at_mutation(db, text):
+    from app.persistence.models import chat_messages
+
+    data, before, after, logs, receipts, _ = await run(db, text)
     assert data["notice"] == ""
     assert items(after) == [("PRD-BC-110", 1)] and len(receipts) == 1
     assert after["version"] == before["version"] + 1
     searches = [log for log in logs if log["tool_name"] == "search_products"]
+    assert searches
     assert all("qr" in log["input"]["filters"]["required_tags"] for log in searches)
+    # The persisted plan carries the tag to the mutation-time guard, whose
+    # REQUIRED_FEATURE_MISSING rejection is covered in test_mutations.py.
+    async with db.connect() as conn:
+        plan = await conn.scalar(sa.select(chat_messages.c.persisted_plan))
+    adds = [step for step in plan if step["name"] == "add_to_quote"]
+    assert len(adds) == 1 and "qr" in adds[0]["required_tags"]
 
 
 async def test_semicolon_separated_adds_are_one_group(db):
@@ -456,3 +468,20 @@ async def test_source_feature_does_not_bind_target(db, text, quote):
     assert after["version"] == before["version"] + 1 and len(receipts) == 1
     replaces = [log for log in logs if log["tool_name"] == "replace_with_alternative"]
     assert [r["input"]["to_product_id"] for r in replaces] == ["PRD-BC-140"]
+
+
+# Re-audit R05/R06: every clause keeps its scope.
+@pytest.mark.parametrize(
+    "text",
+    [
+        "QR zorunlu; BlueScan Lite 1 adet ekle.",
+        "QR zorunlu; BlueScan Air ve BlueScan Lite 1 adet ekle.",
+        "BlueScan Air hakkında; GreenScan Eco 1 adet ekle.",
+        "BlueScan Air 1 adet ekle ve GreenScan Eco'nun fiyatı ne?",
+        "GreenScan Eco kaç TL ve BlueScan Air 1 adet ekle.",
+        "BlueScan Air 1 adet ekle ve GreenScan Eco fiyatını göster.",
+    ],
+)
+async def test_leading_feature_or_question_clause_never_mutates(db, text):
+    data, before, after, logs, receipts, _ = await run(db, text)
+    assert_unchanged(data, before, after, logs, receipts)

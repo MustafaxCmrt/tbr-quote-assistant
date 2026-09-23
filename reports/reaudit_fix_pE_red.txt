@@ -1,0 +1,44 @@
+UTC: 2026-09-23T10:59:45Z
+HEAD (working tree may contain pending changes): 06a758b8cc3e8fba33e5d5bab866d8f242a791d0
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test pytest -q tests/test_audit_regressions.py -k question_clause or enforced_at_mutation
+text = 'BlueScan Air 1 adet ekle ve GreenScan Eco fiyatını göster.'
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "QR zorunlu; BlueScan Lite 1 adet ekle.",
+            "QR zorunlu; BlueScan Air ve BlueScan Lite 1 adet ekle.",
+            "BlueScan Air hakkında; GreenScan Eco 1 adet ekle.",
+            "BlueScan Air 1 adet ekle ve GreenScan Eco'nun fiyatı ne?",
+            "GreenScan Eco kaç TL ve BlueScan Air 1 adet ekle.",
+            "BlueScan Air 1 adet ekle ve GreenScan Eco fiyatını göster.",
+        ],
+    )
+    async def test_leading_feature_or_question_clause_never_mutates(db, text):
+        data, before, after, logs, receipts, _ = await run(db, text)
+>       assert_unchanged(data, before, after, logs, receipts)
+
+tests/test_audit_regressions.py:487: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = {'session_id': '3dac535328ba46468c5fb3ea11cca4b6', 'message_id': 'ada3b5462848460591d9e9d0cc9e0a6e', 'attempt_id': 'f7fb57373f474009ac77749751241a0b', 'mode': 'fallback', ...}
+before = {'quote_id': 'Q-1002', 'customer_id': 'CUST-ANK-002', 'customer_name': 'Ankara Toptan Depo Ltd.', 'status': 'draft', ...}
+after = {'quote_id': 'Q-1002', 'customer_id': 'CUST-ANK-002', 'customer_name': 'Ankara Toptan Depo Ltd.', 'status': 'draft', ...}
+logs = [{'log_id': 1, 'session_id': '3dac535328ba46468c5fb3ea11cca4b6', 'message_id': 'ada3b5462848460591d9e9d0cc9e0a6e', 'at...'duration_ms': 0, 'created_at': datetime.datetime(2026, 9, 23, 10, 59, 50, 321224, tzinfo=datetime.timezone.utc)}, ...]
+receipts = [{'quote_id': 'Q-1002', 'idempotency_key': '86342cef76049e1dd93ec83b04e040e216cf239ba3a6130f86fae08c27719d6e', 'sessio...committed_version': 3, 'created_at': datetime.datetime(2026, 9, 23, 10, 59, 50, 321224, tzinfo=datetime.timezone.utc)}]
+
+    def assert_unchanged(data, before, after, logs, receipts):
+>       assert data["notice"]
+E       AssertionError: assert ''
+
+tests/test_audit_regressions.py:42: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_audit_regressions.py::test_semicolon_feature_is_enforced_at_mutation[QR zorunlu; BlueScan Air 1 adet ekle.]
+FAILED tests/test_audit_regressions.py::test_leading_feature_or_question_clause_never_mutates[QR zorunlu; BlueScan Lite 1 adet ekle.]
+FAILED tests/test_audit_regressions.py::test_leading_feature_or_question_clause_never_mutates[QR zorunlu; BlueScan Air ve BlueScan Lite 1 adet ekle.]
+FAILED tests/test_audit_regressions.py::test_leading_feature_or_question_clause_never_mutates[BlueScan Air hakk\u0131nda; GreenScan Eco 1 adet ekle.]
+FAILED tests/test_audit_regressions.py::test_leading_feature_or_question_clause_never_mutates[BlueScan Air 1 adet ekle ve GreenScan Eco'nun fiyat\u0131 ne?]
+FAILED tests/test_audit_regressions.py::test_leading_feature_or_question_clause_never_mutates[BlueScan Air 1 adet ekle ve GreenScan Eco fiyat\u0131n\u0131 g\xf6ster.]
+6 failed, 2 passed, 91 deselected in 2.51s
+
+Exit code: 1

@@ -125,6 +125,11 @@ def product_mentions(normalized, catalog):
     ]
 
 
+# A product clause asking about the product rather than requesting it.
+QUESTION_WORDS = (
+    r"\b(?:ne|nedir|neler|kac|nasil|hangi\w*|fiyati\w*|fiyatlari\w*|goster\w*|soyle\w*"
+    r"|anlat\w*|acikla\w*|bilgi\w*|midir|mudur)\b"
+)
 # Words that may sit inside a feature adjective run: "QR'lı", "2D ve kablosuz", "QR destekli".
 ADJECTIVE_LINKS = {"li", "lu", "destekli", "ozellikli", "olan", "ve"}
 
@@ -556,35 +561,48 @@ async def build_plan(conn, session, message_id, text, mode):
             notice = "Koşulları sağlayan tek anlamlı stoklu alternatif seçilemedi. Ürün kodunu belirtir misin?"
         return finish()
     # Each conjunction requirement gets its own search and guard tags, then one atomic group.
+    add_verb = r"\bekle(?:r|yin)?\b"
+
+    def names_product(part):
+        return (
+            category(part)
+            or named_catalog_match(part)
+            or any(w.startswith(("prd-", "tbr-")) for w in tokens(part))
+        )
+
     parts = text.split(";")
-    if len(parts) > 1 and not re.search(r"\bekle(?:r|yin)?\b", normalize(parts[0])):
-        # A leading context clause ("Sahada internet olmayacak; ... ekle").
-        content = [text.split(";", 1)[-1]]
-    else:
-        # Later clauses keep their constraints: features bind the preceding
-        # product, another product needs its own add verb, notes are ignored.
-        content = [parts[0]]
-        for part in parts[1:]:
-            if (
-                category(part)
-                or named_catalog_match(part)
-                or any(w.startswith(("prd-", "tbr-")) for w in tokens(part))
-            ):
-                if not re.search(r"\bekle(?:r|yin)?\b", normalize(part)):
-                    notice = "Noktalı virgülden sonraki ürün için ne yapmamı istediğin belirsiz. Ekleme için ürünü ve ekle komutunu ayrı yazar mısın? Teklifi değiştirmedim."
-                    return finish()
-                content.append(part)
-            elif tokens(part) & FEATURES:
-                content.append(part)
+    first = next((i for i, p in enumerate(parts) if re.search(add_verb, normalize(p))), 0)
+    # Clauses before the command: a feature binds every requested product
+    # ("QR zorunlu; Lite ekle"), a product there is ambiguous, the rest is
+    # context ("Sahada internet olmayacak; ... ekle").
+    shared = set()
+    for part in parts[:first]:
+        if names_product(part):
+            notice = "Komuttan önceki ürün için ne yapmamı istediğin belirsiz. Ürünü ve işlemi tek cümlede yazar mısın? Teklifi değiştirmedim."
+            return finish()
+        shared |= tokens(part) & FEATURES
+    # Later clauses keep their constraints: features bind the preceding
+    # product, another product needs its own add verb, notes are ignored.
+    content = [parts[first]]
+    for part in parts[first + 1 :]:
+        if names_product(part):
+            if not re.search(add_verb, normalize(part)):
+                notice = "Noktalı virgülden sonraki ürün için ne yapmamı istediğin belirsiz. Ekleme için ürünü ve ekle komutunu ayrı yazar mısın? Teklifi değiştirmedim."
+                return finish()
+            content.append(part)
+        elif tokens(part) & FEATURES:
+            content.append(part)
     segments = [s for part in content for s in re.split(r"\bve\b", part, flags=re.IGNORECASE)]
     requirements = []
     pending_features = []
     for segment in segments:
-        if (
-            category(segment)
-            or named_catalog_match(segment)
-            or any(w.startswith(("prd-", "tbr-")) for w in tokens(segment))
-        ):
+        if names_product(segment):
+            # "Air ekle ve Eco'nun fiyatı ne?": a product asked about is not added.
+            if not re.search(add_verb, normalize(segment)) and (
+                "?" in segment or re.search(QUESTION_WORDS, normalize(segment))
+            ):
+                notice = "Mesajda ekleme ile birlikte bir soru var; hangi ürünün ekleneceğini kesinleştiremedim. Soruyu ve eklemeyi ayrı yazar mısın? Teklifi değiştirmedim."
+                return finish()
             requirements.append(" ".join(pending_features + [segment]))
             pending_features = []
         elif tokens(segment) & FEATURES:
@@ -592,6 +610,7 @@ async def build_plan(conn, session, message_id, text, mode):
                 requirements[-1] += " " + segment
             else:
                 pending_features.append(segment)
+    requirements = [" ".join([*sorted(shared), r]) for r in requirements]
     if pending_features:
         notice = "Özellikleri hangi ürün için istediğini belirtir misin?"
         return finish()
