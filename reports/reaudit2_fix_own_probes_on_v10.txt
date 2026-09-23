@@ -1,0 +1,22 @@
+UTC: 2026-09-23T12:40:46Z
+Application code: v10 317c5de (git worktree, detached); test files: current HEAD 05fe5cd62b9951d88d915360d24978c35de48bff
+Purpose: show which own probes (written after each fix) were real defects on v10
+Command: docker compose -p tbr-quote-assistant --env-file /Users/comert/Desktop/tbr-quote-assistant/.env -f /private/tmp/claude-501/-Users-comert-Desktop-tbr-quote-assistant/4462be58-edee-49cf-a143-62042a1912da/scratchpad/v10wt/compose.yaml -f /private/tmp/claude-501/-Users-comert-Desktop-tbr-quote-assistant/4462be58-edee-49cf-a143-62042a1912da/scratchpad/v10wt/reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test pytest -q tests/test_reaudit2_matrix.py -k test_own_probe
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_price_en_fazla]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_price_suffix_below]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_price_read_tavan]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_price_unit_and_spend]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_quote_unclosed_guillemet]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_approval_future]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_approval_consult]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_scope_two_sentences]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_yerine_target_feature]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_qty_mixed_larger]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_qty_percent_question]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_size_58_category]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_size_80_category]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_target_late_comma_2d]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_target_preface]
+FAILED tests/test_reaudit2_matrix.py::test_own_probe[own_source_post_features]
+16 failed, 16 passed, 126 deselected in 7.48s
+Exit code: 1
