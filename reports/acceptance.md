@@ -1,7 +1,7 @@
 # Kabul kanıtları — 2026-09-21
 
-> **Güncel durum (2026-09-23):** uygulama `fde6015`, tam backend **451 passed** (22 golden dahil), istemciler 24 passed;
-> [tam denetim çözüm kaydı](audit_fix_resolution.md). Aşağıdaki tablo tarihsel F00–F08 kabul kaydıdır; sayılar kendi commit'lerine aittir.
+> **Güncel durum (2026-09-23, v10):** uygulama `3e5aa4d`, tam backend **604 passed** (22 golden ve 83 yeniden denetim varyantı dahil),
+> istemciler 25 passed; [yeniden denetim çözüm kaydı](reaudit_fix_resolution.md), [ilk denetim](audit_fix_resolution.md). Aşağıdaki tablo tarihsel F00–F08 kabul kaydıdır; sayılar kendi commit'lerine aittir.
 
 **Teslim kabulü henüz tamamlanmadı.** F00–F08 ana kapıları tamam; F07 geniş erişilebilirlik kontrolleri
 ayrıca açık. F08 son disposition [kabul checkpoint](f08_acceptance.md) içinde; F09 son temiz kurulum/video/erişim kapısı açık. Aşağıdaki sonuçlar kendi raporlarındaki commit ve kapsama aittir.

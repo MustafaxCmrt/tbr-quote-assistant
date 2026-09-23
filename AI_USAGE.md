@@ -96,3 +96,5 @@ Test DB servisi bitince durduruldu. Fiziksel prova/video Mustafa'ya aittir.
 2026-09-22 v8 (Codex, Mustafa talimatı, Claude bağımsız denetim bulgusu): yalnız has_price_ceiling_intent içinde en ucuz/şimdiye kadar/bugüne kadar yanlış alarmı daraltıldı; True beklentisi düzeltilip helper ve izole HTTP/DB testleri eklendi, ayrıştırıcı yeniden DONDURULDU.
 
 2026-09-23 v9 (Claude, Mustafa talimatı, Codex bağımsız tam denetim bulguları): B01–B09 önce denetimin HTTP/DB probe kayıtları ve kod okumasıyla doğrulandı, sonra faz faz kırmızı→yeşil HTTP/DB regresyonlarıyla düzeltildi (her faz ayrı commit); v8 fiyat ayrıştırıcısı dondurması yalnız bu bulgular için kaldırıldı; 451 backend/22 golden/24 istemci testi geçti, push yapılmadı.
+
+2026-09-23 v10 (Claude, Mustafa talimatı, Codex bağımsız yeniden denetim bulguları): R01–R09/U01–U03 fazlar hâlinde kapsam düzeyinde düzeltildi; Codex'in 83 varyantı kalıcı HTTP/DB testine çevrildi (22 kırmızı → 83/83), aynı sınıflardan 19 kendi probe'u eklendi; 604 backend/22 golden/25 istemci testi geçti, push yapılmadı.

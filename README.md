@@ -1,16 +1,16 @@
 # The Blue Red — Teklif Asistanı
 
 Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
-**23 Eylül 2026: tam denetimin P1/P2 bulguları düzeltildi ve doğrulandı; F09 fiziksel prova/video/teslim açık.**
+**23 Eylül 2026: yeniden denetimin (86/100) P1 örnekleri ve 83 varyantı HTTP/DB regresyonlarıyla kapatıldı. B10 belgeli sınır olarak açık; F09 fiziksel prova/video/teslim açık.**
 Altı gerçek araç, transaction/receipt, kaynaklı deterministik sohbet, SSE, web admin ve Expo
-uygulaması çalışıyor. Son tam backend koşusu **451 passed** (22 golden dahil):
-[komut/çıktı](reports/audit_fix_final_backend.txt), [golden sonuçları](reports/audit_fix_final_golden.json).
-Tam denetim bulguları ve düzeltmeleri: [çözüm kaydı](reports/audit_fix_resolution.md);
-önceki fiyat/onay düzeltmeleri: [çözüm kaydı](reports/safety_review_resolution.md).
-Doğrulanan uygulama commit'i: `fde6015ba5b18772effcb480c4577e5f2cad46d9`.
-Teslim adayı: `demo-candidate-20260923-v9`; etiketin uygulama kodu test edilen commit ile aynıdır.
+uygulaması çalışıyor. Son tam backend koşusu **604 passed** (22 golden dahil):
+[komut/çıktı](reports/reaudit_fix_final_backend.txt), [golden sonuçları](reports/reaudit_fix_final_golden.json).
+Yeniden denetim düzeltmeleri: [çözüm kaydı](reports/reaudit_fix_resolution.md); ilk tam denetim:
+[çözüm kaydı](reports/audit_fix_resolution.md); önceki fiyat/onay düzeltmeleri: [çözüm kaydı](reports/safety_review_resolution.md).
+Doğrulanan uygulama commit'i: `3e5aa4d1f5c56dba8961146a1544d96d422f6668`.
+Teslim adayı: `demo-candidate-20260923-v10`; etiketin uygulama kodu test edilen commit ile aynıdır.
 Önceki v3 temiz clone'da 229 test geçmişti: [tarihsel temiz kurulum kanıtı](reports/hardening_resolution.md#v3-temiz-clone-provası).
-Bu düzeltmede yeni temiz clone açılmadı; mevcut izole PostgreSQL ve çalışan API doğrulandı.
+Bu düzeltmede yeni temiz clone açılmadı. Testler izole test PostgreSQL'inde gerçek FastAPI route'larını ASGI üzerinden çalıştırdı; demo API/web süreci başlatılmadı, canlı proxy/SSE zamanlaması bu tur doğrulanmadı.
 Mustafa fiziksel iPhone'da stream, ürün ekleme, web ile ortak teklif, aynı isteğin tekrarı,
 klavye ve kaynak aç/kapat akışlarını doğruladı. Kullanıcı bildirimi: iPhone 16e / iOS 26.6.2; Expo Go Client Version 57.0.9, Supported SDK 57.0.0.
 [Kabul kanıtları](reports/acceptance.md) kapsamı ve kalan teslim kapılarını ayırır.
@@ -58,7 +58,7 @@ docker compose --profile test up -d --wait test-db
 docker compose --profile test exec test-db sh -c "psql -U tbr_owner -d tbr_test -tAc \"select format('DROP DATABASE %I;', datname) from pg_database where datname like 'tbr\\_test\\_%'\" | psql -U tbr_owner -d tbr_test -q"
 ```
 
-Son onaylı temizlikte 4.319 geçici test DB’si silindi (sonuç 0); [önce/sonra kanıtı](reports/audit_fix_testdb_cleanup.txt). Sonraki test koşuları yeniden geçici DB oluşturur. Çok sayıda geçici DB test-db’nin 64 MB `/dev/shm` alanını doldurabilir; bu durumda önce bu temizlik yapılır, limit büyütülmez.
+Son onaylı temizliklerde geçici test DB’leri silindi (her seferinde sonuç 0); [önce/sonra kanıtı](reports/reaudit_fix_testdb_cleanup.txt). Sonraki test koşuları yeniden geçici DB oluşturur. Çok sayıda geçici DB test-db’nin 64 MB `/dev/shm` alanını doldurabilir; bu durumda önce bu temizlik yapılır, limit büyütülmez.
 
 Seed yalnız eksik ID'leri ekler, mevcut kullanıcı düzenlemelerini değiştirmez; startup'ta DROP/reset yoktur.
 Tüm seed ve başarı işareti tek transaction içindedir. Named volume veriyi restart'ta korur.
