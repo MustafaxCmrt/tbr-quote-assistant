@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { api, stream } from "../api/client";
-import { visibleAttemptContent } from "../api/retry";
+import { emptyAnswerLabel, visibleAttemptContent } from "../api/retry";
 import { initialStream, reduceChatEvent, type Source } from "../contracts";
 interface Message {
   id: string;
@@ -192,7 +192,7 @@ export function ChatPanel({
           <article className="exchange" key={m.id}>
             <p className="user-message">{m.user}</p>
             <div className="assistant-message">
-              <p className="preserve">{m.text || (m.error ? "Yanıt alınamadı." : "İstek işleniyor…")}</p>
+              <p className="preserve">{m.text || emptyAnswerLabel(m.status, m.error)}</p>
               {m.error && (
                 <p role="alert" className="error-text">
                   {m.error}

@@ -9,3 +9,9 @@ export function visibleAttemptContent(
     ? { text: state.text, sources: state.sources }
     : {};
 }
+
+/** Placeholder for an answer without text; a finished attempt is never "processing". */
+export function emptyAnswerLabel(status: string, error?: string): string {
+  if (error) return "Yanıt alınamadı.";
+  return status === "done" || status === "completed" ? "Yanıt tamamlandı." : "İstek işleniyor…";
+}

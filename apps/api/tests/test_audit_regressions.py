@@ -485,3 +485,13 @@ async def test_source_feature_does_not_bind_target(db, text, quote):
 async def test_leading_feature_or_question_clause_never_mutates(db, text):
     data, before, after, logs, receipts, _ = await run(db, text)
     assert_unchanged(data, before, after, logs, receipts)
+
+
+# Re-audit R07: stock-out questions cite the stock policy; a named product is still looked up.
+async def test_stock_out_question_about_named_product_cites_policy_and_product(db):
+    data, before, after, logs, receipts, _ = await run(db, "BlueScan Air stokta yok mu?")
+    assert after == before and receipts == []
+    assert not MUTATIONS & {log["tool_name"] for log in logs}
+    assert "PRD-BC-110" in data["recommended_product_ids"]
+    cited = {s["source_id"] for s in data["sources"] if s["kind"] == "knowledge"}
+    assert "KNE-STOCK-001" in cited
