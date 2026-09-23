@@ -9,6 +9,7 @@ from app.persistence.models import customers, products
 from app.schemas.tools import ProductFilters, ProductSearchInput
 from app.services.execution_context import Constraints, action_key
 from app.services.normalization import (
+    COMMAND_VERB,
     has_backorder_consent,
     has_price_ceiling_intent,
     has_price_intent,
@@ -18,6 +19,7 @@ from app.services.normalization import (
     normalize,
     numeric_slots,
     price_limit_scope,
+    strip_quoted_commands,
 )
 from app.services.quotes import get_quote
 from app.services.retrieval import FEATURES, search_products, tokens
@@ -124,6 +126,10 @@ def product_mentions(normalized, catalog):
 
 
 async def build_plan(conn, session, message_id, text, mode):
+    # A quoted command is text about a command; act only on the unquoted instruction.
+    unquoted, quoted = strip_quoted_commands(text)
+    if quoted and re.search(COMMAND_VERB, normalize(unquoted)):
+        text = unquoted
     normalized = normalize(text)
     steps = []
     topics = set()
@@ -230,6 +236,8 @@ async def build_plan(conn, session, message_id, text, mode):
     if has_unauthorized_command(text):
         read_only = True
         notice = "Mesajdaki işlemi alıntı, varsayım veya onay bekleyen bir istek olarak anladım. Teklifi değiştirmedim; uygulamamı istersen komutu doğrudan yaz."
+    elif negated and re.search(COMMAND_VERB, normalized):
+        notice = "Mesajda hem yapılacak hem yapılmayacak bir işlem var; hangisini uygulayacağımı kesinleştiremedim. Teklifi değiştirmedim; tek işlemi açıkça yazar mısın?"
     mutating = (remove or replace or update or total or add) and not read_only
     for markers, topic in [
         (("iade",), "return_policy"),

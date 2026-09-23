@@ -1,0 +1,44 @@
+UTC: 2026-09-23T10:51:15Z
+HEAD (working tree may contain pending changes): f3ceb18d9e4cc5407d0f6bc114358ffe7c7c67b1
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test pytest -q tests/test_audit_regressions.py -k mixed_command or unquoted_command
+E         Use -v to get more diff
+
+tests/test_audit_regressions.py:391: AssertionError
+_ test_granted_or_unquoted_command_adds_only_its_product[\xd6rnekte 'GreenScan Eco ekle' yaz\u0131yor. \u015eimdi BlueScan Air 1 adet ekle.] _
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff8432ae50>
+text = "Örnekte 'GreenScan Eco ekle' yazıyor. Şimdi BlueScan Air 1 adet ekle."
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Benden onay alındı, BlueScan Air 1 adet ekle.",
+            'Örnekte "GreenScan Eco ekle" yazıyor. Şimdi BlueScan Air 1 adet ekle.',
+            "Örnekte 'GreenScan Eco ekle' yazıyor. Şimdi BlueScan Air 1 adet ekle.",
+            "BlueScan Air'i 1 adet ekle.",
+            "'BlueScan Air' 1 adet ekle.",
+            "BlueScan Air 1 adet ekler misin?",
+        ],
+    )
+    async def test_granted_or_unquoted_command_adds_only_its_product(db, text):
+        data, before, after, logs, receipts, _ = await run(db, text)
+>       assert items(after) == [("PRD-BC-110", 1)], data["notice"]
+E       AssertionError: Birden fazla ürün aynı ölçüde uyuyor. Ürün kodunu belirtir misin? Teklifi değiştirmedim.
+E       assert [] == [('PRD-BC-110', 1)]
+E         
+E         Right contains one more item: ('PRD-BC-110', 1)
+E         Use -v to get more diff
+
+tests/test_audit_regressions.py:391: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_audit_regressions.py::test_talked_about_or_mixed_command_explains_and_never_mutates['BlueScan Air 1 adet ekle' ifadesini a\xe7\u0131klar m\u0131s\u0131n?]
+FAILED tests/test_audit_regressions.py::test_talked_about_or_mixed_command_explains_and_never_mutates['BlueScan Air 1 adet ekle' yazarsam iade nas\u0131l olur?]
+FAILED tests/test_audit_regressions.py::test_talked_about_or_mixed_command_explains_and_never_mutates[`BlueScan Air 1 adet ekle` ne i\u015fe yarar?]
+FAILED tests/test_audit_regressions.py::test_talked_about_or_mixed_command_explains_and_never_mutates[BlueScan Air 1 adet ekleyelim mi?]
+FAILED tests/test_audit_regressions.py::test_talked_about_or_mixed_command_explains_and_never_mutates[BlueScan Air 1 adet ekle; GreenScan Eco ekleme.]
+FAILED tests/test_audit_regressions.py::test_granted_or_unquoted_command_adds_only_its_product[Benden onay al\u0131nd\u0131, BlueScan Air 1 adet ekle.]
+FAILED tests/test_audit_regressions.py::test_granted_or_unquoted_command_adds_only_its_product[\xd6rnekte "GreenScan Eco ekle" yaz\u0131yor. \u015eimdi BlueScan Air 1 adet ekle.]
+FAILED tests/test_audit_regressions.py::test_granted_or_unquoted_command_adds_only_its_product[\xd6rnekte 'GreenScan Eco ekle' yaz\u0131yor. \u015eimdi BlueScan Air 1 adet ekle.]
+8 failed, 4 passed, 61 deselected in 3.47s
+
+Exit code: 1

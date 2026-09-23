@@ -355,3 +355,40 @@ async def test_explicit_unit_limit_or_currency_note_still_adds(db, text, quote, 
     assert after["version"] == before["version"] + 1 and len(receipts) == 1
     adds = [log for log in logs if log["tool_name"] == "add_to_quote" and log["mutation_applied"]]
     assert len(adds) == 1
+
+
+# Re-audit R02/U01: authority is decided per quoted span and per clause.
+@pytest.mark.parametrize(
+    "text",
+    [
+        "'BlueScan Air 1 adet ekle' ifadesini açıklar mısın?",
+        "'BlueScan Air 1 adet ekle' yazarsam iade nasıl olur?",
+        "`BlueScan Air 1 adet ekle` ne işe yarar?",
+        "Önce benden onay al, sonra BlueScan Air 1 adet ekle.",
+        "BlueScan Air 1 adet ekleyelim mi?",
+        "BlueScan Air 1 adet ekle; GreenScan Eco ekleme.",
+    ],
+)
+async def test_talked_about_or_mixed_command_explains_and_never_mutates(db, text):
+    data, before, after, logs, receipts, _ = await run(db, text)
+    assert_unchanged(data, before, after, logs, receipts)
+    assert "değiştirmedim" in data["notice"]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Benden onay alındı, BlueScan Air 1 adet ekle.",
+        'Örnekte "GreenScan Eco ekle" yazıyor. Şimdi BlueScan Air 1 adet ekle.',
+        "Örnekte 'GreenScan Eco ekle' yazıyor. Şimdi BlueScan Air 1 adet ekle.",
+        "BlueScan Air'i 1 adet ekle.",
+        "'BlueScan Air' 1 adet ekle.",
+        "BlueScan Air 1 adet ekler misin?",
+    ],
+)
+async def test_granted_or_unquoted_command_adds_only_its_product(db, text):
+    data, before, after, logs, receipts, _ = await run(db, text)
+    assert items(after) == [("PRD-BC-110", 1)], data["notice"]
+    assert after["version"] == before["version"] + 1 and len(receipts) == 1
+    adds = [log["input"]["product_id"] for log in logs if log["tool_name"] == "add_to_quote"]
+    assert adds == ["PRD-BC-110"]

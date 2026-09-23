@@ -81,15 +81,38 @@ def has_backorder_consent(value: str) -> bool:
 
 
 COMMAND_VERB = r"\b(?:ekle(?:r|yin)?|degistir(?:ir|in)?|guncelle|cikar|kaldir|sil)\b"
-QUOTED_SPANS = r'"([^"]*)"|“([^”]*)”|«([^»]*)»|„([^“”]*)[“”]|‘([^’]*)’'
+QUOTED_SPANS = (
+    r'"([^"]*)"|“([^”]*)”|«([^»]*)»|„([^“”]*)[“”]|‘([^’]*)’|`([^`]*)`'
+    # A straight single quote opens after a boundary and closes before one, so
+    # Turkish suffix apostrophes (Air'i, TL'ye) are never taken for quotes.
+    r"|(?<![^\s(\[:;,])'([^']+)'(?![^\s.,;:!?)\]])"
+)
+
+
+def strip_quoted_commands(value: str) -> tuple[str, bool]:
+    """Blank quoted spans that contain a command verb; quoted product names stay."""
+    found = False
+
+    def blank(match):
+        nonlocal found
+        if re.search(COMMAND_VERB, normalize(" ".join(g for g in match.groups() if g))):
+            found = True
+            return " "
+        return match[0]
+
+    return re.sub(QUOTED_SPANS, blank, value), found
 
 
 def has_unauthorized_command(value: str) -> bool:
-    """A quoted, hypothetical or approval-gated command is talked about, not given."""
-    for span in re.finditer(QUOTED_SPANS, value):
-        if re.search(COMMAND_VERB, normalize(" ".join(g for g in span.groups() if g))):
-            return True
-    text = normalize(value)
+    """A quoted, hypothetical or approval-gated command is talked about, not given.
+
+    A quoted command only blocks the message when no command remains outside
+    the quotes; the planner then acts on the unquoted instruction alone.
+    """
+    outside, quoted = strip_quoted_commands(value)
+    text = normalize(outside)
+    if quoted and not re.search(COMMAND_VERB, text):
+        return True
     return bool(
         # Conditional verb forms: eklersem, eklesek, degistirirsen, silinirse...
         re.search(
@@ -97,18 +120,26 @@ def has_unauthorized_command(value: str) -> bool:
             r"(?:m|k|n|niz|ydi\w*)?\b",
             text,
         )
-        # Reported or supposed speech: "ekle dersem", "diyelim ki ekle".
+        # Reported or supposed speech: "ekle dersem", "... yazarsam", "diyelim ki".
         or re.search(
-            r"\b(?:der(?:se|sem|sek|sen|seniz)|de(?:sem|sek|sen|seniz)|denirse|dedigimde|"
-            r"diyelim|varsayalim|farz\s+edelim)\b|\bne\s+(?:demek|anlam\w*)\b",
+            r"\b(?:(?:de|der|yaz|yazar|soyle|soyler)s[ae](?:m|k|n|niz)?|denirse|yazilirsa|"
+            r"dedigimde|yazdigimda|soyledigimde|diyelim|varsayalim|farz\s+edelim)\b"
+            r"|\bne\s+(?:demek|anlam\w*)\b",
             text,
         )
-        # The user reserved approval for later.
+        # Approval reserved for later; a granted one ("onay alındı") is not.
         or re.search(
-            r"\bonay\w*\s+(?:(?:iste|bekle|sor)\w*|al(?:in|iniz|madan)?\b)"
+            r"\bonay\w*\s+(?:(?:iste|bekle|sor)\w*|al(?:in|iniz|madan|maksizin)?\b)"
             # "sormadan ekle" (add without asking) is itself the instruction.
-            r"|\b(?:bana|benden)\s+(?:once\s+)?(?:sor(?!madan|maksizin)|onay)\w*"
-            r"|\bonce\s+(?:bana\s+)?sor(?!madan|maksizin)\w*",
+            r"|\b(?:bana|benden)\s+(?:once\s+)?sor(?!madan|maksizin)\w*"
+            r"|\bonce\s+(?:bana\s+|benden\s+)?sor(?!madan|maksizin)\w*",
+            text,
+        )
+        # First-person questions (ekleyelim mi, eklesem mi); "ekler misin" is a request.
+        or re.search(
+            r"\b(?:(?:ekle|degistir|guncelle|kaldir)\w*"
+            r"|(?:sil|cikar)[ae]?(?:yim|lim|sem|sek|sam|sak|meli\w*|mali\w*))"
+            r"\s+m[iu](?:yim|yiz|dir)?\b",
             text,
         )
     )
