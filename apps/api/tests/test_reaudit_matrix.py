@@ -189,7 +189,7 @@ async def check_variant(
     elif isinstance(expected, tuple):
         assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
     else:
-        assert items == expected, (items, body["notice"])
+        assert items == expected and not unchanged, (items, body["notice"])
     if not unchanged:
         # One receipt and one quote version per applied mutation, nothing else.
         assert applied and receipts == len(applied) == after["version"] - before["version"]
