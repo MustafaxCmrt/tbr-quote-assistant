@@ -140,7 +140,7 @@ QUESTION_WORDS = (
     r"|anlat\w*|acikla\w*|bilgi\w*|midir|mudur)\b"
 )
 # Words that may sit inside a feature adjective run: "QR'lı", "2D ve kablosuz", "QR destekli".
-ADJECTIVE_LINKS = {"li", "lu", "destekli", "ozellikli", "olan", "ve"}
+ADJECTIVE_LINKS = {"li", "lu", "destekli", "destekleyen", "ozellikli", "olan", "ve"}
 # Words a coordinated object may carry besides catalog words: quantity, category
 # and generic nouns, and suffix fragments left by apostrophes (Eco'dan, 4G'li).
 OBJECT_WORDS = {
@@ -162,21 +162,48 @@ def adjective_start(normalized, position):
     return start
 
 
-def target_region(normalized, mentions, target, sources):
-    """Text describing the replacement target, excluding the replaced item's words.
+# Case endings split off a product name by an apostrophe (Air'i, Pro'yu, Eco'dan).
+NAME_SUFFIXES = {
+    "i", "u", "yi", "yu", "in", "un", "nin", "nun", "e", "a", "ye", "ya", "de", "da",
+    "den", "dan", "ten", "tan",
+}  # fmt: skip
 
-    After a named source that precedes the target, everything belongs to the
-    target; before a later source, its own adjectives are excluded; without a
-    named source, only adjectives right before the target and what follows count.
+
+def source_phrase(normalized, start, end):
+    """Span of a replaced item's own noun phrase around its mention.
+
+    Adjectives right before it, its case ending, and a following feature run
+    closed by a head noun ("BlueScan Air QR'lı ürününü") describe the source.
     """
-    start = min(s for s, _, pid in mentions if pid == target)
-    spans = [(s, e) for s, e, pid in mentions if pid in sources]
-    before = [e for s, e in spans if s < start]
-    if before:
-        return normalized[max(before) :]
-    if spans:
-        return normalized[: adjective_start(normalized, min(s for s, _ in spans))]
-    return normalized[adjective_start(normalized, start) :]
+    after = list(re.finditer(r"\S+", normalized[end:]))
+    k = 0
+    while k < len(after) and after[k][0] in NAME_SUFFIXES:
+        k += 1
+    j = k
+    while j < len(after) and after[j][0] in FEATURES | ADJECTIVE_LINKS:
+        j += 1
+    if j < len(after) and re.fullmatch(r"(?:urun|model|cihaz)\w*", after[j][0]):
+        k = j + 1
+    return adjective_start(normalized, start), end + (after[k - 1].end() if k else 0)
+
+
+def target_region(normalized, mentions, target, sources):
+    """Text whose features the replacement target must have.
+
+    With a named source every feature binds the target, except those inside the
+    source's own noun phrase, wherever the source and the target stand
+    ("Eco ile Air'i değiştir, hedef QR desteklesin"). Without one, only
+    adjectives right before the target and what follows count.
+    """
+    if not any(pid in sources for _, _, pid in mentions):
+        start = min(s for s, _, pid in mentions if pid == target)
+        return normalized[adjective_start(normalized, start) :]
+    blanks = [source_phrase(normalized, s, e) for s, e, pid in mentions if pid in sources]
+    blanks += [(s, e) for s, e, pid in mentions if pid == target]
+    region = normalized
+    for start, end in sorted(blanks, reverse=True):
+        region = region[:start] + " " + region[end:]
+    return region
 
 
 async def build_plan(conn, session, message_id, text, mode):
@@ -485,7 +512,8 @@ async def build_plan(conn, session, message_id, text, mode):
             # Position, not catalog tags, decides whose feature a word is: a feature
             # the source also has may still be required of the target (QR'lı Eco).
             region = target_region(normalized, mentions, explicit, named_sources)
-            required = (tokens(region) | tokens(target_text)) & FEATURES
+            # Without a named source, a ";"/"stoklu" target clause may sit before it.
+            required = features(region) | (set() if named_sources else features(target_text))
             if explicit not in row["substitute_product_ids"]:
                 notice = "İstediğin hedef ürün bu kalem için kayıtlı alternatifler arasında değil. Teklifi değiştirmedim."
                 return finish()

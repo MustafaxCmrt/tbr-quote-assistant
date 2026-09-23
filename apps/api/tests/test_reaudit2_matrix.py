@@ -174,6 +174,11 @@ OWN_PROBES = [
     ("own_size_58_category", "Q-1002", "58 mm fiş yazıcı ekle.", {"PRD-PRN-310": 1}, {}),
     ("own_size_80_category", "Q-1002", "80 mm fiş yazıcı ekle.", {"PRD-PRN-320": 1}, {}),
     ("own_size_dpi_mismatch", "Q-1002", "203 dpi BluePrint 80 ekle.", NO_CHANGE, {}),
+    ("own_target_late_comma_2d", "Q-1004", "GreenScan Eco ile BlueScan Pro ürününü değiştir, yeni ürün 2D olsun.", NO_CHANGE, {}),
+    ("own_target_preface", "Q-1001", "QR zorunlu, BlueScan Air'i GreenScan Eco ile değiştir.", NO_CHANGE, {}),
+    ("own_target_late_ok", "Q-1001", "GreenScan Eco ile BlueScan Air ürününü değiştir, hedef kablosuz olsun.", {"PRD-BC-140": 1}, {}),
+    ("own_source_post_features", "Q-1004", "BlueScan Pro rugged 2D ürününü GreenScan Eco ile değiştir.", {"PRD-BC-140": 1}, {}),
+    ("own_source_supported_by", "Q-1001", "QR destekleyen BlueScan Air'i GreenScan Eco ile değiştir.", {"PRD-BC-140": 1}, {}),
 ]
 
 
