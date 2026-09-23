@@ -1,8 +1,0 @@
-UTC: 2026-09-21T17:45:58.339777+00:00
-Base commit (working tree may contain pending changes): eca25b2c192b69fc273d933eb4fa5da91c98702a
-Command: python3 .git/f09-demo-replace.py
-Exit code: 0
-
-Demo message: Pahalı okuyucuyu 9.000 TL altında bir alternatifle değiştir.
-After: {"quote_id": "Q-1004", "customer_id": "CUST-IST-001", "customer_name": "Mavi Kırmızı Market A.Ş.", "status": "draft", "currency": "TRY", "version": 2, "items": [{"quote_item_id": "QI-b378bd9d16fe4380bcb2cc976019b39c", "product_id": "PRD-BC-110", "sku": "TBR-BC-110", "name_tr": "BlueScan Air 2D Bluetooth Barkod Okuyucu", "quantity": 1, "unit_price_try": "7990.00", "gross_total_try": "7990.00", "discount_total_try": "0.00", "net_total_try": "7990.00", "rule_ids": [], "status": "active", "fulfillment_status": "in_stock", "replaced_by": null}], "history": [{"quote_item_id": "QI-1004-1", "product_id": "PRD-BC-120", "sku": "TBR-BC-120", "name_tr": "BlueScan Pro Rugged 2D Endüstriyel Okuyucu", "quantity": 1, "unit_price_try": "12950.00", "gross_total_try": "12950.00", "discount_total_try": "0.00", "net_total_try": "12950.00", "rule_ids": [], "status": "replaced", "fulfillment_status": "in_stock", "replaced_by": "QI-b378bd9d16fe4380bcb2cc976019b39c"}], "gross_total_try": "7990.00", "discount_total_try": "0.00", "net_total_try": "7990.00", "rule_ids": []}
-PASS demo replace: price ceiling, preserved history, shared quote; original demo unchanged

@@ -1,4 +1,4 @@
-"""Third independent re-audit probes (reports/reaudit3_20260923_{new,followup}_cases.json) as HTTP/DB tests.
+"""Third independent re-audit probes as HTTP/DB tests.
 
 Oracles are the auditor's, written before the run; `read` only marks a plain recommendation
 request, which needs no refusal notice. Same strict shared check as the earlier matrices.

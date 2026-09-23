@@ -1,8 +1,0 @@
-UTC: 2026-09-21T22:30:32.047814+00:00
-Base commit (working tree may contain pending changes): 62e75dba7cc427c6ae05f7e4027151477186841d
-Command: python3 scripts/check_delivery.py
-Exit code: 0
-
-PASS original source bytes unchanged: 12 files
-PASS stageable files exclude local instructions, env, actual LAN address and scanned key patterns
-PASS iOS verification bundle uses placeholder address and contains no scanned provider key pattern

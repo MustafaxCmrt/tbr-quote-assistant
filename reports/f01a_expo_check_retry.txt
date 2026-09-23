@@ -1,6 +1,0 @@
-UTC: 2026-09-21T10:16:05.972784+00:00
-Base commit (working tree may contain pending changes): adefc3967c95446584812d569bdfa308e413ace1
-Command: npm exec --workspace @tbr/mobile -- expo install --check
-Exit code: 0
-
-Dependencies are up to date

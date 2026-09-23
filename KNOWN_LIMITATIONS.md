@@ -21,9 +21,9 @@ olarak kapsam dışında bırakıldı veya bilinen trade-off'lardır.
 - Gizli değer taraması (`scripts/check_delivery.py`, `scripts/check_git_history.py`) bilinen anahtar
   biçimlerini, yerel IP'yi ve kullanıcı yolunu arar; her olası gizli değer biçimini bulma garantisi yoktur.
 - Mobil uygulama Expo Go ile çalışır; EAS build ve mağaza yayını yapılmadı. Kayıtlı `npm audit` çıktısında
-  Expo geliştirme araçlarının bağımlılık zincirinde 10 orta seviye bildirim vardır
-  ([rapor](reports/f07_npm_audit.txt)). Önerilen `--force` çözümü Expo SDK'yı çok eski bir sürüme
-  düşürdüğü için uygulanmadı.
+  10 orta seviye bildirim vardır ([rapor](reports/npm_audit.txt)). Hepsi tek bir kökten gelir: Expo'nun
+  yerel proje yapılandırma araçlarının (`xcode`) kullandığı eski `uuid` sürümü. Önerilen `--force` çözümü
+  Expo'yu SDK 57'den 46'ya düşürdüğü için uygulanmadı.
 
 ## Türkçe dil anlama
 

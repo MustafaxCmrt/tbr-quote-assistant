@@ -1,6 +1,0 @@
-UTC: 2026-09-21T15:25:14.807290+00:00
-Base commit (working tree may contain pending changes): 4905579c413d51a1c835eebec1f8af75fcaf397b
-Command: env PYTHONPATH=apps/api uv run --project apps/api --locked python scripts/export_tool_schemas.py
-Exit code: 0
-
-PASS six tool names and input field names match original contracts; JSON Schemas exported.

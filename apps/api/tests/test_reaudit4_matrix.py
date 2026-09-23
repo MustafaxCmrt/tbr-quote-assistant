@@ -1,4 +1,4 @@
-"""Fourth independent re-audit probes (reports/reaudit4_20260923_{new,followup}_cases.json) as HTTP/DB tests.
+"""Fourth independent re-audit probes as HTTP/DB tests.
 
 Oracles are the auditor's, written before the run; `read` only marks a plain recommendation
 request, which needs no refusal notice, and `recommendations` is the exact recommended list.

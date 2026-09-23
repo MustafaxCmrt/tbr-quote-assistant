@@ -1,4 +1,4 @@
-"""Independent re-audit variant matrix (reports/reaudit_20260923_variant_matrix.json) as HTTP/DB tests.
+"""Independent re-audit variant matrix as HTTP/DB tests.
 
 Each case runs on a fresh migrated+seeded PostgreSQL DB through /api/chat. NO_CHANGE means the
 canonical quote, version, receipts and mutation logs stay untouched; a dict is the exact active

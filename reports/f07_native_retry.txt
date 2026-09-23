@@ -1,9 +1,0 @@
-UTC: 2026-09-21T16:36:47.263487+00:00
-Base commit (working tree may contain pending changes): e311738347a8c168f48d15ef1bafb385ffdd036b
-Command: python3 scripts/check_f07_native_retry.py
-Exit code: 0
-
-PASS Q-1001 version2 quantity2 net15980.00 unchanged after physical retry
-PASS same message_id, two distinct attempts, one actual mutation and one receipt replay
-{"message_id": "29092b9a-ed3f-48a1-ba64-11143e9c42b7", "attempt_id": "ae7fac3a335040308fc9f21aa0d8e04f", "replayed": false, "mutation_applied": true}
-{"message_id": "29092b9a-ed3f-48a1-ba64-11143e9c42b7", "attempt_id": "2c8af60a7b0e4c13a673d144c8f563e8", "replayed": true, "mutation_applied": false}

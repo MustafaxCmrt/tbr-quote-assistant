@@ -1,8 +1,0 @@
-UTC: 2026-09-23T16:00:23Z
-HEAD: 77ccd81b87403bf397b93dfd558f1e83818bcf53 (tracked modifications: 0)
-Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run -e GOLDEN_REPORT_PATH=/evidence/reaudit4_fix_final_golden.json --rm --no-deps -e EVIDENCE_COMMIT_SHA=77ccd81b87403bf397b93dfd558f1e83818bcf53 test pytest -q tests/golden/test_chat_golden.py
- Container tbr-quote-assistant-test-run-ba79ab76931c Creating 
- Container tbr-quote-assistant-test-run-ba79ab76931c Created 
-......................                                                   [100%]
-22 passed in 5.61s
-Exit code: 0

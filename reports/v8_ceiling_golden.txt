@@ -1,9 +1,0 @@
-UTC: 2026-09-22T15:35:17.665771+00:00
-Base commit (working tree may contain pending changes): 0787bcb4a8df13c93cb527fd66c592511742e6e0
-Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml run --rm --no-deps -e EVIDENCE_COMMIT_SHA=0787bcb4a8df13c93cb527fd66c592511742e6e0 -e GOLDEN_REPORT_PATH=/evidence/v8_ceiling_golden.json test pytest -q tests/golden/test_chat_golden.py
-Exit code: 0
-
- Container tbr-quote-assistant-test-run-31a95ea704bb Creating
- Container tbr-quote-assistant-test-run-31a95ea704bb Created
-......................                                                   [100%]
-22 passed in 6.05s

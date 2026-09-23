@@ -1,8 +1,0 @@
-UTC: 2026-09-21T19:49:58.184839+00:00
-Base commit (working tree may contain pending changes): dcee13d25eb32dad9265c2f914c067218a36cb05
-Command: docker exec tbr-quote-assistant-test-db-1 sh -c 'psql -U tbr_owner -d tbr_test -tAc "select count(*) from pg_database where datname like '"'"'tbr\_test\_%'"'"'"; psql -U tbr_owner -d tbr_test -tAc "select format('"'"'DROP DATABASE %I;'"'"', datname) from pg_database where datname like '"'"'tbr\_test\_%'"'"'" | psql -U tbr_owner -d tbr_test -q -v ON_ERROR_STOP=1 && psql -U tbr_owner -d tbr_test -tAc "select count(*) from pg_database where datname like '"'"'tbr\_test\_%'"'"'"; psql -U tbr_owner -l | grep -c tbr_test'
-Exit code: 0
-
-2348
-0
-1

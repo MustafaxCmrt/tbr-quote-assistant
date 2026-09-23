@@ -43,5 +43,5 @@ vermek teklifi değiştirmez; ek yazmalara izin vermemek ise yan etkisiz davran�
   tam eşitliği, yasak çağrılar, kaynakların gerçek araç sonucundan gelmesi, teklifin son durumu, stok
   miktarlarının ve diğer tekliflerin değişmemesi, yedek mod ve `provider_calls=0`.
 - Sonuç dosyası her senaryo için gerçek araç listesini gösterir; ek okuma çağrıları orada açıkça görünür
-  ([son sonuç](../../reports/reaudit4_fix_final_golden.json)).
+  ([son sonuç](../../reports/golden_results.json)).
 - Firma tam eşitlik bekliyorsa ek okumalar fark olarak görünür; bu risk bilinerek kabul edildi.

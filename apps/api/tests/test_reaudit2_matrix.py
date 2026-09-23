@@ -1,4 +1,4 @@
-"""Second independent re-audit probes (reports/reaudit2_20260923_{new,followup}_cases.json) as HTTP/DB tests.
+"""Second independent re-audit probes as HTTP/DB tests.
 
 Oracles are the auditor's, written before the run, with one correction: f_width_80mm named a
 non-existent product (PRD-RP-310); the catalog's BluePrint 80 is PRD-PRN-320. Same strict

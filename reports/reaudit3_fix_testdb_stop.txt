@@ -1,6 +1,0 @@
-UTC: 2026-09-23T14:38:47Z  HEAD: ae69ff97287bec637c725398ea884b317e1ccd88
-Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test stop test-db
- Container tbr-quote-assistant-test-db-1 Stopped 
-Exit code: 0
-Running containers after stop:
-(end of list)

@@ -92,7 +92,7 @@ components:
 
 Mevcut arayüzün kendi adını taşıyan bu sistem, açık yüzeyli ve yoğunluğu kontrollü bir B2B yönetim ekranıdır. Mavi eylemleri ve gezinmeyi, kırmızı marka vurgusunu ve alan hatalarını taşır. Türkçe metin, kayıtlı değerler ve kaynak kimlikleri görsel süsten önce gelir.
 
-Bu belge mevcut uygulamanın kaydıdır; yeni bir görsel kimlik önermez. Kaynak: `src/style.css`, `src/main.tsx`, `src/features/QuotePanel.tsx`, `src/features/Logs.tsx`; görsel kanıt: `../../reports/images/f06/chat-desktop-final.png`.
+Bu belge mevcut uygulamanın kaydıdır; yeni bir görsel kimlik önermez. Kaynak: `src/style.css`, `src/main.tsx`, `src/features/QuotePanel.tsx`, `src/features/Logs.tsx`.
 
 **Key Characteristics:**
 
@@ -123,7 +123,7 @@ Başlık ve etiket ölçeği frontmatter'dadır. Bölüm alt başlıkları (1rem
 
 Masaüstü kabuk 210px sabit gezinme sütunu ve esnek çalışma alanından oluşur. İçerik en fazla 1600px genişler. Üst bağlam çubuğunda müşteri ve teklif seçilir. Teklif/sohbet alanı 1.3fr ve en az 330px olan 1fr sütunlarını, 28px boşlukla kullanır.
 
-1180px ve altında çalışma panelleri tek sütuna, form üç sütundan ikiye geçer; sayfa dolgusu 24px olur. 700px ve altında gezinme üstte 2×2 buton ızgarasına, form tek sütuna geçer; sayfa yatay dolgusu 16px, panel dolgusu 18px olur. Tablolar `TableScroll` kapsayıcısında yatay kayar; sağda kalan sütun varken kenar 36px solar (`.has-more`), tablo sığınca veya sona kaydırılınca solma kalkar. Sohbet alanı masaüstünde 480px, ara genişlikte 400px, dar ekranda 360px yüksekliğinde kaydırılır. Görsel kanıt: `../../reports/images/design/`.
+1180px ve altında çalışma panelleri tek sütuna, form üç sütundan ikiye geçer; sayfa dolgusu 24px olur. 700px ve altında gezinme üstte 2×2 buton ızgarasına, form tek sütuna geçer; sayfa yatay dolgusu 16px, panel dolgusu 18px olur. Tablolar `TableScroll` kapsayıcısında yatay kayar; sağda kalan sütun varken kenar 36px solar (`.has-more`), tablo sığınca veya sona kaydırılınca solma kalkar. Sohbet alanı masaüstünde 480px, ara genişlikte 400px, dar ekranda 360px yüksekliğinde kaydırılır.
 
 ## Elevation & Depth
 

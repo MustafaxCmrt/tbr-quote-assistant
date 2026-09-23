@@ -87,21 +87,20 @@ Backend testleri ayrı bir test veritabanında, her test için taze migrate ve s
 docker compose --profile test run --build --rm test
 ```
 
-Son tam koşunun sonu ([tam çıktı](reports/reaudit4_fix_final_backend.txt)):
+Son tam koşunun sonu ([tam çıktı](reports/backend_tests.txt)):
 
 ```text
-1015 passed in 214.81s (0:03:34)
+1015 passed in 211.62s (0:03:31)
 ```
 
 Kapsam:
 
 - **22 golden senaryo** (`data/source/golden_test_scenarios.json`). Her senaryo gerçek sohbet uç
   noktasına gider; beklenen araç çağrıları, kaynaklar ve veritabanı durumu doğrulanır
-  ([sonuç dosyası](reports/reaudit4_fix_final_golden.json)). Beklenen çağrılar "en az bu sırayla" yorumlanır;
+  ([sonuç dosyası](reports/golden_results.json)). Beklenen çağrılar "en az bu sırayla" yorumlanır;
   ek okuma çağrısına izin vardır, ek yazmaya ve yasak çağrıya yoktur ([karar kaydı 0002](docs/decisions/0002-golden-beklenti-yorumu.md)).
 - Retrieval ve kaynak doğruluğu, araç seçimi, add/update/replace mutasyonları, tekrar ve idempotency,
   fiyat/stok kuralları, anahtarsız yedek mod, eşzamanlı istekler, yetki ve gövde sınırı.
-  Yeniden başlatma sonrası kalıcılık ayrıca prob betikleriyle doğrulandı ([kanıt](reports/f01b_acceptance.md)).
 - Türkçe ifade çeşitleri için bağımsız denetimlerden gelen yüzlerce regresyon örneği. Belirsiz bir
   ifadede sistemin değişiklik yapmadan netleştirme sorduğu da test edilir.
 
