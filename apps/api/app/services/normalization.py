@@ -27,16 +27,21 @@ def has_price_ceiling_intent(value: str) -> bool:
     """
     currency = bool(re.search(r"\b(?:tl|try|lira\w*)\b|₺", value, re.IGNORECASE))
     # Temporal "until now/today" and superlative "en ucuz" (cheapest) are not ceilings.
-    text = re.sub(r"\b(?:(?:simdiye|bugune) kadar|en ucuz)\b", "", normalize(value))
+    text = re.sub(
+        r"\b(?:(?:simdiye|bugune) kadar|en ucuz)\b", "", strip_unit_caps(normalize(value))
+    )
     # A magnitude word can end a numeric or written amount (8 bin / on bin).
     # Recognize that monetary fragment without pretending to parse its value.
     amount_tail = r"(?<![\w.,-])(?:\d[\d.,]*|bin)"
+    if has_price_limit_clause(value):
+        return True
     for marker in PRICE_CEILING_MARKERS:
         suffix = r"\w*" if marker in {"butce", "limit", "tavan"} else ""
         if re.search(r"\b" + re.escape(marker) + suffix + r"\b", text) and (
             # Conservative safety net: currency + a ceiling marker needs no parsed number.
             currency
-            or marker not in {"kadar", "ucuz"}
+            # "En fazla" bounds a quantity or a time as often as money: it needs an amount.
+            or marker not in {"kadar", "ucuz", "en fazla"}
             # Keep amount punctuation: normalization erases decimal/apostrophe boundaries.
             # Only an adjacent amount qualifies; time/quantity units and model codes do not.
             or re.search(
@@ -186,7 +191,7 @@ def has_unauthorized_command(value: str) -> bool:
 
 
 def has_price_intent(value: str) -> bool:
-    normalized = normalize(value)
+    normalized = strip_unit_caps(normalize(value))
     # Temporal "until now/today" is not a ceiling, even with an item quantity.
     price_text = re.sub(r"\b(?:simdiye|bugune) kadar\b", "", normalized)
     return bool(re.search(r"\b(?:tl|try|lira\w*)\b|₺", value, re.IGNORECASE)) or any(
@@ -250,6 +255,7 @@ def has_unresolved_quantity(value: str) -> bool:
 # order, or a date/campaign context (2026 kampanyası).
 BOUND_NUMBER = (
     r"adet\w*|adede|tane\w*|lokasyon\w*|sube\w*|lisans\w*|mm|cm|gb|dpi|ay\w*|gun\w*|yil\w*"
+    r"|is gun\w*"
     r"|saat\w*|hafta\w*|dakika\w*|kampanya\w*|sezon\w*|donem\w*|tarih\w*|tl|try|lira\w*"
     r"|y?[ea]|[dt][ea]n?|inci|nci|uncu|ncu"
 )
@@ -292,33 +298,71 @@ NON_MONEY_UNIT = (
 # A limit word next to a number binds it as money even without a currency:
 # "limitim 500", "bütçem beş yüz", "en fazla 5.000", "500'ün altında".
 LIMIT_BEFORE = (
-    r"(?:limit\w*|butce\w*|tavan\w*|sinir\w*|masraf\w*|harca\w*|maksimum\w*|max|azami"
+    r"(?:limit\w*|butce\w*|tavan\w*|sinir\w*|masraf\w*|harca\w*|ode\w*|maksimum\w*|max|azami"
     r"|en (?:fazla|cok))"
 )
 LIMIT_AFTER = (
-    r"(?:altinda\w*|alti|asma\w*|asmayan|gecme\w*|ustune\w*|kadar|limit\w*|butce\w*|tavan\w*"
-    r"|ode\w*|harca\w*|ayir\w*)"
+    r"(?:altinda\w*|alti|asma\w*|asmayan|gecme\w*|ustune\w*|uzer\w*|yukari\w*|kadar|limit\w*"
+    r"|butce\w*|tavan\w*|ode\w*|harca\w*|ayir\w*)"
 )
-SPOKEN_NUMBER = rf"(?:\d+(?: \d{{3}})*|(?:{MONEY_WORDS})(?: (?:{MONEY_WORDS}))*)"
+# A written number keeps its case ending (beş yüzü, beş bini, yüzden); dört and
+# buçuk soften before one (dördü, buçuğu).
+NUMBER_CASE = r"(?:y?[iuea]|[dt][ea]n|n?[iu]n)"
+SPOKEN_NUMBER = (
+    rf"(?:\d+(?: \d{{3}})*|(?:(?:{MONEY_WORDS}) )*"
+    rf"(?:(?:{MONEY_WORDS}){NUMBER_CASE}?|(?:dord|bucug){NUMBER_CASE}))"
+)
 # Case ending split off a number by an apostrophe: 500'ün altında, 500'e kadar.
 CASE_ENDING = r"(?:u|un|in|nin|e|a|ye|ya|i|yi|den|dan|ten|tan)"
 NON_MONEY_UNIT_NORMALIZED = (
-    r"(?:adet|adede|tane|lokasyon|sube|lisans|gun|hafta|ay|saat|yil|dakika|mm|x)\w*"
+    r"(?:adet|adede|tane|lokasyon|sube|lisans|gun|is gun|hafta|ay|saat|yil|dakika|mm|x)\w*"
 )
+# "500'den fazlası/azı" bounds the amount whatever verb follows (ödeyemem, olmasın).
+COMPARED = r"(?<=[dt][ea]n )(?:fazla|az)\w*"
 
 
 def has_limit_bound_number(text: str) -> bool:
     """A number tied to a limit word in normalized text (currency-free money)."""
     for match in re.finditer(
-        rf"\b(?:{LIMIT_BEFORE} (?:\w+ )?({SPOKEN_NUMBER})|({SPOKEN_NUMBER}) (?:{CASE_ENDING} )?"
-        rf"{LIMIT_AFTER})\b(?! {NON_MONEY_UNIT_NORMALIZED}\b)",
+        rf"\b(?:{LIMIT_BEFORE} (?:\w+ )?({SPOKEN_NUMBER})|({SPOKEN_NUMBER}) "
+        rf"(?:(?:tl|try|lira\w*) )?(?:{CASE_ENDING} )?(?:{LIMIT_AFTER}|{COMPARED}))\b"
+        rf"(?! {NON_MONEY_UNIT_NORMALIZED}\b)",
         text,
     ):
         amount = match[1] or match[2]
-        # The article "bir" (bir kılıf) is not an amount.
-        if amount not in {"bir", "tek"}:
-            return True
+        # The article "bir" (bir kılıf), the pronoun "on" (ona, onu) and a clock
+        # time (saat beşe kadar) are not amounts.
+        if re.fullmatch(rf"(?:bir|tek|on{NUMBER_CASE})\w*", amount) or text[
+            : match.start()
+        ].endswith("saat "):
+            continue
+        return True
     return False
+
+
+# "En fazla 2 adet", "en çok 3 iş günü": a cap on a quantity or a time, not money.
+def strip_unit_caps(text: str) -> str:
+    return re.sub(
+        rf"\b(?:en (?:fazla|cok)|max|maksimum|azami) (?:\w+ )?{SPOKEN_NUMBER} "
+        rf"{NON_MONEY_UNIT_NORMALIZED}\b",
+        " ",
+        text,
+    )
+
+
+# A price noun whose own sentence bounds it ("fiyatı ... geçmesin", "ücreti ...
+# fazla olmasın") is a ceiling whatever form its amount takes.
+LIMIT_VERB = r"(?:gec(?:me|mey)|as(?:ma|may))\w*"
+PRICE_LIMIT = (
+    r"\b(?:fiyat|ucret|tutar|bedel|maliyet)\w*(?: \S+){0,5} "
+    rf"(?:{LIMIT_VERB}|(?:fazla|ust|uzer|yukari)\w* (?:ol|cik)(?:ma|may)\w*)"
+)
+
+
+def has_price_limit_clause(value: str) -> bool:
+    return any(
+        re.search(PRICE_LIMIT, normalize(sentence)) for sentence in re.split(r"[.;!?\n]", value)
+    )
 
 
 def has_unparsed_money(value: str) -> bool:
@@ -404,7 +448,10 @@ def numeric_slots(value: str) -> dict:
     # 8.500 TL and 8500 TL are one limit; compare values, not spellings.
     if len({parse_money(a) for a in amounts}) > 1 or len(set(quantities)) > 1:
         raise ValueError("Birden çok sayısal hedef; ayrı planlama gerekir.")
-    ceiling = any(marker in normalize(value) for marker in PRICE_CEILING_MARKERS)
+    ceiling = any(marker in normalize(value) for marker in PRICE_CEILING_MARKERS) or bool(
+        # "8.500 TL'yi geçmesin / aşmasın" bounds that amount like "altında".
+        re.search(rf"\b\d[\d ]* (?:tl|try|lira\w*)(?: y?[iuea])? {LIMIT_VERB}", normalize(value))
+    )
     return {
         "quantity": int(quantities[0]) if quantities else None,
         "max_price_try": parse_money(amounts[0]) if amounts and ceiling else None,

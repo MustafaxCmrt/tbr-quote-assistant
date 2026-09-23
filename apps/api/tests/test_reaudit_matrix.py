@@ -144,6 +144,7 @@ async def check_variant(
     knowledge=None,
     no_recommendations=False,
     read=False,
+    recommendations=None,
 ):
     app, client = await chat_client(db)
     async with app.router.lifespan_context(app), client:
@@ -195,6 +196,8 @@ async def check_variant(
         assert applied and receipts == len(applied) == after["version"] - before["version"]
     if no_recommendations:
         assert body["recommended_product_ids"] == [], body["recommended_product_ids"]
+    if recommendations is not None:
+        assert body["recommended_product_ids"] == recommendations, body["recommended_product_ids"]
     if topic:
         entries = {
             e["knowledge_id"]
