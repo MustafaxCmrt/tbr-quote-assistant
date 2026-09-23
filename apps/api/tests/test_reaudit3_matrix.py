@@ -134,6 +134,11 @@ OWN_PROBES = [
     ("own_price_bin_lira", "Q-1002", "BlueScan Air öner; azami bin lira.", NO_CHANGE, {"no_recommendations": True}),
     ("own_price_quantity_cap", "Q-1002", "BlueScan Air birim fiyatı 9.000 TL altında, en fazla 2 adet ekle.", {"PRD-BC-110": 2}, {}),
     ("own_price_months_payment", "Q-1002", "12 ay ödeme ile BlueStock Pro Lisans 12 Ay ekle.", {"PRD-SW-520": 1}, {}),
+    ("own_approval_asked_unknown", "Q-1002", "Onay alındı mı bilmiyorum; BlueScan Air 1 adet ekle.", NO_CHANGE, {}),
+    ("own_approval_if", "Q-1002", "Onay var ise BlueScan Air 1 adet ekle.", NO_CHANGE, {}),
+    ("own_permission_later", "Q-1002", "BlueScan Air 1 adet ekle, müdürün izni gelince.", NO_CHANGE, {}),
+    ("own_permission_granted", "Q-1002", "İzin verildi, BlueScan Air 1 adet ekle.", {"PRD-BC-110": 1}, {}),
+    ("own_permission_have", "Q-1002", "İznim var, BlueScan Air 1 adet ekle.", {"PRD-BC-110": 1}, {}),
 ]
 
 

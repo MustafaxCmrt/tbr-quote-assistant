@@ -96,13 +96,18 @@ QUOTED_SPANS = (
 # An opening quote left after balanced spans are removed never closes. A straight
 # single quote followed later by another one was closed by a suffix ('Air'ı ekle).
 UNCLOSED_QUOTE = r"[\"“«„‘`]|(?<![^\s(\[:;,])'(?=[^\s'])(?![^']*')"
-# Granted approval; any other mention of approval (önce onayımı al, onay
-# vermedim, onay almadan) reserves the decision for later.
+# Granted approval or permission, stated as a plain fact; any other mention
+# (önce onayımı al, onay vermedim, iznimi iste, onay var mı?, onay var ise)
+# reserves the decision for later.
+APPROVAL = r"\b(?:onay|izin|izn)\w*"
 GRANTED_APPROVAL = (
-    r"\b(?:benden\s+|bizden\s+|musteriden\s+)?onay\w*\s+"
-    r"(?:alindi|verildi|var|verdim|verdik|veriyorum|veriyoruz|aldim|aldik)\b"
+    r"\b(?:benden\s+|bizden\s+|musteriden\s+)?(?:onay|izin|izn)\w*\s+"
+    r"(?:alindi|verildi|var|mevcut|tam|tamdir|tamam|verdim|verdik|veriyorum|veriyoruz|aldim"
+    r"|aldik|sagladim|sagladik|alinmistir|verilmistir)\b"
     r"|\bonay(?:ladim|ladik|landi|liyorum|liyoruz)\b"
 )
+# A granted phrase inside a question or a condition is not granted.
+UNSETTLED = r"(?!\s+(?:m[iu]\w*|ise\w*|diye)\b)"
 
 
 def has_command(text: str) -> bool:
@@ -162,7 +167,7 @@ def has_unauthorized_command(value: str) -> bool:
         # granted one lets it run. "Bekleme onayını nasıl veririm?" is a question.
         or (
             re.search(r"\b(?:ekle|degistir|guncelle|cikar|kaldir|sil|toplam)\w*", text)
-            and re.search(r"\bonay\w*", re.sub(GRANTED_APPROVAL, " ", text))
+            and re.search(APPROVAL, re.sub(rf"(?:{GRANTED_APPROVAL}){UNSETTLED}", " ", text))
         )
         # "sormadan ekle" (add without asking) is itself the instruction.
         or re.search(
