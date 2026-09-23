@@ -1,0 +1,44 @@
+UTC: 2026-09-23T10:54:50Z
+HEAD (working tree may contain pending changes): 2ec066d1059aaa854c7a6136ba47c2c8a9117524
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test pytest -q tests/test_audit_regressions.py -k quantity_form
+        [
+            "BlueScan Air ekle, adet: 2.",
+            "BlueScan Air ekle, miktar=2.",
+            "BlueScan Air ve GreenScan Eco 2'şer ekle.",
+            "BlueScan Air ve GreenScan Eco ikişer adet ekle.",
+            "BlueScan Air - 2 adet ekle.",
+            "BlueScan Air 1 / 2 adet ekle.",
+            "BlueScan Air 1/2 adet ekle.",
+            "BlueScan Air 2 - 3 adet ekle.",
+            "BlueScan Air bir buçuk adet ekle.",
+        ],
+    )
+    async def test_unparsed_quantity_form_never_mutates(db, text):
+        data, before, after, logs, receipts, _ = await run(db, text)
+>       assert_unchanged(data, before, after, logs, receipts)
+
+tests/test_audit_regressions.py:414: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+data = {'session_id': '2311ff4da90f41e58f2d1a749c9e7cbb', 'message_id': '765fd1b4aa994033b9cf87adbfeae16a', 'attempt_id': '18f133328fbc46b0b2a458fcaf5e9659', 'mode': 'fallback', ...}
+before = {'quote_id': 'Q-1002', 'customer_id': 'CUST-ANK-002', 'customer_name': 'Ankara Toptan Depo Ltd.', 'status': 'draft', ...}
+after = {'quote_id': 'Q-1002', 'customer_id': 'CUST-ANK-002', 'customer_name': 'Ankara Toptan Depo Ltd.', 'status': 'draft', ...}
+logs = [{'log_id': 1, 'session_id': '2311ff4da90f41e58f2d1a749c9e7cbb', 'message_id': '765fd1b4aa994033b9cf87adbfeae16a', 'at...lse, 'duration_ms': 0, 'created_at': datetime.datetime(2026, 9, 23, 10, 54, 55, 350108, tzinfo=datetime.timezone.utc)}]
+receipts = [{'quote_id': 'Q-1002', 'idempotency_key': '9088237ef20b5717545237553428c4f7923cc31579794cd1be5850e16badad1c', 'sessio...committed_version': 2, 'created_at': datetime.datetime(2026, 9, 23, 10, 54, 55, 350108, tzinfo=datetime.timezone.utc)}]
+
+    def assert_unchanged(data, before, after, logs, receipts):
+>       assert data["notice"]
+E       AssertionError: assert ''
+
+tests/test_audit_regressions.py:42: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_audit_regressions.py::test_unparsed_quantity_form_never_mutates[BlueScan Air ekle, adet: 2.]
+FAILED tests/test_audit_regressions.py::test_unparsed_quantity_form_never_mutates[BlueScan Air ekle, miktar=2.]
+FAILED tests/test_audit_regressions.py::test_unparsed_quantity_form_never_mutates[BlueScan Air ve GreenScan Eco 2'\u015fer ekle.]
+FAILED tests/test_audit_regressions.py::test_unparsed_quantity_form_never_mutates[BlueScan Air - 2 adet ekle.]
+FAILED tests/test_audit_regressions.py::test_unparsed_quantity_form_never_mutates[BlueScan Air 1 / 2 adet ekle.]
+FAILED tests/test_audit_regressions.py::test_unparsed_quantity_form_never_mutates[BlueScan Air 2 - 3 adet ekle.]
+FAILED tests/test_audit_regressions.py::test_unparsed_quantity_form_never_mutates[BlueScan Air bir bu\xe7uk adet ekle.]
+7 failed, 4 passed, 73 deselected in 3.03s
+
+Exit code: 1

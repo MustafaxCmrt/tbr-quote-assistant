@@ -392,3 +392,34 @@ async def test_granted_or_unquoted_command_adds_only_its_product(db, text):
     assert after["version"] == before["version"] + 1 and len(receipts) == 1
     adds = [log["input"]["product_id"] for log in logs if log["tool_name"] == "add_to_quote"]
     assert adds == ["PRD-BC-110"]
+
+
+# Re-audit R03: any stated-but-unparsed quantity form asks instead of guessing.
+@pytest.mark.parametrize(
+    "text",
+    [
+        "BlueScan Air ekle, adet: 2.",
+        "BlueScan Air ekle, miktar=2.",
+        "BlueScan Air ve GreenScan Eco 2'şer ekle.",
+        "BlueScan Air ve GreenScan Eco ikişer adet ekle.",
+        "BlueScan Air - 2 adet ekle.",
+        "BlueScan Air 1 / 2 adet ekle.",
+        "BlueScan Air 1/2 adet ekle.",
+        "BlueScan Air 2 - 3 adet ekle.",
+        "BlueScan Air bir buçuk adet ekle.",
+    ],
+)
+async def test_unparsed_quantity_form_never_mutates(db, text):
+    data, before, after, logs, receipts, _ = await run(db, text)
+    assert_unchanged(data, before, after, logs, receipts)
+
+
+@pytest.mark.parametrize(
+    "text,quantity",
+    [("BlueScan Air tek adet ekle.", 1), ("BlueScan Air ２ adet ekle.", 2)],
+)
+async def test_supported_quantity_forms_still_add(db, text, quantity):
+    data, before, after, _, receipts, _ = await run(db, text)
+    assert data["notice"] == ""
+    assert items(after) == [("PRD-BC-110", quantity)]
+    assert after["version"] == before["version"] + 1 and len(receipts) == 1

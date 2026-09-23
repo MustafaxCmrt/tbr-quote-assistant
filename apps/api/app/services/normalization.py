@@ -184,13 +184,20 @@ QUANTITY_UNIT = r"(?:adet|adede|tane|lokasyon|şube|lisans)\b"
 NUMBER_WORDS = {
     "iki", "uc", "dort", "bes", "alti", "yedi", "sekiz", "dokuz", "on", "yirmi", "otuz",
     "kirk", "elli", "altmis", "yetmis", "seksen", "doksan", "yuz", "bin", "birkac", "bircok",
-    "kac", "birer", "ikiser", "yarim", "cift", "duzine",
+    "kac", "birer", "ikiser", "yarim", "cift", "duzine", "bucuk", "ceyrek",
 }  # fmt: skip
+DISTRIBUTIVE = r"\b(?:birer|ikiser|ucer|dorder|beser|altiser|yediser|sekizer|dokuzar|onar|yirmiser)\b"
 
 
 def has_unresolved_quantity(value: str) -> bool:
     """A quantity was stated, but not as a plain integer: never default it to one."""
-    for match in re.finditer(r"(\S+)\s+" + QUANTITY_UNIT, value.translate(SIGNS).lower()):
+    lowered = value.translate(SIGNS).lower()
+    # Unit-first (adet: 2) and distributive (2'şer, ikişer) forms are not parsed.
+    if re.search(r"\b(?:adet|tane|miktar\w*|say[ıi]\w*)\s*[:=]", lowered):
+        return True
+    if re.search(r"\d\s*['’]\s*ş?[ea]r\b", lowered) or re.search(DISTRIBUTIVE, normalize(value)):
+        return True
+    for match in re.finditer(r"(\S+)\s+" + QUANTITY_UNIT, lowered):
         word = normalize(match[1])
         if re.fullmatch(r"\d+|bir|tek", word):
             continue
@@ -257,7 +264,10 @@ def price_limit_scope(value: str) -> str | None:
 
 
 def numeric_slots(value: str) -> dict:
-    lowered = value.translate(SIGNS).lower()
+    # A detached sign ("- 2 adet") still signs the quantity.
+    lowered = re.sub(r"(?<![\w.,])([-+])\s+(?=\d)", r"\1", value.translate(SIGNS).lower())
+    if re.search(r"\d\s*[/\\]\s*\d+\s*" + QUANTITY_UNIT, lowered):
+        raise ValueError("Kesirli miktar desteklenmez.")
     amounts = re.findall(TL_AMOUNT, lowered)
     raw_quantities = re.findall(r"(?<![\w.,+-])([-+]?\d[\d.,]*)\s*" + QUANTITY_UNIT, lowered)
     if any(not re.fullmatch(r"\d+", value) for value in raw_quantities):
