@@ -316,3 +316,42 @@ async def test_history_endpoints_return_latest_window(db):
         logs = (await client.get("/api/tool-calls", params={"session_id": sid})).json()
     assert [r["message_id"] for r in rows] == ids[-200:]
     assert [log["tool_sequence"] for log in logs] == list(range(6, 506))
+
+
+# Re-audit R01/U02/U03: a limit's scope decides, not one keyword.
+@pytest.mark.parametrize(
+    "text,quote",
+    [
+        ("Hepsi için en fazla 9.000 TL, 2 adet BlueScan Air ekle.", "Q-1002"),
+        ("Sepet tutarı 9.000 TL altında olsun, 2 adet BlueScan Air ekle.", "Q-1002"),
+        ("İkisi birlikte 9.000 TL altında olsun, 2 adet BlueScan Air ekle.", "Q-1002"),
+        ("Teklif tutarı 9.000 TL altında kalsın, BlueScan Air 1 adet ekle.", "Q-1002"),
+        ("Bütçem 9.000 TL, BlueScan Air 1 adet ekle.", "Q-1002"),
+        ("Bütçem 9.000 TL, BlueScan Air 1 adet daha ekle.", "Q-1001"),
+        # A second limit without a currency word is still a second limit.
+        ("BlueScan Air 8.500 TL altında 1 adet ekle; bütçem 5.000.", "Q-1002"),
+    ],
+)
+async def test_total_or_ambiguous_budget_never_becomes_unit_ceiling(db, text, quote):
+    data, before, after, logs, receipts, _ = await run(db, text, quote)
+    assert_unchanged(data, before, after, logs, receipts)
+    assert "değiştirmedim" in data["notice"]
+
+
+@pytest.mark.parametrize(
+    "text,quote,expected",
+    [
+        ("Birim bütçem 9.000 TL, 2 adet BlueScan Air ekle.", "Q-1002", 2),
+        ("Adet başı 9.000 TL altında 2 adet BlueScan Air ekle.", "Q-1002", 2),
+        ("Birim fiyatı 9.000 TL altında, BlueScan Air 1 adet daha ekle.", "Q-1001", 2),
+        ("BlueScan Air birim fiyatı 8.500 TL altında 1 adet ekle; para birimi TRY.", "Q-1002", 1),
+        ("BlueScan Air 8.500 TL altında 1 adet ekle; tavan yine 8500 TL.", "Q-1002", 1),
+    ],
+)
+async def test_explicit_unit_limit_or_currency_note_still_adds(db, text, quote, expected):
+    data, before, after, logs, receipts, _ = await run(db, text, quote)
+    assert data["notice"] == ""
+    assert items(after) == [("PRD-BC-110", expected)]
+    assert after["version"] == before["version"] + 1 and len(receipts) == 1
+    adds = [log for log in logs if log["tool_name"] == "add_to_quote" and log["mutation_applied"]]
+    assert len(adds) == 1

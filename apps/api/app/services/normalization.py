@@ -169,22 +169,60 @@ def has_unresolved_quantity(value: str) -> bool:
 
 
 TL_AMOUNT = r"(?<![\w.,])([0-9][0-9.,]*)\s*tl\b"
+MONEY_WORDS = (
+    "bir|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on|yirmi|otuz|kirk|elli|altmis|yetmis|seksen"
+    "|doksan|yuz|bin|milyon|bucuk"
+)
+# Units after a bare number that make it a quantity, time or size, not money.
+NON_MONEY_UNIT = r"(?:adet|adede|tane|lokasyon|şube|lisans|gün|gun|hafta|ay|saat|yıl|yil|dakika|mm)"
 
 
 def has_unparsed_money(value: str) -> bool:
-    """One parsed TL amount does not mean every money condition was understood."""
+    """One parsed TL amount does not mean every money condition was understood.
+
+    Checks amounts left after removing parsed TL amounts; a bare currency note
+    ("para birimi TRY", "kaç TL") is not a second limit.
+    """
     rest = re.sub(TL_AMOUNT, " ", value.translate(SIGNS).lower())
-    return bool(re.search(r"\b(?:tl|try|lira\w*)\b|₺", rest))
-
-
-def has_total_budget_scope(value: str) -> bool:
-    """Money 'toplam' is a total budget; 'toplam 4 adet' is a quantity target."""
+    if re.search(r"₺\s*\d|\d\s*₺", rest):
+        return True
+    if re.search(r"\b(?:\d+|" + MONEY_WORDS + r")\s+(?:tl|try|lira\w*)\b", normalize(rest)):
+        return True
+    # A thousand-scale bare number (bütçem 5.000) is a limit the parser cannot bind.
     return bool(
         re.search(
-            r"\btoplam\w*\b(?!\s+\d+\s+(?:adet|adede|tane|lokasyon|sube|lisans)\b)",
-            normalize(value),
+            r"(?<![\w.,-])(?:\d{1,3}(?:\.\d{3})+|\d{4,})(?:,\d{1,2})?(?![\w.,-])"
+            r"(?!\s*['’]?\s*" + NON_MONEY_UNIT + r")",
+            rest,
         )
     )
+
+
+# "Birim fiyat/bütçe/tutar", "adet başı", "tanesi" bind a limit to one unit.
+UNIT_SCOPE = r"\b(?:birim\w*|tanesi\w*|her\s+biri\w*|(?:adet|tane)\s+bas\w*|basina)\b"
+TOTAL_SCOPE = (
+    r"\btoplam\w*\b(?!\s+\d+\s+(?:adet|adede|tane|lokasyon|sube|lisans)\b)"
+    r"|\b(?:hepsi\w*|tamami\w*|tumu\w*|butun\w*|birlikte|ikisi\w*)\b"
+    r"|\bsepet\w*\s+(?:tutar\w*|toplam\w*|deger\w*|\d)"
+    r"|\bteklif\w*\s+(?:tutar\w*|toplam\w*|deger\w*|butce\w*)|\btutar\w*"
+)
+BUDGET_SCOPE = r"\b(?:butce\w*|harca\w*|par(?:am|amiz)\b)"
+
+
+def price_limit_scope(value: str) -> str | None:
+    """Classify what a money limit applies to: 'total', 'unit', 'budget' (ambiguous) or None.
+
+    max_price_try is only a unit list-price ceiling (B04), so a total or ambiguous
+    budget must be clarified instead of being narrowed to a unit limit.
+    """
+    text = normalize(value)
+    if re.search(TOTAL_SCOPE, re.sub(r"\bbirim\s+\w+", " ", text)):
+        return "total"
+    if re.search(UNIT_SCOPE, text):
+        return "unit"
+    if re.search(BUDGET_SCOPE, text):
+        return "budget"
+    return None
 
 
 def numeric_slots(value: str) -> dict:
@@ -196,7 +234,8 @@ def numeric_slots(value: str) -> dict:
     quantities = raw_quantities
     if not quantities and "cikar" in normalize(value):
         quantities = re.findall(r"(?<![\w.,-])(\d+)['’]?[ea]\b", lowered)
-    if len(set(amounts)) > 1 or len(set(quantities)) > 1:
+    # 8.500 TL and 8500 TL are one limit; compare values, not spellings.
+    if len({parse_money(a) for a in amounts}) > 1 or len(set(quantities)) > 1:
         raise ValueError("Birden çok sayısal hedef; ayrı planlama gerekir.")
     ceiling = any(marker in normalize(value) for marker in PRICE_CEILING_MARKERS)
     return {
