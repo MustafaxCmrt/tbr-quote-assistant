@@ -125,6 +125,37 @@ def product_mentions(normalized, catalog):
     ]
 
 
+# Words that may sit inside a feature adjective run: "QR'lı", "2D ve kablosuz", "QR destekli".
+ADJECTIVE_LINKS = {"li", "lu", "destekli", "ozellikli", "olan", "ve"}
+
+
+def adjective_start(normalized, position):
+    """Start of the feature adjectives directly before position."""
+    start = position
+    for match in reversed(list(re.finditer(r"\S+", normalized[:position]))):
+        if match[0] not in FEATURES | ADJECTIVE_LINKS:
+            break
+        start = match.start()
+    return start
+
+
+def target_region(normalized, mentions, target, sources):
+    """Text describing the replacement target, excluding the replaced item's words.
+
+    After a named source that precedes the target, everything belongs to the
+    target; before a later source, its own adjectives are excluded; without a
+    named source, only adjectives right before the target and what follows count.
+    """
+    start = min(s for s, _, pid in mentions if pid == target)
+    spans = [(s, e) for s, e, pid in mentions if pid in sources]
+    before = [e for s, e in spans if s < start]
+    if before:
+        return normalized[max(before) :]
+    if spans:
+        return normalized[: adjective_start(normalized, min(s for s, _ in spans))]
+    return normalized[adjective_start(normalized, start) :]
+
+
 async def build_plan(conn, session, message_id, text, mode):
     # A quoted command is text about a command; act only on the unquoted instruction.
     unquoted, quoted = strip_quoted_commands(text)
@@ -406,10 +437,10 @@ async def build_plan(conn, session, message_id, text, mode):
         if row["stock_qty"] == 0:
             knowledge("stock_rule")
         if explicit:
-            # Features describing the replaced item do not bind its replacement.
-            required = (
-                tokens(target_text) if target_text else tokens(text) - set(map(normalize, row["tags"]))
-            ) & FEATURES
+            # Position, not catalog tags, decides whose feature a word is: a feature
+            # the source also has may still be required of the target (QR'lı Eco).
+            region = target_region(normalized, mentions, explicit, named_sources)
+            required = (tokens(region) | tokens(target_text)) & FEATURES
             if explicit not in row["substitute_product_ids"]:
                 notice = "İstediğin hedef ürün bu kalem için kayıtlı alternatifler arasında değil. Teklifi değiştirmedim."
                 return finish()

@@ -423,3 +423,36 @@ async def test_supported_quantity_forms_still_add(db, text, quantity):
     assert data["notice"] == ""
     assert items(after) == [("PRD-BC-110", quantity)]
     assert after["version"] == before["version"] + 1 and len(receipts) == 1
+
+
+# Re-audit R04: a target feature binds the target even when the source has it too.
+@pytest.mark.parametrize(
+    "text,quote",
+    [
+        ("BlueScan Air ürününü QR'lı GreenScan Eco ile değiştir.", "Q-1001"),
+        ("BlueScan Pro ürününü 2D GreenScan Eco ile değiştir.", "Q-1004"),
+        ("Kablosuz okuyucuyu QR'lı GreenScan Eco ile değiştir.", "Q-1001"),
+        ("GreenScan Eco ile BlueScan Pro'yu değiştir; 2D zorunlu.", "Q-1004"),
+    ],
+)
+async def test_target_feature_is_never_dropped(db, text, quote):
+    data, before, after, logs, receipts, _ = await run(db, text, quote)
+    assert_unchanged(data, before, after, logs, receipts)
+
+
+@pytest.mark.parametrize(
+    "text,quote",
+    [
+        ("QR'lı BlueScan Air ürününü GreenScan Eco ile değiştir.", "Q-1001"),
+        ("2D BlueScan Pro'yu GreenScan Eco ile değiştir.", "Q-1004"),
+        ("Kablosuz okuyucuyu GreenScan Eco ile değiştir.", "Q-1001"),
+        ("BlueScan Air ürününü kablosuz GreenScan Eco ile değiştir.", "Q-1001"),
+    ],
+)
+async def test_source_feature_does_not_bind_target(db, text, quote):
+    data, before, after, logs, receipts, _ = await run(db, text, quote)
+    assert data["notice"] == ""
+    assert items(after) == [("PRD-BC-140", 1)]
+    assert after["version"] == before["version"] + 1 and len(receipts) == 1
+    replaces = [log for log in logs if log["tool_name"] == "replace_with_alternative"]
+    assert [r["input"]["to_product_id"] for r in replaces] == ["PRD-BC-140"]
