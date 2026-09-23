@@ -86,7 +86,8 @@ olarak kapsam dışında bırakıldı veya bilinen trade-off'lardır.
 - Web ve mobil için bileşen (UI) testi yoktur; ayrıştırıcı, reducer, istemci, yeniden deneme ve durum
   mantığı test edilir. Uçtan uca doğrulama backend HTTP/DB testleri ve fiziksel cihaz denemeleriyle yapıldı.
 - Fiziksel test cihazı iPhone 16e (iOS 26.6.2, Expo Go SDK 57) oldu ve karanlık modda denendi. Açık tema,
-  büyük yazı, tablet ve VoiceOver için fiziksel doğrulama yapılmadı.
+  büyük yazı, tablet ve VoiceOver için fiziksel doğrulama yapılmadı. Android'de fiziksel deneme
+  yapılmadı; Android paketi hatasız derleniyor (`apps/mobile` içinde `npx expo export --platform android`).
 - `build_plan` (`apps/api/app/orchestration/planner.py`) büyük tek bir fonksiyondur. Okuma araçları da
   mesajın teklif kilidi altında çalışır: daha geniş ama basit bir tutarlılık tercihi.
 - Testler teşhis için her test veritabanını saklar. Çok sayıda tam koşudan sonra PostgreSQL'in paylaşımlı

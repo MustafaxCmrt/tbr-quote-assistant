@@ -1,8 +1,8 @@
 # Mobil uygulama (Expo)
 
-iPhone'da Expo Go ile çalışan Türkçe sohbet ve teklif uygulaması. Expo SDK 57, React Native 0.86,
-React 19, TypeScript; paketler kökteki `package-lock.json` ile kilitli. Docker Compose dışında,
-geliştirici makinesindeki Metro sunucusundan çalışır.
+Expo Go ile iPhone ve Android'de açılan Türkçe sohbet ve teklif uygulaması (fiziksel deneme iPhone'da
+yapıldı). Expo SDK 57, React Native 0.86, React 19, TypeScript; paketler kökteki `package-lock.json` ile
+kilitli. Docker Compose dışında, geliştirici makinesindeki Metro sunucusundan çalışır.
 
 ## Özellikler
 

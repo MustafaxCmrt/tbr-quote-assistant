@@ -14,7 +14,7 @@ olarak gösterir; ürün ve bilgi kayıtları buradan yönetilir.
 ## Mimari
 
 ```text
- Expo mobil (iPhone) ─┐                      ┌─ PostgreSQL 16
+ Expo mobil ──────────┐                      ┌─ PostgreSQL 16
                       ├─ HTTP + SSE ─ FastAPI ┤   ürün, bilgi, teklif, kalem, receipt, araç logları
  React web paneli ────┘                      └─ Alembic migration + JSON seed (ilk açılışta)
 ```
@@ -51,7 +51,9 @@ Docker volume'unda kalıcıdır. Durdurmak için `docker compose stop`; veriyi k
 
 ## Mobil uygulama (Expo Go)
 
-Gereken: Node 24 ve npm 11, iPhone'da App Store'daki Expo Go. Mac ve telefon aynı Wi-Fi ağında olmalı.
+Gereken: Node 24 ve npm 11, telefonda Expo Go (iPhone: App Store, Android: Google Play). Mac ve telefon
+aynı Wi-Fi ağında olmalı. Fiziksel deneme iPhone'da yapıldı; Android paketi hatasız derleniyor ama bir
+Android cihazda denenmedi.
 
 1. API'yi yerel ağa açarak başlatın:
 
@@ -63,7 +65,8 @@ Gereken: Node 24 ve npm 11, iPhone'da App Store'daki Expo Go. Mac ve telefon ayn
 
 2. `apps/mobile/.env` dosyasına Mac'in yerel IP adresini yazın (dosya git dışındadır):
    `EXPO_PUBLIC_API_BASE_URL=http://<MAC_LAN_IP>:8001`
-3. Expo'yu başlatın ve terminaldeki QR kodu iPhone kamerasıyla okutun:
+3. Expo'yu başlatın ve terminaldeki QR kodu okutun (iPhone'da kamerayla, Android'de Expo Go'nun içindeki
+   QR tarayıcıyla):
 
    ```sh
    npm start --workspace @tbr/mobile
@@ -76,7 +79,7 @@ Gereken: Node 24 ve npm 11, iPhone'da App Store'daki Expo Go. Mac ve telefon ayn
 Demo bitince API'yi yeniden yalnız bu bilgisayara kapatın:
 `API_BIND_HOST=127.0.0.1 docker compose up -d --no-deps --wait api`.
 
-Bağlanamazsa sırayla kontrol edin: aynı Wi-Fi ve Expo Go'nun yerel ağ izni; iPhone Safari'den
+Bağlanamazsa sırayla kontrol edin: aynı Wi-Fi ve Expo Go'nun yerel ağ izni; telefonun tarayıcısından
 `http://<MAC_LAN_IP>:8001/health/ready` açılıyor mu; `.env` adresi doğru mu ve Expo yeniden başlatıldı mı.
 
 ## Testler
