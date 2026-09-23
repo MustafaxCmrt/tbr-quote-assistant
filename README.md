@@ -1,99 +1,59 @@
-# The Blue Red — Teklif Asistanı
+# The Blue Red — Yapay Zekâ Destekli Teklif Asistanı
 
-Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
-**23 Eylül 2026: dördüncü yeniden denetimin (90/100) W01–W03 P1 grupları, W04/UX11–UX13 bulguları ve 91 denemesi HTTP/DB regresyonlarıyla kapatıldı. B10 ve U10 belgeli sınır olarak açık; F09 fiziksel prova/video/teslim açık.**
-Altı gerçek araç, transaction/receipt, kaynaklı deterministik sohbet, SSE, web admin ve Expo
-uygulaması çalışıyor. Son tam backend koşusu **1015 passed** (22 golden dahil):
-[komut/çıktı](reports/reaudit4_fix_final_backend.txt), [golden sonuçları](reports/reaudit4_fix_final_golden.json).
-Dördüncü yeniden denetim düzeltmeleri: [çözüm kaydı](reports/reaudit4_fix_resolution.md); üçüncü:
-[çözüm kaydı](reports/reaudit3_fix_resolution.md); ikinci:
-[çözüm kaydı](reports/reaudit2_fix_resolution.md); ilk yeniden denetim:
-[çözüm kaydı](reports/reaudit_fix_resolution.md); ilk tam denetim: [çözüm kaydı](reports/audit_fix_resolution.md);
-önceki fiyat/onay düzeltmeleri: [çözüm kaydı](reports/safety_review_resolution.md).
-Doğrulanan uygulama commit'i: `77ccd81b87403bf397b93dfd558f1e83818bcf53`.
-Teslim adayı: `demo-candidate-20260923-v13`; etiketin uygulama kodu test edilen commit ile aynıdır.
-Önceki v3 temiz clone'da 229 test geçmişti: [tarihsel temiz kurulum kanıtı](reports/hardening_resolution.md#v3-temiz-clone-provası).
-Bu düzeltmede yeni temiz clone açılmadı. Testler izole test PostgreSQL'inde gerçek FastAPI route'larını ASGI üzerinden çalıştırdı; demo API/web süreci başlatılmadı, canlı proxy/SSE zamanlaması bu tur doğrulanmadı.
-Mustafa fiziksel iPhone'da stream, ürün ekleme, web ile ortak teklif, aynı isteğin tekrarı,
-klavye ve kaynak aç/kapat akışlarını doğruladı. Kullanıcı bildirimi: iPhone 16e / iOS 26.6.2; Expo Go Client Version 57.0.9, Supported SDK 57.0.0.
-[Kabul kanıtları](reports/acceptance.md) kapsamı ve kalan teslim kapılarını ayırır.
+B2B satış ekipleri için Türkçe teklif asistanı. Kullanıcı mobil sohbet ekranından ürün veya politika
+sorusu sorar; sistem ürünleri ve bilgi kayıtlarını bulur, cevabını **kaynaklarıyla** verir ve gerektiğinde
+aynı teklif taslağı üzerinde **gerçek, kalıcı** değişiklik yapar. Web yönetim paneli aynı teklifi anlık
+olarak gösterir; ürün ve bilgi kayıtları buradan yönetilir.
 
-## Docker ile yerel altyapı
+- Altı zorunlu araç (`search_products`, `get_knowledge_entries`, `get_quote`, `add_to_quote`,
+  `update_quote_item`, `replace_with_alternative`) gerçek PostgreSQL üzerinde çalışır; sahte veya mock mutasyon yoktur.
+- Sohbet SSE ile akar: mesaj başlangıcı, araç çağrısı başlangıcı/sonucu, kaynaklar, metin parçaları ve bitiş/hata.
+- Dil modeli anahtarı olmadan tam çalışır: yanıtlar retrieval tabanlı ve kaynaklıdır, harici model çağrılmaz.
+- Fiyat üst limiti, stok ve bekleme (backorder) kuralları hem aramada hem de değişikliğin yazıldığı anda uygulanır.
 
-Docker Desktop çalışırken repo kökünde:
+## Mimari
+
+```text
+ Expo mobil (iPhone) ─┐                      ┌─ PostgreSQL 16
+                      ├─ HTTP + SSE ─ FastAPI ┤   ürün, bilgi, teklif, kalem, receipt, araç logları
+ React web paneli ────┘                      └─ Alembic migration + JSON seed (ilk açılışta)
+```
+
+Tek FastAPI servisi ve tek veritabanından oluşan modüler bir monolit. Teklifin tek doğruluk kaynağı
+backend'dir: fiyat, indirim ve toplamlar sunucuda hesaplanır; web ve mobil aynı `GET /api/quotes/{id}`
+cevabını gösterir, kendi başlarına tutar hesaplamaz.
+
+| Katman | Teknoloji |
+|---|---|
+| Backend | Python 3.12, FastAPI, SQLAlchemy 2 (async), Alembic, PostgreSQL 16 |
+| Web | React, TypeScript, Vite |
+| Mobil | Expo SDK 57 (React Native), Expo Go ile çalışır |
+| Ortak sözleşme | `packages/contracts`: SSE ayrıştırıcı, olay ve teklif tipleri (web ve mobil aynı kodu kullanır) |
+| Altyapı | Docker Compose |
+
+## Hızlı başlangıç
+
+Gereken: Docker Desktop (Compose v2) ve Python 3. Repo kökünde:
 
 ```sh
-python3 scripts/init_env.py
+python3 scripts/init_env.py        # .env dosyasını güçlü rastgele parolalarla üretir (git dışında)
 docker compose up --build -d --wait
 ```
 
-İlk komut güçlü parolalar ve yönetim anahtarıyla ignored `.env` oluşturur; mevcut dosyada yalnız eksik
-`ADMIN_API_KEY` değerini ekler, diğer değerleri değiştirmez. API
-`http://localhost:8001/health/ready`, web yönetimi `http://localhost:5173` adresindedir.
-PostgreSQL host portu açılmaz. API ve web varsayılan olarak yalnız Mac loopback'e bağlanır.
-Migration ve JSON seed başarılı olmadan API başlamaz. Runtime DB rolü şema değiştiremez.
-Web Compose servisi Vite geliştirme sunucusudur; public dağıtım için kullanılmaz.
-Ürün/bilgi ekleme, düzenleme ve silme `X-Admin-Key` ister. Web paneli bu başlığı Vite proxy'si üzerinden
-sunucu tarafında ekler; tarayıcıya veya mobil uygulamaya anahtar verilmez. Anahtarsız yazma 401 döner.
-Okuma, sohbet ve teklif uçları anahtarsızdır. İstek gövdesi 256 KiB ile sınırlıdır.
+| Adres | Ne var |
+|---|---|
+| http://localhost:5173 | Web paneli: teklif ve sohbet, ürünler, bilgi bankası, işlem kayıtları |
+| http://localhost:8001/docs | API belgesi (Swagger) |
+| http://localhost:8001/health/ready | Hazır olma kontrolü (migration ve seed tamamlanınca 200) |
 
-```sh
-docker compose --profile test run --build --rm test
-docker compose run --rm --no-deps migrate-seed alembic check
-```
+İlk açılışta migration ve orijinal dataset otomatik yüklenir; API bunlar bitmeden başlamaz. Veriler
+Docker volume'unda kalıcıdır. Durdurmak için `docker compose stop`; veriyi korumak için `down -v` kullanmayın.
 
-Testler ayrı test-db servisinde her test için yeni veritabanı oluşturur; teşhis için tutar.
-Belleği sınırlamak için mevcut test image/DB hazırken aşağıdaki ek Compose dosyası kullanılabilir.
-Bu dosya test sürecini 512 MB / 1 CPU ile sınırlar, konteyner swap'ını kapatır ve güncel kaynak/testleri
-salt okunur bağlar. PostgreSQL ayrı servistir; bu sınır bütün makinenin bellek sınırı değildir.
+## Mobil uygulama (Expo Go)
 
-```sh
-docker compose --profile test up -d --wait test-db
-docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml run --rm --no-deps test pytest -v
-docker compose --profile test stop test-db
-```
+Gereken: Node 24 ve npm 11, iPhone'da App Store'daki Expo Go. Mac ve telefon aynı Wi-Fi ağında olmalı.
 
-Çok sayıda tam koşudan sonra testler `DiskFullError` verirse eski test veritabanlarını yalnız test-db'de sil
-(demo veritabanına ve volume'lara dokunmaz):
-
-```sh
-docker compose --profile test up -d --wait test-db
-docker compose --profile test exec test-db sh -c "psql -U tbr_owner -d tbr_test -tAc \"select format('DROP DATABASE %I;', datname) from pg_database where datname like 'tbr\\_test\\_%'\" | psql -U tbr_owner -d tbr_test -q"
-```
-
-Son onaylı temizliklerde geçici test DB’leri silindi (her seferinde sonuç 0); [önce/sonra kanıtı](reports/reaudit4_fix_testdb_cleanup.txt). Sonraki test koşuları yeniden geçici DB oluşturur. Çok sayıda geçici DB test-db’nin 64 MB `/dev/shm` alanını doldurabilir; bu durumda önce bu temizlik yapılır, limit büyütülmez.
-
-Seed yalnız eksik ID'leri ekler, mevcut kullanıcı düzenlemelerini değiştirmez; startup'ta DROP/reset yoktur.
-Tüm seed ve başarı işareti tek transaction içindedir. Named volume veriyi restart'ta korur.
-Kaynak `seed.sql` otomatik çalıştırılmaz. Kanıt: [F01b kabul raporu](reports/f01b_acceptance.md).
-
-## Mevcut demoyu koruyarak ikinci kurulum
-
-Yeni clone klasöründe aşağıdaki değişkenleri aynı terminalde ayarla; sonra yukarıdaki
-kurulum ve test komutlarını çalıştır. Compose proje adı ayrı volume/network oluşturur.
-Portların boş olması gerekir. Mevcut `.env` veya veritabanını kopyalama/sıfırlama.
-
-```sh
-export COMPOSE_PROJECT_NAME=tbr-f09-clean
-export API_BIND_HOST=127.0.0.1
-export API_PORT=18001
-export WEB_PORT=15173
-python3 scripts/init_env.py
-docker compose up --build -d --wait
-```
-
-Bu ortam API `http://localhost:18001`, web `http://localhost:15173` kullanır.
-Aynı terminalde `docker compose stop` servisleri durdurur ve volume'ları korur.
-`down -v` kullanma. Fiziksel telefon demosu için ana kurulumun aşağıdaki LAN adımlarını izle.
-[F09 temiz kurulum kanıtı](reports/f09_acceptance.md) ve [3:30 demo akışı](docs/DEMO.md).
-
-## Kurulum ve iPhone testi
-
-Gerekenler: uv 0.12.17, Python 3.12.14, Node 24.21.0, npm 11.19.0.
-Python sürümü `apps/api/.python-version`, Node `.node-version`; bağımlılıklar `uv.lock` ve kök `package-lock.json` ile kilitli.
-Expo SDK 57, FastAPI 0.141.1 ve uvicorn 0.53.0 kurulup doğrulandı.
-
-1. Repo kökünde kur ve kalıcı API'yi yerel ağ demosu için başlat:
+1. API'yi yerel ağa açarak başlatın:
 
    ```sh
    npm ci
@@ -101,157 +61,190 @@ Expo SDK 57, FastAPI 0.141.1 ve uvicorn 0.53.0 kurulup doğrulandı.
    API_BIND_HOST=0.0.0.0 docker compose up --build -d --wait api web
    ```
 
-   Bu adım API'yi aynı Wi-Fi'daki cihazlara açar. Ürün/bilgi yazma anahtar ister; okuma ve sohbet açıktır.
-   Yalnız güvenilen ağda ve demo süresince kullan. Bitince `API_BIND_HOST=127.0.0.1 docker compose up -d --no-deps --wait api` ile API'yi
-   açıkça loopback adresine döndür. Demo sırasında başka bir servisi yeniden build ederken
-   (örn. `docker compose up -d --build web`) aynı `API_BIND_HOST=0.0.0.0` önekini tekrar ver; yoksa
-   Compose API'yi loopback ayarıyla yeniden oluşturur ve telefon "sunucuya ulaşılamadı" der.
-
-2. `apps/mobile/.env` dosyasına `EXPO_PUBLIC_API_BASE_URL=http://<MAC_LAN_IP>:8001` yaz.
-   `<MAC_LAN_IP>` yerine Mac'in Wi-Fi ayarlarındaki IP adresini kullan. Dosya git dışındadır; yeni kurulumda oluştur,
-   ağ değişirse güncelle. IP'yi rapora/örnek dosyaya/ekran görüntüsüne koyma. Telefonda localhost Mac'e gitmez.
-3. İkinci terminali repo kökünde açıp Expo'yu başlat:
+2. `apps/mobile/.env` dosyasına Mac'in yerel IP adresini yazın (dosya git dışındadır):
+   `EXPO_PUBLIC_API_BASE_URL=http://<MAC_LAN_IP>:8001`
+3. Expo'yu başlatın ve terminaldeki QR kodu iPhone kamerasıyla okutun:
 
    ```sh
    npm start --workspace @tbr/mobile
    ```
 
-4. Expo Go ve Mac CLI’da aynı Expo hesabıyla giriş yap (`npx expo login`); ardından Expo’yu yeniden başlat. Mac ve iPhone aynı Wi-Fi'dayken App Store'daki güncel Expo Go'yu kullan. iPhone Kamerasıyla
-   terminaldeki QR'ı okut, Expo Go'da aç; yerel ağ izni sorulursa izin ver.
-5. Mavi Kırmızı Market A.Ş. / Q-1001 seç; mevcut adedi not et. **“BlueScan Air 1 adet daha ekle.”**
-   gönder. Parça parça yanıt ve kaynaklar görünmeli; Teklif tabında adet bir artmalı. Web'de aynı
-   Q-1001 aynı adet/sürümü göstermeli. **Aynı isteği tekrar gönder** adedi yeniden artırmamalı.
-6. macOS güvenlik duvarı sorarsa bu yerel test için Docker/API ve Node'un gelen bağlantılarına izin ver;
-   güvenlik duvarını tamamen kapatman gerekmez.
-7. Çalışmazsa ilk üç kontrol: **(a)** aynı Wi-Fi, VPN/misafir ağı izolasyonu ve Expo Go yerel ağ izni;
-   **(b)** iPhone Safari'den `http://<MAC_LAN_IP>:8001/health/ready` açılıyor mu, API çalışıyor mu;
-   **(c)** `.env` adresi doğru mu, Expo yeniden başlatıldı mı, Expo Go SDK 57 ile uyumlu mu?
+4. Uygulamada müşteri ve teklif seçin (örneğin Mavi Kırmızı Market A.Ş. / Q-1001) ve
+   `BlueScan Air 1 adet daha ekle.` yazın. Yanıt parça parça akar, kaynaklar görünür, Teklif sekmesinde
+   adet artar; web panelinde aynı teklif aynı adet ve sürümü gösterir.
 
-Metro QR bağlantısı ile API bağlantısı ayrıdır. Expo'nun açılması API erişimini tek başına kanıtlamaz.
-F01 debug sonucu **passed**: Mustafa 0.0/1.1 sn ve Tamamlandı görüntüsünü paylaştı.
-Bu tam sohbet testi değildir. Güncel fiziksel kabul durumu `reports/native_smoke.md` içindedir.
-Eski debug ekranı için mobil `.env` içinde `EXPO_PUBLIC_DEBUG_STREAM_SMOKE=1`, API'de
-`DEBUG_STREAM_SMOKE=1` gerekir. DB'siz debug API komutu:
-`DEBUG_STREAM_SMOKE=1 uv run --directory apps/api --locked uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-access-log`.
-Bu ayrı debug testi için mobil API portu 8000 seçilir; gerçek uygulama için 8001'e dönülür.
+Demo bitince API'yi yeniden yalnız bu bilgisayara kapatın:
+`API_BIND_HOST=127.0.0.1 docker compose up -d --no-deps --wait api`.
 
-## Doğrulama
+Bağlanamazsa sırayla kontrol edin: aynı Wi-Fi ve Expo Go'nun yerel ağ izni; iPhone Safari'den
+`http://<MAC_LAN_IP>:8001/health/ready` açılıyor mu; `.env` adresi doğru mu ve Expo yeniden başlatıldı mı.
 
-Repo kökünde:
+## Testler
+
+Backend testleri ayrı bir test veritabanında, her test için taze migrate ve seed edilmiş PostgreSQL ile çalışır:
 
 ```sh
-npm test
-npm run typecheck
-npm run lint
-npm exec --workspace @tbr/mobile -- expo install --check
-PYTHONPATH=apps/api uv run --project apps/api --locked python scripts/check_debug_flag.py
-# Ayrı debug API 8000 portunda açıkken:
-python3 scripts/smoke_api.py
+docker compose --profile test run --build --rm test
 ```
 
-`scripts/smoke_api.py` gerçek `curl -N` çalıştırır, olayların geliş zamanlarını ve Türkçe içeriklerini doğrular.
-`reports/` içinde gerçek komutlar, exit code'lar ve çıktılar bulunur; başarısız ilk denemeler de saklanır.
-iOS bundle üretimi native cihaz gözlemi yerine geçmez. Kanıt haritası: [F01a kabul raporu](reports/f01a_acceptance.md).
+Son tam koşunun sonu ([tam çıktı](reports/reaudit4_fix_final_backend.txt)):
 
-## Kapsam ve düzen
+```text
+1015 passed in 214.81s (0:03:34)
+```
 
-- `apps/api`: altı domain tool, kaynaklı sohbet/SSE, ürün/bilgi CRUD, `/health/live` ve `/health/ready`; env ile açılan `/api/debug/stream-smoke`. `DEBUG_STREAM_SMOKE` yoksa/0 ise debug yolu yoktur;
-  değişiklik API yeniden başlatılınca geçerli olur. Kök `.env` otomatik yüklenmez.
-- `apps/mobile`: Türkçe sohbet, kaynaklar, retry ve kanonik teklif; `expo/fetch`, ortak parser. Compose dışında çalışır.
-- `packages/contracts`: testli SSE parser/reducer, Quote DTO ve version1 event sözleşmeleri.
-- `apps/web`: React/TypeScript/Vite admin/chat/quote/log. Ayrı `apps/web/package-lock.json` ile kilitli; `npm --prefix apps/web ci` ve `npm --prefix apps/web run build`.
-- `apps/api/app/persistence`: SQLAlchemy async Core şema, Alembic, JSON seed ve readiness.
-- `data/source`: orijinal şirket dataset'i, değiştirilmez. Seed/kalıcılık, iş kuralları ve golden testleri gerçek PostgreSQL üzerinde çalışır.
+Kapsam:
 
-ADR-005 (indirimler toplanmaz, özel kural önceliği) ve ADR-007 (beklenen çağrı/kaynaklar minimum)
-firma tarafından karar adaya bırakıldıktan sonra **kabul edilmiş aday tercihleridir** (21 Eylül 2026).
-Şirketin belirlediği kesin kurallar olarak sunulmaz; saf fiyatlama ve mutasyon yürütücüsü gerçek DB'de test edildi.
+- **22 golden senaryo** (`data/source/golden_test_scenarios.json`). Her senaryo gerçek sohbet uç
+  noktasına gider; beklenen araç çağrıları, kaynaklar ve veritabanı durumu doğrulanır
+  ([sonuç dosyası](reports/reaudit4_fix_final_golden.json)).
+- Retrieval ve kaynak doğruluğu, araç seçimi, add/update/replace mutasyonları, tekrar ve idempotency,
+  fiyat/stok kuralları, anahtarsız yedek mod, eşzamanlı istekler, yetki ve gövde sınırı.
+  Yeniden başlatma sonrası kalıcılık ayrıca prob betikleriyle doğrulandı ([kanıt](reports/f01b_acceptance.md)).
+- Türkçe ifade çeşitleri için bağımsız denetimlerden gelen yüzlerce regresyon örneği. Belirsiz bir
+  ifadede sistemin değişiklik yapmadan netleştirme sorduğu da test edilir.
 
-[AI kullanımı](AI_USAGE.md) · [Bilinen sınırlamalar](KNOWN_LIMITATIONS.md)
-
-## Kaynaklı okuma (F02)
-
-`POST /api/tools/search_products`, `POST /api/tools/get_knowledge_entries`,
-`GET /api/quotes/{quote_id}` gerçek PostgreSQL verisini okur. Para cevaplarda iki ondalıklı string,
-hesapta Decimal'dir. Teklif mevcut snapshot birim fiyatını kullanır; katalog fiyat güncellemesi eski teklifi değiştirmez.
-Aktif ve geçmiş satırlar ayrı döner. Read işlemleri teklif version'ını artırmaz.
+İstemci ve teslim kontrolleri (repo kökünde, `npm ci` sonrası):
 
 ```sh
-python3 scripts/smoke_reads.py
+npm test                                   # ortak sözleşme, web ve mobil testleri
+npm run typecheck && npm run lint
+npm --prefix apps/web ci && npm --prefix apps/web run build
+python3 scripts/check_delivery.py          # orijinal dataset bütünlüğü, depoda gizli değer/yerel veri taraması
 ```
 
-Fiyat çakışmasında en özel tek kural uygulanır (bundle/acil hizmet hariç tutma → Plus →
-yazılım kombinasyonu → aksesuar → partner). Örneğin 4 × 9430 için Plus %6: net 35456.80;
-toplamsal %13 seçilseydi net 32816.40 olurdu. Firma kararı adaya bıraktı; bu belgelenmiş
-aday tercihidir. Kaynak condition metinleri eval edilmez.
-Kanıt: [F02 kabul raporu](reports/f02_acceptance.md).
+## Tasarım kararları
 
-## Transaction ve tekrar davranışı (F03)
+### 1. Kaynak bulma: SQL + normalize edilmiş anahtar sözcük eşleşmesi
 
-Üç mutation tool'u tek executor'dan, kaydedilmiş plan ve güvenilir mesaj bağlamıyla çalışır.
-Sunucu anahtarı quote/message/action-index/tool üzerinden üretir; client veya LLM'nin değiştirdiği
-anahtar reddedilir. Teklif satırı `FOR UPDATE` kilidiyle receipt kontrolü ve güncelleme sıraya girer.
-Ürün satırları sabit ID sırasında `FOR SHARE` ile okunur; fiyat/stok admin güncellemesi commit öncesinde
-kontrolü geçersiz kılamaz. Grup içindeki ikinci hata, kalem/version/receipt/başarı loglarını birlikte geri alır.
+Ürünler PostgreSQL'den okunur ve Türkçe karakterleri katlanmış (`ş→s`, `ı→i`) metin üzerinden ad,
+Türkçe alias, etiket, ürün kodu ve SKU ile eşleştirilir. Kategori, **fiyat üst limiti**, stok ve zorunlu
+özellikler (QR, 2D, 58mm…) puan değil **kesin filtredir**. Bilgi kayıtları konu ve kelime eşleşmesiyle,
+yalnız yürürlükteki aktif kayıtlar arasından seçilir.
 
-Aynı mesajın yeniden gönderimi gerçek wrapper'ı receipt yolundan geçirir; yeni deneme loglanır,
-teklif tekrar değiştirilmez. Farklı message_id kasıtlı yeni işlemdir. Eski quantity-set tekrarları,
-arada yapılan yeni güncellemeyi geri almaz. Başarı cevabı yalnız transaction commit'inden sonra döner.
-Bu belirli anahtarda tekrar etmeyen DB etkisidir; genel bir “exactly once delivery” iddiası değildir.
+Neden: veri küçüktür (48 ürün, 22 bilgi kaydı) ve iş kuralları kesindir. Embedding veya vektör veritabanı
+eklemek açıklanabilirliği azaltırdı; fiyat ve stok kuralları olasılıksal bir benzerlik skoruna
+bırakılmamalıdır. Yeni eklenen ürün ve bilgi kayıtları ek indeksleme gerekmeden anında aramaya katılır.
 
-`quantity=0` kalemi removed yapar; pasif/stok dışı kaynak ürünü kaldırmayı engellemez.
-Replace eski satırı replaced yapar ve hedefe bağlar; hedef zaten aktifse miktarı birleştirir.
-Yeni stok dışı add için hem müşteri uygunluğu hem açık bekleme onayı gerekir; replace hedefi stoklu olmalıdır.
-Taslak stok rezervasyonu yapmaz ve stok miktarını düşürmez. Araçlar gerçek web sohbetine bağlıdır.
+### 2. Araç çağrısı orkestrasyonu: deterministik planlayıcı
 
-F04 sohbet: `POST /api/chat/sessions` ile `customer_id`, `quote_id`, `channel` gönder;
-dönen `session_id` ile `POST /api/chat` gövdesinde `message_id`, `quote_id`, `message` gönder.
-Aynı gönderimin tekrarında aynı `message_id`, yeni mesajda yeni kimlik kullanılır. Plan sunucuda
-kalıcıdır; istemci guard veya idempotency anahtarı veremez. Anahtarsız Türkçe fallback gerçek
-araçları çalıştırır; şu anda ücretli/harici model adaptörü yoktur. 22 golden senaryo HTTP sohbet
-kapısından geçti; kanıt `reports/f04_acceptance.md`. SSE ve web chat entegrasyonu F05/F06'da tamamlandı.
+Türkçe mesaj, kural tabanlı bir niyet/slot planlayıcısıyla araç çağrısı planına çevrilir. Plan
+veritabanına yazılır ve tek bir yürütücü gerçek araçları sırayla çalıştırır. Her çağrının girdisi,
+sonucu, kaynakları ve sırası `tool_call_logs` tablosuna kaydedilir; web panelindeki "İşlem kayıtları"
+ekranı bunları gösterir. Planlayıcı çalışırken senaryo kimliği veya golden mesaj eşlemesi kullanmaz;
+kararlarını canlı katalog verisiyle verir.
 
-F05: `POST /api/chat/stream` aynı chat gövdesiyle gerçek SSE döndürür. `message_start`, gerçek
-`tool_call_start/result`, `sources`, `text_delta`, `done/error` olayları version 1 envelope kullanır.
-Başarılı araç sonuçları transaction commit'inden sonra yayınlanır. Bağlantıyı kesmek kabul edilmiş
-işlemi geri almaz; aynı mesaj kimliğiyle tekrar dene ve `GET /api/quotes/{id}` ile yenile.
-`GET /api/chat/sessions/{id}/messages` toparlanma, `GET /api/tool-calls?session_id=...` denetim içindir.
-Kalıcı token/Last-Event-ID replay yoktur; işlem tekrarsızlığı receipt ile sağlanır. Fallback metni
-parçalar halinde gönderilir; LLM token akışı diye sunulmaz. Kanıt `reports/f05_acceptance.md`.
+Belirsiz bir istekte (hangi ürün, kaç adet, hangi fiyat sınırı olduğu kesinleşmiyorsa) değişiklik
+yapılmaz, kullanıcıya netleştirme sorusu sorulur. Bu teslimde harici dil modeli bağlantısı yoktur.
+Maliyet, güvenlik ve test edilebilirlik nedeniyle bilinçli bir tercihtir.
 
-## Web yönetimi (F06)
+### 3. Yedek mod: ne garanti ediliyor
 
-Compose açıkken `http://localhost:5173/`: müşteri/teklif seç, sohbetten işlem yap ve aynı kanonik
-teklifi izle. Ürünler ve Bilgi bankası ekranlarından listeleme/ekleme yapılır; yeni kayıtlar
-anında DB retrieval'ına katılır. İşlem kayıtları ekranı gerçek araç girdisi/sonucu, kaynaklar,
-deneme ve receipt tekrarını gösterir. API `/api/products` ve `/api/knowledge` için GET/list,
-POST, PATCH ve mantıksal DELETE sağlar. ID verilmezse sunucu üretir; silme geçmişi bozmaz.
+`OPENAI_API_KEY` tanımlı olmasa da (varsayılan budur) sistem eksiksiz çalışır:
 
-Web her 2,5 saniyede, pencereye dönünce ve mutation/retry sonunda teklifi yeniden okur;
-eski sürüm yeni sürümü ezmez. Bağlantı kesilince son görünüm ve başarılı kontrol zamanı korunur.
-Oturum kimliği tarayıcıda saklanır; fiyat ve miktar için ikinci bir kalıcı istemci deposu yoktur.
+- Hiçbir harici model çağrılmaz; her yanıtta bu `provider_calls=0` olarak kaydedilir.
+- Politika ve uyumluluk cevapları gerçek `knowledge_id` kaynaklarıyla döner; kaynak uydurulmaz.
+- Yanıt, yedek mod bilgi kaydını da kaynak olarak gösterir. Politika sorusu teklifi değiştirmez;
+  emin olunamayan istekte mutasyon yapılmaz.
+- Akış olayları aynıdır. Metin parçaları hazırlanmış cevabın bölünmesidir; model token akışı gibi sunulmaz.
 
-`npm run build --prefix apps/web` production build/typecheck; `python3 scripts/sync_web_contracts.py --check`
-ortak parser/DTO kopyalarının eşleşmesini doğrular. Compose web build context'i `apps/web` olduğundan
-`python3 scripts/sync_web_contracts.py` ile üretilmiş, SHA256 işaretli kopyalar kullanılır; elle düzenlenmez.
-Yerel demo authentication/RBAC içermez; müşteri seçimi kimlik doğrulama değildir.
-Kanıt: [F06 kabul raporu](reports/f06_acceptance.md).
+### 4. Tekrarsızlık (idempotency)
 
-Görsel dil: firmanın logosu ve ona hizalanmış mavi/kırmızı token seti (`apps/web/DESIGN.md`),
-sistem yazı tipi, animasyonsuz. Dar ekranda gezinme 2×2 ızgaraya geçer, tablolar sağda sütun
-kaldıkça solan kenarla kayar. Web'de karanlık tema yok; mobil sistem temasını izler.
-Kanıt ve öncesi/sonrası görüntüler: [tasarım düzenleme raporu](reports/design_polish.md).
+- Anahtar **sunucuda** üretilir: teklif kimliği, mesaj kimliği, plandaki adım sırası ve araç adından
+  SHA-256. İstemci veya planlayıcı dışı bir kaynak anahtar veremez; değiştirilmiş anahtar reddedilir.
+- Her mutasyon, sonucu ile birlikte **aynı transaction içinde** `mutation_receipts` tablosuna yazılır.
+  Teklif satırı `FOR UPDATE` ile kilitlenir; eşzamanlı istekler sıraya girer.
+- Aynı mesaj yeniden gelirse (ağ kopması, SSE yeniden deneme) gerçek araç yine çağrılır ama receipt
+  bulunduğu için teklif değişmez: log `replayed=true`, `mutation_applied=false` gösterir. Farklı mesaj
+  kimliği bilinçli yeni bir işlemdir.
+- "Toplam 5 adet olsun" gibi istekler hesaplandıkları teklif sürümüne bağlıdır. Arada teklif değişirse
+  eski hesap uygulanmaz (HTTP 409).
 
+### 5. Teklif mutasyon modeli
 
-## Son sağlamlaştırma (F08)
+- **Ekleme:** aynı ürün için tek aktif satır vardır (kısmi benzersiz indeks); tekrar ekleme miktarı artırır.
+- **Güncelleme:** yeni miktar yazılır; `quantity=0` satırı silmez, durumunu `removed` yapar.
+- **Değiştirme:** eski satır `replaced` olur ve yeni satıra bağlanır; geçmiş korunur. Hedef ürün zaten
+  teklifteyse miktarlar birleştirilir, iki aktif muadil satır oluşmaz. Hedef yalnız ürünün kayıtlı
+  alternatiflerinden, stokta ve kurallara uygun olanlardan seçilir.
+- Satıra eklendiği andaki birim fiyat saklanır (snapshot); sonraki katalog fiyat değişikliği eski teklifi
+  değiştirmez. Her başarılı mutasyon teklif sürümünü bir artırır. Taslak teklif stok rezervasyonu yapmaz.
+- Kurallar değişikliğin yazıldığı anda da kontrol edilir: fiyat üst limiti (birim liste fiyatı),
+  stok, bekleme için müşterinin `allow_backorder` yetkisi **ve** açık kullanıcı onayı, Plus sürümün
+  açıkça seçilmesi ve istenen zorunlu özellikler.
+- İndirimlerin çakışması kaynak veride belirsizdi ve kararı adaya bırakıldı. Tercihim: indirimler
+  toplanmaz, en özel tek kural uygulanır (örnek: Plus ürünlerde %6 hacim indirimi partner %7 ile toplanmaz).
 
-Tanınmayan fiyat sınırı, olumsuzlanan Plus/özellik, belirsiz kalem ve kısmi çıkarma komutlarında
-netleştirme istenir; rastgele mutasyon yapılmaz. Wi-Fi/USB C/çevrimdışı yazımları aynı kesin
-özellik filtrelerine dönüşür. Canlı ürünler kategori sözcüğü olmadan model adıyla bulunabilir.
-Eşit güçlü adaylar fiyat sırasına göre otomatik eklenmez; ürün kodu sorulur.
+### 6. Bilinen sınırlamalar
 
-“Toplam N olsun” planı, delta hesaplanan teklif sürümüne bağlıdır. Araya değişiklik girerse yeni
-etki 409 ile reddedilir ve güncel hedef yeni mesajla istenir. Taslak olmayan teklif değiştirilemez.
-Önceden tamamlanmış receipt replay bu kontrollerden önce doğrulanır; geçmiş işlem ikinci etki yaratmaz.
-[Bağımsız review](reports/f08_claude_review.md) ve [düzeltme/test eşlemesi](reports/f08_review_resolution.md)
-ayrıdır; test başarısı bütün olası doğal dil ifadelerinin desteklendiği iddiası değildir.
+Ayrıntı: [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md). Özetle:
+
+- Türkçe dil desteği kural tabanlıdır. Desteklenmeyen bir ifade yanlış işlem yerine netleştirme sorusu
+  üretir; bazı meşru cümlelerde bu soru gereksiz olabilir.
+- `max_price_try` birim fiyat sınırıdır; toplam bütçe kontrolü yoktur (toplam bütçe yazılırsa sorulur).
+- Kimlik doğrulama ve rol yetkisi yoktur; müşteri seçimi demo bağlamıdır. Uygulama yerel demo içindir.
+- Harici dil modeli bağlantısı yoktur.
+
+## Güvenlik
+
+- **Gizli değerler depoda yoktur.** `.env`, `scripts/init_env.py` ile güçlü rastgele parolalarla
+  üretilir ve `.gitignore`'dadır; `.env.example` yalnız yer tutucu içerir. `check_delivery.py`
+  depoya girecek dosyalarda özel anahtar, sağlayıcı anahtarı, yerel IP ve kullanıcı yolu tarar.
+- **Yönetim anahtarı tarayıcıya gitmez.** Ürün ve bilgi kaydı yazma uçları `X-Admin-Key` ister; web
+  paneli bu başlığı sunucu tarafındaki Vite proxy'sinde ekler. Mobil uygulama ve tarayıcı anahtarı hiç
+  görmez; anahtarsız yazma `401` döner.
+- **Ağ yüzeyi dardır.** PostgreSQL'in portu dışarı açılmaz; API ve web varsayılan olarak yalnız
+  `127.0.0.1` adresine bağlanır. Yerel ağ açılımı yalnız mobil demo için ve açıkça istenirse yapılır.
+- **Veritabanı yetkisi sınırlıdır.** Uygulama, şema değiştiremeyen ayrı bir veritabanı kullanıcısıyla
+  çalışır; migration ayrı adımda sahibinin yetkisiyle yapılır. Açılışta veri silen bir adım yoktur.
+- **Güvenilir çalışma bağlamı.** Fiyat sınırı, bekleme onayı ve idempotency anahtarı istemciden
+  alınmaz; sunucu mesajdan ve kalıcı plandan üretir. İstemci bu kontrolleri atlatamaz.
+- **Girdi sınırları.** İstek gövdesi 256 KiB ile sınırlıdır. Beklenmeyen hatalarda iç ayrıntı veya
+  exception metni döndürülmez; akış kontrollü bir `error` olayıyla biter. Bilgi kayıtlarındaki metin
+  yalnız kaynak olarak gösterilir, komut olarak yorumlanmaz.
+- Web servisi Vite geliştirme sunucusudur; public dağıtım için tasarlanmamıştır.
+
+## API özeti
+
+| Uç | Açıklama |
+|---|---|
+| `POST /api/chat/sessions` | Müşteri, teklif ve kanal ile sohbet oturumu açar |
+| `POST /api/chat/stream` | Sohbet mesajı; SSE akışı döner (`POST /api/chat` aynı işlemin akışsız hâli) |
+| `GET /api/chat/sessions/{id}/messages` | Oturum mesajları |
+| `GET /api/tool-calls?session_id=…` | Araç çağrısı logları |
+| `GET /api/quotes/{quote_id}` | Kanonik teklif (web ve mobilin ortak okuması) |
+| `POST /api/tools/search_products`, `POST /api/tools/get_knowledge_entries` | Okuma araçları |
+| `GET/POST/PATCH/DELETE /api/products`, `/api/knowledge` | Ürün ve bilgi kaydı listeleme/CRUD (yazma anahtar ister, silme mantıksaldır) |
+| `GET /api/customers`, `GET /api/quotes` | Müşteri ve teklif listeleri |
+| `GET /health/live`, `GET /health/ready` | Süreç ve hazır olma kontrolleri |
+
+## Proje yapısı
+
+```text
+apps/api            FastAPI uygulaması: araçlar, planlayıcı, yürütücü, SSE, migration, testler
+apps/web            React + Vite web paneli
+apps/mobile         Expo mobil uygulama
+packages/contracts  Web ve mobilin ortak SSE ayrıştırıcısı ve tipleri
+data/source         Firmanın orijinal dataset'i (değiştirilmedi)
+scripts             Kurulum, doğrulama ve teslim kontrol betikleri
+reports             Test ve doğrulama kanıtları (açıklama: reports/README.md)
+docs                Demo akışı ve karar kayıtları
+```
+
+## Sorun giderme
+
+- **Port dolu veya ikinci bir kurulum gerekiyor:** aynı terminalde
+  `export COMPOSE_PROJECT_NAME=tbr-ikinci API_PORT=18001 WEB_PORT=15173` verip kurulum komutlarını
+  tekrarlayın. Ayrı volume ve ağ oluşur; mevcut veri etkilenmez.
+- **Çok sayıda test koşusundan sonra `DiskFullError`:** testler teşhis için her test veritabanını
+  saklar. Yalnız test veritabanındaki geçici DB'leri silmek için:
+
+  ```sh
+  docker compose --profile test up -d --wait test-db
+  docker compose --profile test exec test-db sh -c "psql -U tbr_owner -d tbr_test -tAc \"select format('DROP DATABASE %I;', datname) from pg_database where datname like 'tbr\\_test\\_%'\" | psql -U tbr_owner -d tbr_test -q"
+  ```
+
+## Belgeler
+
+[Bilinen sınırlamalar](KNOWN_LIMITATIONS.md) · [Yapay zekâ kullanımı](AI_USAGE.md) ·
+[Demo akışı](docs/DEMO.md) · [Test kanıtları](reports/README.md)
