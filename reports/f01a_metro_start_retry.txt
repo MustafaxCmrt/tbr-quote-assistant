@@ -5,7 +5,7 @@ Exit code: 0
 
 Command: node node_modules/expo/bin/cli start apps/mobile --localhost --port 8081
 PASS Metro HTTP /status: packager-status:running
-Starting project at /Users/comert/Desktop/tbr-quote-assistant/apps/mobile
+Starting project at <repo>/apps/mobile
 Expo Autolinking module resolution enabled
 Metro is running in CI mode, reloads are disabled. Remove CI=true to enable watch mode.
 Starting Metro Bundler

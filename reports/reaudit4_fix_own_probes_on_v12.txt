@@ -1,6 +1,6 @@
 UTC: 2026-09-23T15:55:07Z
 App code: v12 c63e5cd (git archive apps/api/app, mounted read-only); tests: working tree at f5b3ac5d3b59d00744d8c0ff46fa2f8cf853880e + pending probe file
-Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml -f /private/tmp/claude-501/-Users-comert-Desktop-tbr-quote-assistant/33a32564-ce69-4799-bf30-d36ca8e91a14/scratchpad/v12.override.yaml --profile test run --rm --no-deps test pytest -q -p no:randomly tests/test_reaudit4_matrix.py -k test_own_probe
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml -f <tmp>/v12.override.yaml --profile test run --rm --no-deps test pytest -q -p no:randomly tests/test_reaudit4_matrix.py -k test_own_probe
  Container tbr-quote-assistant-test-run-315b0223d3a9 Creating 
  Container tbr-quote-assistant-test-run-315b0223d3a9 Created 
 .FFFFFFF..FFF.FF..F.FFFFFFFF.FFF                                         [100%]

@@ -101,7 +101,7 @@ KNOWN_LIMITATIONS içinde açıklandı. Retry'ı yeniden planlamak çift/istenme
 Auth yokluğu, rule registry seçimi, session dahil olmayan key'in fail-closed conflict davranışı
 belgelenmiş tasarım sınırlarıdır; üretim yetkilendirmesi iddia edilmez.
 
-F08 son tam koşu: commit313a486, `docker compose --profile test run --build --rm -e GOLDEN_REPORT_PATH=/evidence/golden_results.json -e EVIDENCE_COMMIT_SHA=313a4865dd2bcf15dec7fefd01d0c57f984eb01b -v /Users/comert/Desktop/tbr-quote-assistant/reports:/evidence test pytest -v`: exit0,179passed40.92s. reports/f08_review_full_backend.txt ve golden_results.json yenilendi. Opus5/xhigh odaklı takip review session6425 çalışıyor; verdict bekleniyor.
+F08 son tam koşu: commit313a486, `docker compose --profile test run --build --rm -e GOLDEN_REPORT_PATH=/evidence/golden_results.json -e EVIDENCE_COMMIT_SHA=313a4865dd2bcf15dec7fefd01d0c57f984eb01b -v <repo>/reports:/evidence test pytest -v`: exit0,179passed40.92s. reports/f08_review_full_backend.txt ve golden_results.json yenilendi. Opus5/xhigh odaklı takip review session6425 çalışıyor; verdict bekleniyor.
 
 ## Opus 5 takip bulguları — 9 ek ifade ve ortak tespit
 

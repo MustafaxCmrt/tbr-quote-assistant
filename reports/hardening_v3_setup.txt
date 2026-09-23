@@ -1,6 +1,6 @@
 UTC: 2026-09-21T20:00:39.393370+00:00
 Base commit (working tree may contain pending changes): 0864c7c5a81956aa123c87e41b63aa855b65f6a0
-Command: python3 /private/tmp/claude-501/-Users-comert-Desktop-tbr-quote-assistant/eab83dcf-f70c-4b1f-8da5-e19b9e21d8cd/scratchpad/v3_clean.py setup
+Command: python3 <tmp>/v3_clean.py setup
 Exit code: 0
 
 Clone: /var/folders/qp/25bz40_x17x19kmh5g5rjb7m0000gn/T/tbr-f09-v3-ujspa67t/repo Tag: demo-candidate-20260921-v3 Commit: bf9275665c9a5870a3c574b7a53ae3b1d8fbde1e

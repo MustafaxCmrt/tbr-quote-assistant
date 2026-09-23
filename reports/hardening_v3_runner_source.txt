@@ -12,7 +12,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 from uuid import uuid4
 
-repo = Path("/Users/comert/Desktop/tbr-quote-assistant")
+repo = Path("<repo>")
 state = Path(__file__).with_name("v3_clone_path")
 tag = "demo-candidate-20260921-v3"
 mode = sys.argv[1]

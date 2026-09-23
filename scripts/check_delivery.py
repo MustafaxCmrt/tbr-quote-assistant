@@ -15,15 +15,19 @@ print(f"PASS original source bytes unchanged: {len(source_files)} files")
 files = subprocess.check_output(["git", "ls-files", "--cached", "--others", "--exclude-standard"], text=True).splitlines()
 local_env = root / "apps/mobile/.env"
 address = re.search(r"http://([^:]+):", local_env.read_text()).group(1) if local_env.exists() else None
+# The developer's home directory (/Users/<name>, also as -Users-<name>- in tool paths) names the user.
+home = str(Path.home())
+home_forms = [home.encode(), home.replace("/", "-").encode()]
 for name in set(files):
     path = root / name
     assert path.name not in {"AGENTS.md", "CLAUDE.md", ".env"}, f"Private file stageable: {name}"
     if path.is_file():
         content = path.read_bytes()
         assert not address or address.encode() not in content, f"LAN address outside local env: {name}"
+        assert not any(form in content for form in home_forms), f"Local home path: {name}"
         assert not re.search(rb"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----", content), f"Private key: {name}"
         assert not re.search(rb"sk-(?:proj-)?[A-Za-z0-9_-]{32,}", content), f"Possible provider key: {name}"
-print("PASS stageable files exclude local instructions, env, actual LAN address and scanned key patterns")
+print("PASS stageable files exclude local instructions, env, actual LAN address, home path and scanned key patterns")
 for path in (root / "apps/mobile/dist").rglob("*.hbc"):
     content = path.read_bytes()
     assert not address or address.encode() not in content

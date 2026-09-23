@@ -27,14 +27,14 @@ test at apps/mobile/tests/client.test.ts:139:1
 
   'Error: Sunucuya ulaşılamadı. Aynı ağı ve API bağlantısını kontrol edip yeniden dene.'
 
-      at async TestContext.<anonymous> (/Users/comert/Desktop/tbr-quote-assistant/apps/mobile/tests/client.test.ts:145:3)
+      at async TestContext.<anonymous> (<repo>/apps/mobile/tests/client.test.ts:145:3)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
     generatedMessage: true,
     code: 'ERR_ASSERTION',
     actual: Error: Sunucuya ulaşılamadı. Aynı ağı ve API bağlantısını kontrol edip yeniden dene.
-        at Object.request (/Users/comert/Desktop/tbr-quote-assistant/apps/mobile/src/api/client.ts:39:13)
-        at TestContext.<anonymous> (/Users/comert/Desktop/tbr-quote-assistant/apps/mobile/tests/client.test.ts:145:31)
+        at Object.request (<repo>/apps/mobile/src/api/client.ts:39:13)
+        at TestContext.<anonymous> (<repo>/apps/mobile/tests/client.test.ts:145:31)
         at Test.runInAsyncScope (node:async_hooks:227:14)
         at Test.run (node:internal/test_runner/test:1402:25)
         at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -49,18 +49,18 @@ test at apps/mobile/tests/client.test.ts:139:1
 test at apps/mobile/tests/client.test.ts:157:1
 ✖ unknown server session is distinguishable so the next retry can open a new one (0.172458ms)
   TypeError: Right-hand side of 'instanceof' is not an object
-      at Object.<anonymous> (/Users/comert/Desktop/tbr-quote-assistant/apps/mobile/tests/client.test.ts:166:12)
+      at Object.<anonymous> (<repo>/apps/mobile/tests/client.test.ts:166:12)
       at expectedException (node:assert:578:17)
       at expectsError (node:assert:703:21)
       at strict.rejects (node:assert:769:3)
-      at async TestContext.<anonymous> (/Users/comert/Desktop/tbr-quote-assistant/apps/mobile/tests/client.test.ts:164:3)
+      at async TestContext.<anonymous> (<repo>/apps/mobile/tests/client.test.ts:164:3)
       at async Test.run (node:internal/test_runner/test:1409:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
 
 test at apps/mobile/tests/state.test.ts:17:1
 ✖ mobile rejects a quote payload whose shape the screens cannot render (0.1475ms)
   TypeError: (0 , import_state.isQuote) is not a function
-      at TestContext.<anonymous> (/Users/comert/Desktop/tbr-quote-assistant/apps/mobile/tests/state.test.ts:19:16)
+      at TestContext.<anonymous> (<repo>/apps/mobile/tests/state.test.ts:19:16)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)

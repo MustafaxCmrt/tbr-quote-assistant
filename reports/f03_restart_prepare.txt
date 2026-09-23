@@ -1,6 +1,6 @@
 UTC: 2026-09-21T15:21:10.170039+00:00
 Base commit (working tree may contain pending changes): 4905579c413d51a1c835eebec1f8af75fcaf397b
-Command: docker compose --profile test run --build --rm -v /Users/comert/Desktop/tbr-quote-assistant/artifacts/f03:/evidence test python -m tests.mutation_restart_probe prepare
+Command: docker compose --profile test run --build --rm -v <repo>/artifacts/f03:/evidence test python -m tests.mutation_restart_probe prepare
 Exit code: 0
 
  Image tbr-postgres:16.15 Building

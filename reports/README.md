@@ -10,4 +10,6 @@ Gerçek test kanıtları burada tutulur:
 - `native_smoke.md` — cihaz/Expo sürümü, adımlar, gözlem, ekran görüntüsü yolu
 
 Kurallar: `not_run` / `skipped` / `not_verified` **passed değildir**. Secret, gerçek IP veya kişisel yol
-içeren çıktı redakte edilir ve redaksiyon belirtilir. Şablon: vault `Sablonlar/golden_results_template.json`.
+içeren çıktı redakte edilir ve redaksiyon belirtilir. Kayıtlardaki yerel yollar redakte edilmiştir:
+`<repo>` depo kökünü, `<tmp>` geliştirme makinesindeki geçici çalışma klasörünü gösterir; komutların ve
+çıktıların geri kalanı değişmemiştir. Şablon: vault `Sablonlar/golden_results_template.json`.

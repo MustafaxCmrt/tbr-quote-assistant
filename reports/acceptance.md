@@ -34,7 +34,7 @@ Son tam backend koşusu: [225 passed](f08_release_backend.txt), 22 golden dahil.
 `test_output.txt` yeni bir test koşusu değildir; mevcut gerçek koşuların komut/sonuç indeksidir.
 Başarısız ilk denemeler raporlarda korunur. `skipped`, `not_run`, `not_verified` başarı değildir.
 
-F08 son tam koşu: commit313a486, `docker compose --profile test run --build --rm -e GOLDEN_REPORT_PATH=/evidence/golden_results.json -e EVIDENCE_COMMIT_SHA=313a4865dd2bcf15dec7fefd01d0c57f984eb01b -v /Users/comert/Desktop/tbr-quote-assistant/reports:/evidence test pytest -v`: exit0,179passed40.92s. reports/f08_review_full_backend.txt ve golden_results.json yenilendi. Opus5/xhigh odaklı takip review session6425 çalışıyor; verdict bekleniyor.
+F08 son tam koşu: commit313a486, `docker compose --profile test run --build --rm -e GOLDEN_REPORT_PATH=/evidence/golden_results.json -e EVIDENCE_COMMIT_SHA=313a4865dd2bcf15dec7fefd01d0c57f984eb01b -v <repo>/reports:/evidence test pytest -v`: exit0,179passed40.92s. reports/f08_review_full_backend.txt ve golden_results.json yenilendi. Opus5/xhigh odaklı takip review session6425 çalışıyor; verdict bekleniyor.
 
 Güncel F08 disposition: [f08_acceptance.md](f08_acceptance.md). Önceki satırlardaki in_progress kayıtları tarihsel aşamadır; son runtime e84b2a6,204passed. F09 hâlâ açık.
 

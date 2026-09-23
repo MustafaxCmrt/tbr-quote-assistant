@@ -5,7 +5,7 @@ Exit code: 2
 
 ============================= test session starts ==============================
 platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
-rootdir: /Users/comert/Desktop/tbr-quote-assistant/apps/api
+rootdir: <repo>/apps/api
 configfile: pyproject.toml
 plugins: asyncio-1.4.0, anyio-4.15.1
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
@@ -13,7 +13,7 @@ collected 0 items / 1 error
 
 ==================================== ERRORS ====================================
 ______________ ERROR collecting tests/unit/test_normalization.py _______________
-ImportError while importing test module '/Users/comert/Desktop/tbr-quote-assistant/apps/api/tests/unit/test_normalization.py'.
+ImportError while importing test module '<repo>/apps/api/tests/unit/test_normalization.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ../../../../.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12/importlib/__init__.py:90: in import_module

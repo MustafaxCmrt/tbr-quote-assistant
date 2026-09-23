@@ -1,6 +1,6 @@
 UTC: 2026-09-21T18:17:46.214633+00:00
 Base commit (working tree may contain pending changes): 53b99488bdd8427ed8a8b3a06c9e8ca6dba106d6
-Command: docker compose --profile test run --build --rm -e GOLDEN_REPORT_PATH=/evidence/golden_results.json -e EVIDENCE_COMMIT_SHA=53b99488bdd8427ed8a8b3a06c9e8ca6dba106d6 -v /Users/comert/Desktop/tbr-quote-assistant/reports:/evidence test pytest -v
+Command: docker compose --profile test run --build --rm -e GOLDEN_REPORT_PATH=/evidence/golden_results.json -e EVIDENCE_COMMIT_SHA=53b99488bdd8427ed8a8b3a06c9e8ca6dba106d6 -v <repo>/reports:/evidence test pytest -v
 Exit code: 0
 
  Image tbr-postgres:16.15 Building
