@@ -1,6 +1,6 @@
 # Demo akışı
 
-Demo videosu 4 dakikanın altındadır ve aşağıdaki adımları sırayla izler. Adımlardaki cümleler temiz bir
+Demo videosu yaklaşık 4 dakikadır ve aşağıdaki adımları sırayla izler. Adımlardaki cümleler temiz bir
 kurulumda (seed verisi), tek veritabanında bu sırayla gerçek API üzerinden çalıştırılarak doğrulandı; beklenen sonuçlar tablodadır.
 Aynı adımları kendi kurulumunuzda deneyebilirsiniz.
 
@@ -22,10 +22,9 @@ Aynı adımları kendi kurulumunuzda deneyebilirsiniz.
 | 1:30–1:45 | Mobil: aynı teklif | `Cep tipi RedScan Mini 2D okuyucu ekle.` | "İstenen ürün stokta yok… teklif değişmedi." Kaynak `KNE-STOCK-001`; stoklu aday olarak BlueScan Air gösterilir, eklenmez. |
 | 1:45–2:10 | Mobil: Mavi Kırmızı Market A.Ş. / Q-1004 (BlueScan Pro Rugged, 12.950 TL) | `Rugged okuyucu çok pahalı; 9.000 TL altında stoklu alternatifle değiştir.` | BlueScan Air 7.990 TL aktif kalem olur; eski satır **Kalem geçmişi**nde "Değiştirildi". |
 | 2:10–2:30 | Mobil: Q-1001 | `Aktive edilmiş yazılım lisansını iade edebilir miyiz?` | Kaynak `KNE-RET-001`: aktive edilmiş lisans iade kapsamında değil. Kaynak düğmesiyle kayıt açılıp kapanır; teklif değişmez. |
-| 2:30–2:40 | Mobil: Q-1001 | `BlueScan Air'den iki adet ekle.` | "Miktarı kesinleştiremedim. Adedi rakamla yazar mısın?… Teklifi değiştirmedim." Belirsiz ifadede sistem sorar, tahmin etmez. |
-| 2:40–3:05 | Web: Ankara Toptan Depo Ltd. / Q-1002 | `Depo için 3 adet BlueScan Air ekle; partner indirimini de göster.` | 4 adet; partner indirimi `RUL-PARTNER-3` (%7) uygulanır, net 29.722,80 TL. İndirimler toplanmaz, en özel tek kural uygulanır ([karar kaydı 0001](decisions/0001-indirim-cakismasi.md)). |
-| 3:05–3:20 | Web: **Ürünler**, **Bilgi bankası** | Listeler; **Ürün ekle** formu | Katalog ve bilgi kayıtları listelenir ve eklenir. Yeni kayıt ek indeksleme gerekmeden aramaya katılır. |
-| 3:20–3:50 | Test kanıtları | [reports/README.md](../reports/README.md) | 1015 backend testi ve 22/22 golden senaryo; golden özet tablosu. |
+| 2:30–2:55 | Web: Ankara Toptan Depo Ltd. / Q-1002 | `Depo için 3 adet BlueScan Air ekle; partner indirimini de göster.` | 4 adet; partner indirimi `RUL-PARTNER-3` (%7) uygulanır, net 29.722,80 TL. İndirimler toplanmaz, en özel tek kural uygulanır ([karar kaydı 0001](decisions/0001-indirim-cakismasi.md)). |
+| 2:55–3:45 | Web: **Ürünler** → **Ürün ekle**, sonra **Teklif & sohbet** | Yeni ürün: DemoScan Mini QR Kablosuz Okuyucu, SKU `TBR-DEMO-01`, marka The Blue Red, kategori Barkod okuyucu, 5500.00 TL, stok 10, özellikler `2d, qr, kablosuz`, arama adı `demoscan`. Ardından sohbete `6.000 TL altında stokta olan kablosuz QR barkod okuyucu öner.` Son olarak **Bilgi bankası** | Eklemeden önce bu fiyatın altında uygun ürün yoktur; kayıttan hemen sonra DemoScan önerilir. Ek indeksleme gerekmez; teklif değişmez. |
+| 3:45–4:15 | Test kanıtları | [reports/README.md](../reports/README.md) | 1015 backend testi ve 22/22 golden senaryo; golden özet tablosu. |
 
 ## Anlatırken
 
@@ -39,6 +38,7 @@ Aynı adımları kendi kurulumunuzda deneyebilirsiniz.
 
 | Nerede | Ne yapılır | Beklenen sonuç |
 |---|---|---|
+| Mobil: Q-1001 | `BlueScan Air'den iki adet ekle.` | "Miktarı kesinleştiremedim. Adedi rakamla yazar mısın?… Teklifi değiştirmedim." Belirsiz ifadede sistem sorar, tahmin etmez. |
 | Web: Mavi Kırmızı Market A.Ş. Pilot Şube / Q-2001 | `BlueScan Air Plus toplam 4 adet olsun, varsa hacim indirimini göster.` | Partner müşteride Plus hacim indirimi `RUL-PLUS-QTY` (%6) partner indiriminin önüne geçer; net 35.456,80 TL. |
 | Web: Mavi Kırmızı Market A.Ş. / Q-1003 | `Ethernet fiş yazıcısını 4 adede çıkar.` | `update_quote_item`: BluePrint 80 Ethernet Fiş Yazıcı 2 → 4 adet. |
 | Mobil: Q-1001 | `8K TL'ye kadar endüstriyel barkod okuyucu öner.` | "Fiyat sınırını kesinleştiremedim…"; arama ve öneri yapılmaz. |
