@@ -152,13 +152,27 @@ OBJECT_WORDS = {
 }  # fmt: skip
 
 
+def adjective(words, i):
+    """Whether words[i] can sit in a feature adjective run, sizes included (80mm, 80 mm)."""
+    word = words[i]
+    return (
+        word in FEATURES | ADJECTIVE_LINKS
+        or bool(re.fullmatch(r"\d+(?:mm|dpi)|mm|dpi", word))
+        or (word.isdigit() and i + 1 < len(words) and words[i + 1] in {"mm", "dpi"})
+    )
+
+
 def adjective_start(normalized, position):
     """Start of the feature adjectives directly before position."""
     start = position
-    for match in reversed(list(re.finditer(r"\S+", normalized[:position]))):
-        if match[0] not in FEATURES | ADJECTIVE_LINKS:
+    matches = list(re.finditer(r"\S+", normalized))
+    words = [m[0] for m in matches]
+    for i in reversed(range(len(matches))):
+        if matches[i].end() > position:
+            continue
+        if not adjective(words, i):
             break
-        start = match.start()
+        start = matches[i].start()
     return start
 
 
@@ -182,15 +196,18 @@ def source_phrase(normalized, start, end):
     the source.
     """
     after = list(re.finditer(r"\S+", normalized[end:]))
+    words = [m[0] for m in after]
     k = 0
     while k < len(after) and after[k][0] in NAME_SUFFIXES:
         k += 1
     # A case ending (Air'i) closes the phrase: what follows describes the next
-    # noun, e.g. the target in "Air'i QR destekli cihaz olan Eco ile".
+    # noun, e.g. the target in "Air'i QR destekli cihaz olan Eco ile". A genitive
+    # (Air'in) opens a possessive whose head is still the source ("Air'in QR'lı modelini").
+    open_phrase = not k or (k == 1 and words[0] in {"in", "un", "nin", "nun"})
     j = k
-    while not k and j < len(after) and after[j][0] in FEATURES | ADJECTIVE_LINKS:
+    while open_phrase and j < len(after) and adjective(words, j):
         j += 1
-    if not k and j < len(after) and after[j][0] in SOURCE_HEADS:
+    if open_phrase and j < len(after) and after[j][0] in SOURCE_HEADS:
         k = j + 1
     return adjective_start(normalized, start), end + (after[k - 1].end() if k else 0)
 
@@ -516,16 +533,29 @@ async def build_plan(conn, session, message_id, text, mode):
             for start, end, pid in reversed(mentions):
                 if pid == explicit:
                     source_text = source_text[:start] + " " + source_text[end:]
-        # A named current line is the source; target features must not filter it.
+        # A named current line is the source; target features must not filter it
+        # ("BluePrint 80 ürününü 58mm stoklu alternatifle").
         source = (
             current[next(iter(named_sources))]
-            if explicit and len(named_sources) == 1
+            if len(named_sources) == 1
             else reference(source_text, quote, catalog)
         )
         if source is None:
             notice = "Değiştirilecek kalemi tek anlamlı seçemedim. Ürün kodunu belirtir misin?"
             return finish()
         row = catalog[source.product_id]
+        # Its own phrase ("80 mm BluePrint 80", "Air'in QR'lı modelini") must describe it.
+        described = set().union(
+            *(
+                features(normalized[a:b])
+                for s, e, pid in mentions
+                if pid in named_sources
+                for a, b in [source_phrase(normalized, s, e)]
+            )
+        )
+        if len(named_sources) == 1 and described - set(map(normalize, row["tags"])):
+            notice = "Değiştirilecek ürün için yazdığın özellik veya ölçü bu kalemde yok. Ürün kodunu ve özelliği kontrol eder misin? Teklifi değiştirmedim."
+            return finish()
         if row["stock_qty"] == 0:
             knowledge("stock_rule")
         if explicit:
@@ -564,13 +594,36 @@ async def build_plan(conn, session, message_id, text, mode):
             )
             return finish()
         required = features(target_text) | free_features(text)
+        # The adjectives of the alternative itself ("QR'lı alternatifle") are its requirements.
+        alternative = re.search(r"\balternatif\w*", normalized)
+        if alternative:
+            required |= features(
+                normalized[adjective_start(normalized, alternative.start()) : alternative.start()]
+            )
         if named_sources:
             # Outside the named source's own phrase every feature is the alternative's
             # ("BluePrint 80 ürününü 80mm stoklu alternatifle").
             required |= features(target_region(normalized, mentions, None, named_sources))
+        else:
+            # Same rule as with an explicit target: only the unnamed source's own
+            # adjectives ("QR'lı okuyucuyu") describe it; any other feature before the
+            # alternative is ambiguous ("QR zorunlu okuyucuyu stoklu alternatifle").
+            before = normalize(source_text) if target_text else normalized
+            if alternative and not target_text:
+                before = before[: adjective_start(before, alternative.start())]
+            for match in reversed(list(re.finditer(r"\S+", before))):
+                if category(match[0]):
+                    before = before[: adjective_start(before, match.start())] + before[match.end() :]
+            if features(before) - required:
+                notice = "Özelliğin değiştirilecek ürüne mi yeni ürüne mi ait olduğunu kesinleştiremedim. Değiştirilecek ürünün adını veya kodunu yazar mısın? Teklifi değiştirmedim."
+                return finish()
+        if not row["substitute_product_ids"]:
+            notice = "Bu kalem için kayıtlı alternatif ürün yok; teklif değişmedi."
+            return finish()
         # No explicit target: retain substitution order supplied by the current catalog.
         # Only the item's registered substitutes are candidates, never the item itself
-        # ("80mm alternatif" must not recommend the 80mm item being replaced).
+        # or another ID left in the text ("80mm alternatif" must not recommend the
+        # 80mm item being replaced).
         query = (
             target_text
             if category(target_text)
@@ -578,8 +631,9 @@ async def build_plan(conn, session, message_id, text, mode):
             or any(w.startswith(("prd-", "tbr-")) for w in tokens(target_text))
             else ""
         )
+        query = re.sub(r"(?<![\w-])(?:prd|tbr)-[\w-]+", " ", query, flags=re.IGNORECASE)
         result = await search(
-            " ".join([query.strip(), *row["substitute_product_ids"]]).strip(),
+            " ".join([*query.split(), *row["substitute_product_ids"]]),
             required=required,
             cat=row["category"],
         )
@@ -618,6 +672,11 @@ async def build_plan(conn, session, message_id, text, mode):
             notice = (
                 "Mevcut teklifte hangi kalemi kastettiğin belirsiz. Ürün kodunu belirtir misin?"
             )
+            return finish()
+        # A stated feature or size the line lacks ("58 mm zorunlu" on an 80mm printer)
+        # is refused here, before any mutation; the executor guard stays the backstop.
+        if features(text) - set(map(normalize, catalog[item.product_id]["tags"])):
+            notice = "Teklifteki kalem belirttiğin özellik veya ölçüyü taşımıyor. Ürün kodunu ve istediğin özelliği kontrol eder misin? Teklifi değiştirmedim."
             return finish()
         if remove or update:
             mutation(
