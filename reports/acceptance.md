@@ -1,7 +1,7 @@
 # Kabul kanıtları — 2026-09-21
 
-> **Güncel durum (2026-09-23, v12):** uygulama `ae69ff9`, tam backend **892 passed** (22 golden, 83 + 126 + 109 yeniden denetim denemesi ve 53 kendi probe dahil),
-> istemciler 25 passed; [üçüncü yeniden denetim çözüm kaydı](reaudit3_fix_resolution.md), [ikinci](reaudit2_fix_resolution.md), [ilk yeniden denetim](reaudit_fix_resolution.md), [ilk denetim](audit_fix_resolution.md). Aşağıdaki tablo tarihsel F00–F08 kabul kaydıdır; sayılar kendi commit'lerine aittir.
+> **Güncel durum (2026-09-23, v13):** uygulama `77ccd81`, tam backend **1015 passed** (22 golden, 83 + 126 + 109 + 91 yeniden denetim denemesi ve 85 kendi probe dahil),
+> istemciler 25 passed; [dördüncü yeniden denetim çözüm kaydı](reaudit4_fix_resolution.md), [üçüncü](reaudit3_fix_resolution.md), [ikinci](reaudit2_fix_resolution.md), [ilk yeniden denetim](reaudit_fix_resolution.md), [ilk denetim](audit_fix_resolution.md). Aşağıdaki tablo tarihsel F00–F08 kabul kaydıdır; sayılar kendi commit'lerine aittir.
 
 **Teslim kabulü henüz tamamlanmadı.** F00–F08 ana kapıları tamam; F07 geniş erişilebilirlik kontrolleri
 ayrıca açık. F08 son disposition [kabul checkpoint](f08_acceptance.md) içinde; F09 son temiz kurulum/video/erişim kapısı açık. Aşağıdaki sonuçlar kendi raporlarındaki commit ve kapsama aittir.

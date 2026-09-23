@@ -1,0 +1,7 @@
+UTC: 2026-09-23T16:00:31Z
+HEAD: 77ccd81b87403bf397b93dfd558f1e83818bcf53
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test ruff check app tests
+ Container tbr-quote-assistant-test-run-d2de8602821e Creating 
+ Container tbr-quote-assistant-test-run-d2de8602821e Created 
+All checks passed!
+Exit code: 0

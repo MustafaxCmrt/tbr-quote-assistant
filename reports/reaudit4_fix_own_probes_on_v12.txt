@@ -1,0 +1,1958 @@
+UTC: 2026-09-23T15:55:07Z
+App code: v12 c63e5cd (git archive apps/api/app, mounted read-only); tests: working tree at f5b3ac5d3b59d00744d8c0ff46fa2f8cf853880e + pending probe file
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml -f /private/tmp/claude-501/-Users-comert-Desktop-tbr-quote-assistant/33a32564-ce69-4799-bf30-d36ca8e91a14/scratchpad/v12.override.yaml --profile test run --rm --no-deps test pytest -q -p no:randomly tests/test_reaudit4_matrix.py -k test_own_probe
+ Container tbr-quote-assistant-test-run-315b0223d3a9 Creating 
+ Container tbr-quote-assistant-test-run-315b0223d3a9 Created 
+.FFFFFFF..FFF.FF..F.FFFFFFFF.FFF                                         [100%]
+=================================== FAILURES ===================================
+____________________ test_own_probe[own_price_half_million] ____________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa01a0810>
+case = 'own_price_half_million', quote = 'Q-1002'
+text = 'BlueScan Air öner; fiyatı yarım milyonu geçmesin.'
+expected = 'no_change', options = {'no_recommendations': True, 'read': True}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa01a0810>
+quote = 'Q-1002', text = 'BlueScan Air öner; fiyatı yarım milyonu geçmesin.'
+expected = 'no_change', preludes = (), topic = None, knowledge = None
+no_recommendations = True, read = True, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+            assert items == expected and not unchanged, (items, body["notice"])
+        if not unchanged:
+            # One receipt and one quote version per applied mutation, nothing else.
+            assert applied and receipts == len(applied) == after["version"] - before["version"]
+        if no_recommendations:
+>           assert body["recommended_product_ids"] == [], body["recommended_product_ids"]
+E           AssertionError: ['PRD-BC-110']
+E           assert ['PRD-BC-110'] == []
+E             
+E             Left contains one more item: 'PRD-BC-110'
+E             Use -v to get more diff
+
+tests/test_reaudit_matrix.py:198: AssertionError
+___________________ test_own_probe[own_price_words_compared] ___________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa1679210>
+case = 'own_price_words_compared', quote = 'Q-1002'
+text = 'BlueScan Air öner; beş yüzden fazlasını ödeyemem.'
+expected = 'no_change', options = {'no_recommendations': True, 'read': True}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa1679210>
+quote = 'Q-1002', text = 'BlueScan Air öner; beş yüzden fazlasını ödeyemem.'
+expected = 'no_change', preludes = (), topic = None, knowledge = None
+no_recommendations = True, read = True, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+            assert items == expected and not unchanged, (items, body["notice"])
+        if not unchanged:
+            # One receipt and one quote version per applied mutation, nothing else.
+            assert applied and receipts == len(applied) == after["version"] - before["version"]
+        if no_recommendations:
+>           assert body["recommended_product_ids"] == [], body["recommended_product_ids"]
+E           AssertionError: ['PRD-BC-110']
+E           assert ['PRD-BC-110'] == []
+E             
+E             Left contains one more item: 'PRD-BC-110'
+E             Use -v to get more diff
+
+tests/test_reaudit_matrix.py:198: AssertionError
+___________________ test_own_probe[own_price_fee_thousands] ____________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa01e75d0>
+case = 'own_price_fee_thousands', quote = 'Q-1002'
+text = 'BlueScan Air 1 adet ekle; ücreti dört bini aşmasın.'
+expected = 'no_change', options = {'no_recommendations': True}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa01e75d0>
+quote = 'Q-1002', text = 'BlueScan Air 1 adet ekle; ücreti dört bini aşmasın.'
+expected = 'no_change', preludes = (), topic = None, knowledge = None
+no_recommendations = True, read = False, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+>           assert unchanged, (items, body["notice"])
+E           AssertionError: ({'PRD-BC-110': 1}, '')
+E           assert False
+
+tests/test_reaudit_matrix.py:186: AssertionError
+____________________ test_own_probe[own_price_words_dative] ____________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa02c2dd0>
+case = 'own_price_words_dative', quote = 'Q-1002'
+text = 'BlueScan Air öner; beş yüze kadar.', expected = 'no_change'
+options = {'no_recommendations': True, 'read': True}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa02c2dd0>
+quote = 'Q-1002', text = 'BlueScan Air öner; beş yüze kadar.'
+expected = 'no_change', preludes = (), topic = None, knowledge = None
+no_recommendations = True, read = True, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+            assert items == expected and not unchanged, (items, body["notice"])
+        if not unchanged:
+            # One receipt and one quote version per applied mutation, nothing else.
+            assert applied and receipts == len(applied) == after["version"] - before["version"]
+        if no_recommendations:
+>           assert body["recommended_product_ids"] == [], body["recommended_product_ids"]
+E           AssertionError: ['PRD-BC-110']
+E           assert ['PRD-BC-110'] == []
+E             
+E             Left contains one more item: 'PRD-BC-110'
+E             Use -v to get more diff
+
+tests/test_reaudit_matrix.py:198: AssertionError
+____________________ test_own_probe[own_price_above_clause] ____________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e5213d0>
+case = 'own_price_above_clause', quote = 'Q-1002'
+text = "BlueScan Air öner; fiyatı 500'ün üzerinde olmasın."
+expected = 'no_change', options = {'no_recommendations': True, 'read': True}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e5213d0>
+quote = 'Q-1002', text = "BlueScan Air öner; fiyatı 500'ün üzerinde olmasın."
+expected = 'no_change', preludes = (), topic = None, knowledge = None
+no_recommendations = True, read = True, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+            assert items == expected and not unchanged, (items, body["notice"])
+        if not unchanged:
+            # One receipt and one quote version per applied mutation, nothing else.
+            assert applied and receipts == len(applied) == after["version"] - before["version"]
+        if no_recommendations:
+>           assert body["recommended_product_ids"] == [], body["recommended_product_ids"]
+E           AssertionError: ['PRD-BC-110']
+E           assert ['PRD-BC-110'] == []
+E             
+E             Left contains one more item: 'PRD-BC-110'
+E             Use -v to get more diff
+
+tests/test_reaudit_matrix.py:198: AssertionError
+___________________ test_own_probe[own_price_tl_exceed_add] ____________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e6e8c50>
+case = 'own_price_tl_exceed_add', quote = 'Q-1002'
+text = "BlueScan Air 1 adet ekle; fiyatı 8.500 TL'yi geçmesin."
+expected = {'PRD-BC-110': 1}, options = {}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e6e8c50>
+quote = 'Q-1002'
+text = "BlueScan Air 1 adet ekle; fiyatı 8.500 TL'yi geçmesin."
+expected = {'PRD-BC-110': 1}, preludes = (), topic = None, knowledge = None
+no_recommendations = False, read = False, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+>           assert items == expected and not unchanged, (items, body["notice"])
+E           AssertionError: ({}, 'Fiyat sınırını kesinleştiremedim. Örneğin 5.000 TL altında şeklinde yazar mısın? Teklifi değiştirmedim.')
+E           assert ({} == {'PRD-BC-110': 1}
+E             
+E             Right contains 1 more item:
+E             {'PRD-BC-110': 1}
+E             Use -v to get more diff)
+
+tests/test_reaudit_matrix.py:193: AssertionError
+___________________ test_own_probe[own_price_tl_exceed_read] ___________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e71aed0>
+case = 'own_price_tl_exceed_read', quote = 'Q-1002'
+text = "BlueScan Air öner; fiyatı 8.500 TL'yi aşmasın.", expected = 'no_change'
+options = {'recommendations': ['PRD-BC-110'], 'read': True}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e71aed0>
+quote = 'Q-1002', text = "BlueScan Air öner; fiyatı 8.500 TL'yi aşmasın."
+expected = 'no_change', preludes = (), topic = None, knowledge = None
+no_recommendations = False, read = True, recommendations = ['PRD-BC-110']
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+            assert items == expected and not unchanged, (items, body["notice"])
+        if not unchanged:
+            # One receipt and one quote version per applied mutation, nothing else.
+            assert applied and receipts == len(applied) == after["version"] - before["version"]
+        if no_recommendations:
+            assert body["recommended_product_ids"] == [], body["recommended_product_ids"]
+        if recommendations is not None:
+>           assert body["recommended_product_ids"] == recommendations, body["recommended_product_ids"]
+E           AssertionError: []
+E           assert [] == ['PRD-BC-110']
+E             
+E             Right contains one more item: 'PRD-BC-110'
+E             Use -v to get more diff
+
+tests/test_reaudit_matrix.py:200: AssertionError
+___________________ test_own_probe[own_price_enfazla_three] ____________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e154610>
+case = 'own_price_enfazla_three', quote = 'Q-1002'
+text = 'En fazla 3 adet BlueScan Air ekle.', expected = {'PRD-BC-110': 3}
+options = {}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e154610>
+quote = 'Q-1002', text = 'En fazla 3 adet BlueScan Air ekle.'
+expected = {'PRD-BC-110': 3}, preludes = (), topic = None, knowledge = None
+no_recommendations = False, read = False, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+>           assert items == expected and not unchanged, (items, body["notice"])
+E           AssertionError: ({}, 'Fiyat sınırını kesinleştiremedim. Örneğin 5.000 TL altında şeklinde yazar mısın? Teklifi değiştirmedim.')
+E           assert ({} == {'PRD-BC-110': 3}
+E             
+E             Right contains 1 more item:
+E             {'PRD-BC-110': 3}
+E             Use -v to get more diff)
+
+tests/test_reaudit_matrix.py:193: AssertionError
+___________________ test_own_probe[own_price_business_days] ____________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e2aca10>
+case = 'own_price_business_days', quote = 'Q-1002'
+text = 'En çok 5 iş günü içinde teslim; GreenScan Eco 1 adet ekle.'
+expected = {'PRD-BC-140': 1}, options = {}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e2aca10>
+quote = 'Q-1002'
+text = 'En çok 5 iş günü içinde teslim; GreenScan Eco 1 adet ekle.'
+expected = {'PRD-BC-140': 1}, preludes = (), topic = None, knowledge = None
+no_recommendations = False, read = False, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+>           assert items == expected and not unchanged, (items, body["notice"])
+E           AssertionError: ({}, 'Fiyat sınırını kesinleştiremedim. Örneğin 5.000 TL altında şeklinde yazar mısın? Teklifi değiştirmedim.')
+E           assert ({} == {'PRD-BC-140': 1}
+E             
+E             Right contains 1 more item:
+E             {'PRD-BC-140': 1}
+E             Use -v to get more diff)
+
+tests/test_reaudit_matrix.py:193: AssertionError
+__________________ test_own_probe[own_approval_hedge_before] ___________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e30f190>
+case = 'own_approval_hedge_before', quote = 'Q-1002'
+text = 'Galiba onay var, BlueScan Air 1 adet ekle.', expected = 'no_change'
+options = {}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e30f190>
+quote = 'Q-1002', text = 'Galiba onay var, BlueScan Air 1 adet ekle.'
+expected = 'no_change', preludes = (), topic = None, knowledge = None
+no_recommendations = False, read = False, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+>           assert unchanged, (items, body["notice"])
+E           AssertionError: ({'PRD-BC-110': 1}, '')
+E           assert False
+
+tests/test_reaudit_matrix.py:186: AssertionError
+__________________ test_own_probe[own_approval_verify_after] ___________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e6cdf90>
+case = 'own_approval_verify_after', quote = 'Q-1002'
+text = 'Onay var; önce teyit et, sonra BlueScan Air 1 adet ekle.'
+expected = 'no_change', options = {}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e6cdf90>
+quote = 'Q-1002'
+text = 'Onay var; önce teyit et, sonra BlueScan Air 1 adet ekle.'
+expected = 'no_change', preludes = (), topic = None, knowledge = None
+no_recommendations = False, read = False, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+>           assert unchanged, (items, body["notice"])
+E           AssertionError: ({'PRD-BC-110': 1}, '')
+E           assert False
+
+tests/test_reaudit_matrix.py:186: AssertionError
+____________________ test_own_probe[own_approval_reported] _____________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e529190>
+case = 'own_approval_reported', quote = 'Q-1002'
+text = 'Müdür onay var dedi, BlueScan Air 1 adet ekle.', expected = 'no_change'
+options = {}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e529190>
+quote = 'Q-1002', text = 'Müdür onay var dedi, BlueScan Air 1 adet ekle.'
+expected = 'no_change', preludes = (), topic = None, knowledge = None
+no_recommendations = False, read = False, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+>           assert unchanged, (items, body["notice"])
+E           AssertionError: ({'PRD-BC-110': 1}, '')
+E           assert False
+
+tests/test_reaudit_matrix.py:186: AssertionError
+_____________________ test_own_probe[own_approval_arrived] _____________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa0131b90>
+case = 'own_approval_arrived', quote = 'Q-1002'
+text = 'Onay geldi, BlueScan Air 1 adet ekle.', expected = {'PRD-BC-110': 1}
+options = {}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa0131b90>
+quote = 'Q-1002', text = 'Onay geldi, BlueScan Air 1 adet ekle.'
+expected = {'PRD-BC-110': 1}, preludes = (), topic = None, knowledge = None
+no_recommendations = False, read = False, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+>           assert items == expected and not unchanged, (items, body["notice"])
+E           AssertionError: ({}, 'Mesajdaki işlemi alıntı, varsayım veya onay bekleyen bir istek olarak anladım. Teklifi değiştirmedim; uygulamamı istersen komutu doğrudan yaz.')
+E           assert ({} == {'PRD-BC-110': 1}
+E             
+E             Right contains 1 more item:
+E             {'PRD-BC-110': 1}
+E             Use -v to get more diff)
+
+tests/test_reaudit_matrix.py:193: AssertionError
+_________________ test_own_probe[own_replace_unbound_wireless] _________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa12cc6d0>
+case = 'own_replace_unbound_wireless', quote = 'Q-1001'
+text = 'Kablosuz zorunlu okuyucuyu stoklu alternatifle değiştir.'
+expected = 'no_change', options = {'no_recommendations': True}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa12cc6d0>
+quote = 'Q-1001'
+text = 'Kablosuz zorunlu okuyucuyu stoklu alternatifle değiştir.'
+expected = 'no_change', preludes = (), topic = None, knowledge = None
+no_recommendations = True, read = False, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+>           assert unchanged, (items, body["notice"])
+E           AssertionError: ({'PRD-BC-120': 1}, '')
+E           assert False
+
+tests/test_reaudit_matrix.py:186: AssertionError
+_________________ test_own_probe[own_replace_alternative_adj] __________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e6ff1d0>
+case = 'own_replace_alternative_adj', quote = 'Q-1001'
+text = "Okuyucuyu QR'lı alternatifle değiştir.", expected = 'no_change'
+options = {'no_recommendations': True}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e6ff1d0>
+quote = 'Q-1001', text = "Okuyucuyu QR'lı alternatifle değiştir."
+expected = 'no_change', preludes = (), topic = None, knowledge = None
+no_recommendations = True, read = False, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+>           assert unchanged, (items, body["notice"])
+E           AssertionError: ({'PRD-BC-120': 1}, '')
+E           assert False
+
+tests/test_reaudit_matrix.py:186: AssertionError
+_________________ test_own_probe[own_replace_alternative_run] __________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e2e5350>
+case = 'own_replace_alternative_run', quote = 'Q-1001'
+text = 'Okuyucuyu kablosuz stoklu alternatifle değiştir.'
+expected = {'PRD-BC-140': 1}, options = {}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e2e5350>
+quote = 'Q-1001', text = 'Okuyucuyu kablosuz stoklu alternatifle değiştir.'
+expected = {'PRD-BC-140': 1}, preludes = (), topic = None, knowledge = None
+no_recommendations = False, read = False, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+>           assert items == expected and not unchanged, (items, body["notice"])
+E           AssertionError: ({'PRD-BC-120': 1}, '')
+E           assert ({'PRD-BC-120': 1} == {'PRD-BC-140': 1}
+E             
+E             Left contains 1 more item:
+E             {'PRD-BC-120': 1}
+E             Right contains 1 more item:
+E             {'PRD-BC-140': 1}
+E             Use -v to get more diff)
+
+tests/test_reaudit_matrix.py:193: AssertionError
+_________________ test_own_probe[own_replace_id_left_in_query] _________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa018add0>
+case = 'own_replace_id_left_in_query', quote = 'Q-1001'
+text = 'Kablosuz olsun; PRD-BC-110 ürününü stoklu alternatifle değiştir.'
+expected = {'PRD-BC-140': 1}, options = {'recommendations': ['PRD-BC-140']}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa018add0>
+quote = 'Q-1001'
+text = 'Kablosuz olsun; PRD-BC-110 ürününü stoklu alternatifle değiştir.'
+expected = {'PRD-BC-140': 1}, preludes = (), topic = None, knowledge = None
+no_recommendations = False, read = False, recommendations = ['PRD-BC-140']
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+            assert items == expected and not unchanged, (items, body["notice"])
+        if not unchanged:
+            # One receipt and one quote version per applied mutation, nothing else.
+            assert applied and receipts == len(applied) == after["version"] - before["version"]
+        if no_recommendations:
+            assert body["recommended_product_ids"] == [], body["recommended_product_ids"]
+        if recommendations is not None:
+>           assert body["recommended_product_ids"] == recommendations, body["recommended_product_ids"]
+E           AssertionError: ['PRD-BC-140', 'PRD-BC-110']
+E           assert ['PRD-BC-140', 'PRD-BC-110'] == ['PRD-BC-140']
+E             
+E             Left contains one more item: 'PRD-BC-110'
+E             Use -v to get more diff
+
+tests/test_reaudit_matrix.py:200: AssertionError
+__________________ test_own_probe[own_replace_no_substitutes] __________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e4f5dd0>
+case = 'own_replace_no_substitutes', quote = 'Q-1002'
+text = 'Saha Satış Kiti ürününü stoklu alternatifle değiştir.'
+expected = 'no_change'
+options = {'no_recommendations': True, 'preludes': ('Saha Satış Kiti 1 adet ekle.',)}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e4f5dd0>
+quote = 'Q-1002', text = 'Saha Satış Kiti ürününü stoklu alternatifle değiştir.'
+expected = 'no_change', preludes = ('Saha Satış Kiti 1 adet ekle.',)
+topic = None, knowledge = None, no_recommendations = True, read = False
+recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+            assert items == expected and not unchanged, (items, body["notice"])
+        if not unchanged:
+            # One receipt and one quote version per applied mutation, nothing else.
+            assert applied and receipts == len(applied) == after["version"] - before["version"]
+        if no_recommendations:
+>           assert body["recommended_product_ids"] == [], body["recommended_product_ids"]
+E           AssertionError: ['PRD-KIT-610', 'PRD-KIT-620']
+E           assert ['PRD-KIT-610', 'PRD-KIT-620'] == []
+E             
+E             Left contains 2 more items, first extra item: 'PRD-KIT-610'
+E             Use -v to get more diff
+
+tests/test_reaudit_matrix.py:198: AssertionError
+_________________ test_own_probe[own_replace_genitive_product] _________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e6da8d0>
+case = 'own_replace_genitive_product', quote = 'Q-1001'
+text = "BlueScan Air'in QR'lı ürününü GreenScan Eco ile değiştir."
+expected = {'PRD-BC-140': 1}, options = {}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e6da8d0>
+quote = 'Q-1001'
+text = "BlueScan Air'in QR'lı ürününü GreenScan Eco ile değiştir."
+expected = {'PRD-BC-140': 1}, preludes = (), topic = None, knowledge = None
+no_recommendations = False, read = False, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+            assert unchanged, (items, body["notice"])
+            # The planner itself refuses; a refusal must not depend on an executor guard.
+            assert not attempted, (attempted, body["notice"])
+            assert body["notice"] or topic or knowledge or read
+        elif isinstance(expected, tuple):
+            assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
+        else:
+>           assert items == expected and not unchanged, (items, body["notice"])
+E           AssertionError: ({'PRD-BC-110': 1}, 'İstediğin hedef ürün fiyat, stok veya özellik koşullarını sağlamıyor. Teklifi değiştirmedim.')
+E           assert ({'PRD-BC-110': 1} == {'PRD-BC-140': 1}
+E             
+E             Left contains 1 more item:
+E             {'PRD-BC-110': 1}
+E             Right contains 1 more item:
+E             {'PRD-BC-140': 1}
+E             Use -v to get more diff)
+
+tests/test_reaudit_matrix.py:193: AssertionError
+________________ test_own_probe[own_replace_genitive_mismatch] _________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9df3cb10>
+case = 'own_replace_genitive_mismatch', quote = 'Q-1001'
+text = "BlueScan Air'in 1D modelini GreenScan Eco ile değiştir."
+expected = 'no_change', options = {}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9df3cb10>
+quote = 'Q-1001'
+text = "BlueScan Air'in 1D modelini GreenScan Eco ile değiştir."
+expected = 'no_change', preludes = (), topic = None, knowledge = None
+no_recommendations = False, read = False, recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+>           assert unchanged, (items, body["notice"])
+E           AssertionError: ({'PRD-BC-140': 1}, '')
+E           assert False
+
+tests/test_reaudit_matrix.py:186: AssertionError
+_______________ test_own_probe[own_replace_source_size_mismatch] _______________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e4e0fd0>
+case = 'own_replace_source_size_mismatch', quote = 'Q-1002'
+text = '58mm BluePrint 80 ürününü RedPrint 58 ile değiştir.'
+expected = 'no_change', options = {'preludes': ('BluePrint 80 1 adet ekle.',)}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e4e0fd0>
+quote = 'Q-1002', text = '58mm BluePrint 80 ürününü RedPrint 58 ile değiştir.'
+expected = 'no_change', preludes = ('BluePrint 80 1 adet ekle.',), topic = None
+knowledge = None, no_recommendations = False, read = False
+recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+>           assert unchanged, (items, body["notice"])
+E           AssertionError: ({'PRD-PRN-310': 1}, '')
+E           assert False
+
+tests/test_reaudit_matrix.py:186: AssertionError
+________________ test_own_probe[own_update_total_size_mismatch] ________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9deba2d0>
+case = 'own_update_total_size_mismatch', quote = 'Q-1002'
+text = 'BluePrint 80 toplam 2 adet olsun; 58 mm zorunlu.'
+expected = 'no_change', options = {'preludes': ('BluePrint 80 1 adet ekle.',)}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9deba2d0>
+quote = 'Q-1002', text = 'BluePrint 80 toplam 2 adet olsun; 58 mm zorunlu.'
+expected = 'no_change', preludes = ('BluePrint 80 1 adet ekle.',), topic = None
+knowledge = None, no_recommendations = False, read = False
+recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+>           assert response.status_code == 200, response.text
+E           AssertionError: {"error":{"code":"REQUIRED_FEATURE_MISSING","detail":"Ürün gerekli özellikleri karşılamıyor."}}
+E           assert 422 == 200
+E            +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+tests/test_reaudit_matrix.py:162: AssertionError
+________________ test_own_probe[own_update_more_size_mismatch] _________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e522c90>
+case = 'own_update_more_size_mismatch', quote = 'Q-1002'
+text = 'BluePrint 80 ürününden 1 adet daha ekle; 58 mm zorunlu.'
+expected = 'no_change', options = {'preludes': ('BluePrint 80 1 adet ekle.',)}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffff9e522c90>
+quote = 'Q-1002'
+text = 'BluePrint 80 ürününden 1 adet daha ekle; 58 mm zorunlu.'
+expected = 'no_change', preludes = ('BluePrint 80 1 adet ekle.',), topic = None
+knowledge = None, no_recommendations = False, read = False
+recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+>           assert response.status_code == 200, response.text
+E           AssertionError: {"error":{"code":"REQUIRED_FEATURE_MISSING","detail":"Ürün gerekli özellikleri karşılamıyor."}}
+E           assert 422 == 200
+E            +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+tests/test_reaudit_matrix.py:162: AssertionError
+___________________ test_own_probe[own_remove_size_mismatch] ___________________
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa007f1d0>
+case = 'own_remove_size_mismatch', quote = 'Q-1002'
+text = '58 mm BluePrint 80 ürününü kaldır.', expected = 'no_change'
+options = {'preludes': ('BluePrint 80 1 adet ekle.',)}
+
+    @pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+    async def test_own_probe(db, case, quote, text, expected, options):
+>       await check_variant(db, quote, text, expected, **options)
+
+tests/test_reaudit4_matrix.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+db = <sqlalchemy.ext.asyncio.engine.AsyncEngine object at 0xffffa007f1d0>
+quote = 'Q-1002', text = '58 mm BluePrint 80 ürününü kaldır.'
+expected = 'no_change', preludes = ('BluePrint 80 1 adet ekle.',), topic = None
+knowledge = None, no_recommendations = False, read = False
+recommendations = None
+
+    async def check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes=(),
+        *,
+        topic=None,
+        knowledge=None,
+        no_recommendations=False,
+        read=False,
+        recommendations=None,
+    ):
+        app, client = await chat_client(db)
+        async with app.router.lifespan_context(app), client:
+            sid = await open_session(client, quote, CUSTOMERS[quote])
+            for prelude in preludes:
+                setup = await client.post("/api/chat", json=message(sid, prelude, quote))
+                assert setup.status_code == 200, setup.text
+            before = (await client.get(f"/api/quotes/{quote}")).json()
+            async with db.connect() as conn:
+                receipts_before = await conn.scalar(
+                    sa.select(sa.func.count()).select_from(mutation_receipts)
+                )
+            request = message(sid, text, quote)
+            response = await client.post("/api/chat", json=request)
+            assert response.status_code == 200, response.text
+            after = (await client.get(f"/api/quotes/{quote}")).json()
+        async with db.connect() as conn:
+            receipts_after = await conn.scalar(
+                sa.select(sa.func.count()).select_from(mutation_receipts)
+            )
+            logs = (
+                (
+                    await conn.execute(
+                        sa.select(tool_call_logs).where(
+                            tool_call_logs.c.message_id == request["message_id"]
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        body = response.json()
+        attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
+        applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
+        receipts = receipts_after - receipts_before
+        unchanged = after == before and receipts == 0 and not applied
+        items = {p["product_id"]: p["quantity"] for p in after["items"]}
+        if expected == NO_CHANGE:
+>           assert unchanged, (items, body["notice"])
+E           AssertionError: ({}, '')
+E           assert False
+
+tests/test_reaudit_matrix.py:186: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_price_half_million]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_price_words_compared]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_price_fee_thousands]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_price_words_dative]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_price_above_clause]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_price_tl_exceed_add]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_price_tl_exceed_read]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_price_enfazla_three]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_price_business_days]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_approval_hedge_before]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_approval_verify_after]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_approval_reported]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_approval_arrived] - ...
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_replace_unbound_wireless]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_replace_alternative_adj]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_replace_alternative_run]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_replace_id_left_in_query]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_replace_no_substitutes]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_replace_genitive_product]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_replace_genitive_mismatch]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_replace_source_size_mismatch]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_update_total_size_mismatch]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_update_more_size_mismatch]
+FAILED tests/test_reaudit4_matrix.py::test_own_probe[own_remove_size_mismatch]
+24 failed, 8 passed, 91 deselected in 7.79s
+
+Exit code: 1

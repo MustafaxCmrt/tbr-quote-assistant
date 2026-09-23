@@ -1,0 +1,93 @@
+UTC: 2026-09-23T16:00:38Z
+HEAD: 77ccd81b87403bf397b93dfd558f1e83818bcf53
+Command: npm test
+
+> tbr-quote-assistant@0.1.0 test
+> npm run check:contracts && tsx --test packages/contracts/tests/*.test.ts apps/mobile/tests/*.test.ts apps/web/tests/*.test.ts
+
+
+> tbr-quote-assistant@0.1.0 check:contracts
+> python3 scripts/sync_web_contracts.py --check
+
+PASS shared contract copies match
+✔ native transport posts identity and decodes every UTF-8 byte before terminal done (33.289084ms)
+✔ EOF without terminal rejects and preserves delivered partial text (0.43875ms)
+✔ controlled error is terminal, malformed content and native hostname never escape (0.757458ms)
+✔ missing API address is reported as configuration, not as a network failure (0.12875ms)
+✔ unknown server session is distinguishable so the next retry can open a new one (0.240375ms)
+✔ retry preserves previous text and citations through reconnect and early error (1.661125ms)
+✔ retry replaces rather than duplicates text and uses new citations; successful empty answer clears old content (0.8415ms)
+✔ mobile canonical quote ignores stale versions and responses from another selection (0.462959ms)
+✔ mobile rejects a quote payload whose shape the screens cannot render (0.191917ms)
+✔ web retry keeps previous text and citations through reconnect and early error (1.405417ms)
+✔ web retry replaces text with the new attempt; a finished empty answer clears it (0.098584ms)
+✔ an empty finished answer is labelled finished, not processing (0.084667ms)
+✔ late poll cannot replace new version or changed quote context (0.771125ms)
+✔ actual envelope survives every UTF-8 split and reducer completes once (19.581167ms)
+✔ replayed delta is never applied locally and duplicate event is ignored (0.229958ms)
+✔ error preserves partial text and signals committed-state refetch (0.292ms)
+✔ unknown schema, mismatched type, impossible receipt flags and broken order rejected (0.176666ms)
+✔ utf8_multibyte_split (1.986959ms)
+✔ crlf_across_chunks (0.123916ms)
+✔ multiple_events_in_one_chunk (0.108208ms)
+✔ unfinished_final_event_is_discarded (0.278417ms)
+✔ all_byte_boundaries_preserve_frames (4.066625ms)
+✔ comments_multiline_data_and_persistent_id (0.225708ms)
+✔ empty_stream_and_bare_cr (0.097ms)
+✔ truncated_utf8_is_rejected (0.100875ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 163.1765
+Exit code: 0
+Command: npm run lint
+
+> tbr-quote-assistant@0.1.0 lint
+> eslint apps/mobile packages/contracts apps/web/src apps/web/tests
+
+Exit code: 0
+Command: npm run typecheck
+
+> tbr-quote-assistant@0.1.0 typecheck
+> npm run typecheck --workspaces
+
+
+> @tbr/mobile@0.1.0 typecheck
+> tsc --noEmit && tsc -p tsconfig.tests.json --noEmit
+
+
+> @tbr/contracts@0.1.0 typecheck
+> tsc --noEmit
+
+Exit code: 0
+Command: npm --prefix apps/web run build
+
+> @tbr/web@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.0 building client environment for production...
+transforming...
+✓ 27 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                          0.91 kB │ gzip:  0.53 kB
+dist/assets/bluered-logo-Bwzsn_6O.png   50.44 kB
+dist/assets/index-cGqJbTKL.css           9.95 kB │ gzip:  2.96 kB
+dist/assets/index-D9Hv5IQx.js          217.74 kB │ gzip: 68.69 kB
+
+✓ built in 83ms
+Exit code: 0
+Command: python3 scripts/check_delivery.py
+PASS original source bytes unchanged: 12 files
+PASS stageable files exclude local instructions, env, actual LAN address and scanned key patterns
+PASS iOS verification bundle uses placeholder address and contains no scanned provider key pattern
+Exit code: 0
+Command: git diff 88165fb HEAD -- data/source | wc -l
+       0
+Exit code: 0
+Command: git diff c63e5cd HEAD --stat -- apps/web apps/mobile packages data compose.yaml apps/api/migrations
+Exit code: 0

@@ -1,16 +1,17 @@
 # The Blue Red — Teklif Asistanı
 
 Hedef: kaynaklı Türkçe chat, altı gerçek tool ve web/mobil ortak kalıcı teklif durumu.
-**23 Eylül 2026: üçüncü yeniden denetimin (89/100) V01–V03 P1 grupları, V04 ölçü bulgusu ve 109 denemesi HTTP/DB regresyonlarıyla kapatıldı. B10 belgeli sınır olarak açık; F09 fiziksel prova/video/teslim açık.**
+**23 Eylül 2026: dördüncü yeniden denetimin (90/100) W01–W03 P1 grupları, W04/UX11–UX13 bulguları ve 91 denemesi HTTP/DB regresyonlarıyla kapatıldı. B10 ve U10 belgeli sınır olarak açık; F09 fiziksel prova/video/teslim açık.**
 Altı gerçek araç, transaction/receipt, kaynaklı deterministik sohbet, SSE, web admin ve Expo
-uygulaması çalışıyor. Son tam backend koşusu **892 passed** (22 golden dahil):
-[komut/çıktı](reports/reaudit3_fix_final_backend.txt), [golden sonuçları](reports/reaudit3_fix_final_golden.json).
-Üçüncü yeniden denetim düzeltmeleri: [çözüm kaydı](reports/reaudit3_fix_resolution.md); ikinci:
+uygulaması çalışıyor. Son tam backend koşusu **1015 passed** (22 golden dahil):
+[komut/çıktı](reports/reaudit4_fix_final_backend.txt), [golden sonuçları](reports/reaudit4_fix_final_golden.json).
+Dördüncü yeniden denetim düzeltmeleri: [çözüm kaydı](reports/reaudit4_fix_resolution.md); üçüncü:
+[çözüm kaydı](reports/reaudit3_fix_resolution.md); ikinci:
 [çözüm kaydı](reports/reaudit2_fix_resolution.md); ilk yeniden denetim:
 [çözüm kaydı](reports/reaudit_fix_resolution.md); ilk tam denetim: [çözüm kaydı](reports/audit_fix_resolution.md);
 önceki fiyat/onay düzeltmeleri: [çözüm kaydı](reports/safety_review_resolution.md).
-Doğrulanan uygulama commit'i: `ae69ff97287bec637c725398ea884b317e1ccd88`.
-Teslim adayı: `demo-candidate-20260923-v12`; etiketin uygulama kodu test edilen commit ile aynıdır.
+Doğrulanan uygulama commit'i: `77ccd81b87403bf397b93dfd558f1e83818bcf53`.
+Teslim adayı: `demo-candidate-20260923-v13`; etiketin uygulama kodu test edilen commit ile aynıdır.
 Önceki v3 temiz clone'da 229 test geçmişti: [tarihsel temiz kurulum kanıtı](reports/hardening_resolution.md#v3-temiz-clone-provası).
 Bu düzeltmede yeni temiz clone açılmadı. Testler izole test PostgreSQL'inde gerçek FastAPI route'larını ASGI üzerinden çalıştırdı; demo API/web süreci başlatılmadı, canlı proxy/SSE zamanlaması bu tur doğrulanmadı.
 Mustafa fiziksel iPhone'da stream, ürün ekleme, web ile ortak teklif, aynı isteğin tekrarı,
@@ -60,7 +61,7 @@ docker compose --profile test up -d --wait test-db
 docker compose --profile test exec test-db sh -c "psql -U tbr_owner -d tbr_test -tAc \"select format('DROP DATABASE %I;', datname) from pg_database where datname like 'tbr\\_test\\_%'\" | psql -U tbr_owner -d tbr_test -q"
 ```
 
-Son onaylı temizliklerde geçici test DB’leri silindi (her seferinde sonuç 0); [önce/sonra kanıtı](reports/reaudit3_fix_testdb_cleanup.txt). Sonraki test koşuları yeniden geçici DB oluşturur. Çok sayıda geçici DB test-db’nin 64 MB `/dev/shm` alanını doldurabilir; bu durumda önce bu temizlik yapılır, limit büyütülmez.
+Son onaylı temizliklerde geçici test DB’leri silindi (her seferinde sonuç 0); [önce/sonra kanıtı](reports/reaudit4_fix_testdb_cleanup.txt). Sonraki test koşuları yeniden geçici DB oluşturur. Çok sayıda geçici DB test-db’nin 64 MB `/dev/shm` alanını doldurabilir; bu durumda önce bu temizlik yapılır, limit büyütülmez.
 
 Seed yalnız eksik ID'leri ekler, mevcut kullanıcı düzenlemelerini değiştirmez; startup'ta DROP/reset yoktur.
 Tüm seed ve başarı işareti tek transaction içindedir. Named volume veriyi restart'ta korur.

@@ -1,0 +1,18 @@
+UTC: 2026-09-23T16:01:07Z
+HEAD: 77ccd81b87403bf397b93dfd558f1e83818bcf53
+DB count before stop (tbr_test_*): 898
+shm: shm              64M   30M   35M  46% /dev/shm
+Command: docker compose --profile test stop test-db
+ Container tbr-quote-assistant-test-db-1 Stopping 
+ Container tbr-quote-assistant-test-db-1 Stopped 
+Exit code: 0
+Running containers after stop:
+(end)
+
+UTC: 2026-09-23T16:01:45Z — after final cleanup (reaudit4_fix_testdb_cleanup.txt)
+Command: docker compose --profile test stop test-db
+ Container tbr-quote-assistant-test-db-1 Stopping 
+ Container tbr-quote-assistant-test-db-1 Stopped 
+Exit code: 0
+Running containers after stop:
+(end)

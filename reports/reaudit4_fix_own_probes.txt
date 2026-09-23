@@ -1,0 +1,9 @@
+UTC: 2026-09-23T15:54:16Z
+HEAD (working tree may contain pending changes): f5b3ac5d3b59d00744d8c0ff46fa2f8cf853880e
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test pytest -q -p no:randomly tests/test_reaudit4_matrix.py
+ Container tbr-quote-assistant-test-run-afc39aff8051 Creating 
+ Container tbr-quote-assistant-test-run-afc39aff8051 Created 
+........................................................................ [ 58%]
+...................................................                      [100%]
+123 passed in 28.91s
+Exit code: 0
