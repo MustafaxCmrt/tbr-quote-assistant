@@ -2,11 +2,14 @@
 
 Oracles are the auditor's, written before the run; `read` only marks a plain recommendation
 request, which needs no refusal notice. Same strict shared check as the earlier matrices.
+The six U10 cases (a product named in an earlier sentence, `ile` as "and", a context word
+on a shared object) are the auditor's non-blocking conservative clarifications: safe(...)
+accepts the auditor's items or an unchanged quote without any attempted mutation.
 """
 
 import pytest
 
-from tests.test_reaudit_matrix import NO_CHANGE, check_variant
+from tests.test_reaudit_matrix import NO_CHANGE, check_variant, safe
 
 CASES = [
     ('p_upper_read', 'Q-1002', 'BlueScan Air öner; fiyat için üst sınır 500.', NO_CHANGE, {'no_recommendations': True, 'read': True}),
@@ -59,11 +62,11 @@ CASES = [
     ('q_approval_negative', 'Q-1002', 'Onay vermedim, BlueScan Air 1 adet ekleme.', NO_CHANGE, {}),
     ('q_quoted_total', 'Q-1001', "'BlueScan Air toplam 4 adet olsun' ifadesini açıkla.", NO_CHANGE, {}),
     ('q_external_total', 'Q-1001', 'Örnekte "GreenScan Eco 1 adet ekle" yazıyor. BlueScan Air toplam 4 adet olsun.', {'PRD-BC-110': 4}, {}),
-    ('c_name_then_command', 'Q-1002', 'BlueScan Air. Bundan 1 adet ekle.', {'PRD-BC-110': 1}, {}),
-    ('c_name_question_then_command', 'Q-1002', 'BlueScan Air? Evet, 1 adet ekle.', {'PRD-BC-110': 1}, {}),
-    ('c_context_joint', 'Q-1002', 'Müşteriye BlueScan Air ve GreenScan Eco 1 adet ekle.', {'PRD-BC-110': 1, 'PRD-BC-140': 1}, {}),
-    ('c_need_joint', 'Q-1002', 'İhtiyacımız olan BlueScan Air ve GreenScan Eco 1 adet ekle.', {'PRD-BC-110': 1, 'PRD-BC-140': 1}, {}),
-    ('c_ile_joint', 'Q-1002', 'BlueScan Air ile GreenScan Eco 1 adet ekle.', {'PRD-BC-110': 1, 'PRD-BC-140': 1}, {}),
+    ('c_name_then_command', 'Q-1002', 'BlueScan Air. Bundan 1 adet ekle.', safe({'PRD-BC-110': 1}), {}),
+    ('c_name_question_then_command', 'Q-1002', 'BlueScan Air? Evet, 1 adet ekle.', safe({'PRD-BC-110': 1}), {}),
+    ('c_context_joint', 'Q-1002', 'Müşteriye BlueScan Air ve GreenScan Eco 1 adet ekle.', safe({'PRD-BC-110': 1, 'PRD-BC-140': 1}), {}),
+    ('c_need_joint', 'Q-1002', 'İhtiyacımız olan BlueScan Air ve GreenScan Eco 1 adet ekle.', safe({'PRD-BC-110': 1, 'PRD-BC-140': 1}), {}),
+    ('c_ile_joint', 'Q-1002', 'BlueScan Air ile GreenScan Eco 1 adet ekle.', safe({'PRD-BC-110': 1, 'PRD-BC-140': 1}), {}),
     ('c_exclamation', 'Q-1002', 'BlueScan Air 1 adet ekle! GreenScan Eco 1 adet ekle.', {'PRD-BC-110': 1, 'PRD-BC-140': 1}, {}),
     ('c_question_request', 'Q-1002', 'BlueScan Air 1 adet ekler misin? GreenScan Eco 1 adet ekle.', {'PRD-BC-110': 1, 'PRD-BC-140': 1}, {}),
     ('c_note_existing', 'Q-1002', 'BlueScan Air 1 adet ekle ve not: GreenScan Eco müşterinin mevcut cihazı.', NO_CHANGE, {}),
@@ -72,7 +75,7 @@ CASES = [
     ('c_008_period', 'Q-1002', "Sahada internet olmayacak. 4G'li el terminali ve offline senkron için gereken lisansı ekle.", {'PRD-POS-210': 1, 'PRD-SW-520': 1}, {'knowledge': 'KNE-COMP-001'}),
     ('c_011_period', 'Q-1002', 'Depo için 3 adet BlueScan Air ekle. Partner indirimini de göster.', {'PRD-BC-110': 3}, {'knowledge': 'KNE-DIS-001'}),
     ('c_012_period', 'Q-2003', '1.500 TL altında stokta olan koruyucu kılıf ekle. Kaynağını göster.', {'PRD-ACC-710-PLUS': 4, 'PRD-ACC-710': 1}, {}),
-    ('c_017_context', 'Q-1002', 'Müşteriye offline senkron ve şube senkronu için gerekli yazılımları ekle.', {'PRD-SW-520': 1, 'PRD-SW-530': 1}, {'knowledge': 'KNE-COMP-001'}),
+    ('c_017_context', 'Q-1002', 'Müşteriye offline senkron ve şube senkronu için gerekli yazılımları ekle.', safe({'PRD-SW-520': 1, 'PRD-SW-530': 1}), {'knowledge': 'KNE-COMP-001'}),
     ('n_mixed_bare', 'Q-1002', 'BlueScan Air 2 adet ve GreenScan Eco 3 ekle.', NO_CHANGE, {}),
     ('n_mixed_x', 'Q-1002', 'BlueScan Air 2 adet ve GreenScan Eco x3 ekle.', NO_CHANGE, {}),
     ('n_mixed_words', 'Q-1002', 'BlueScan Air 2 adet ve GreenScan Eco üç tane ekle.', NO_CHANGE, {}),

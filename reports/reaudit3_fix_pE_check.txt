@@ -1,0 +1,11 @@
+UTC: 2026-09-23T14:07:55Z
+HEAD (working tree may contain pending changes): 17a1642f05785853d84fe67b20160e20c24adc77
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test pytest -q tests/test_reaudit_matrix.py tests/test_reaudit2_matrix.py tests/test_reaudit3_matrix.py
+........................................................................ [ 19%]
+........................................................................ [ 38%]
+........................................................................ [ 58%]
+........................................................................ [ 77%]
+........................................................................ [ 97%]
+...........                                                              [100%]
+371 passed in 96.48s (0:01:36)
+Exit code: 0

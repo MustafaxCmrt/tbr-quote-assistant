@@ -205,7 +205,8 @@ async def check_variant(
         assert entries
         cited = {s["source_id"] for s in body["sources"] if s["kind"] == "knowledge"}
         assert entries <= cited
-    if knowledge:
+    # A safe(...) case may answer with a clarification; its source oracle is for the change.
+    if knowledge and not (isinstance(expected, tuple) and unchanged):
         assert knowledge in {s["source_id"] for s in body["sources"] if s["kind"] == "knowledge"}
 
 
