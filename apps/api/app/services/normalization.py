@@ -229,8 +229,36 @@ MONEY_WORDS = (
     "bir|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on|yirmi|otuz|kirk|elli|altmis|yetmis|seksen"
     "|doksan|yuz|bin|milyon|bucuk"
 )
-# Units after a bare number that make it a quantity, time or size, not money.
-NON_MONEY_UNIT = r"(?:adet|adede|tane|lokasyon|şube|lisans|gün|gun|hafta|ay|saat|yıl|yil|dakika|mm)"
+# Units after a bare number that make it a quantity, time, size or date, not money.
+NON_MONEY_UNIT = (
+    r"(?:adet|adede|tane|lokasyon|şube|lisans|gün|gun|hafta|ay|saat|yıl|yil|dakika|mm"
+    r"|kampanya|sezon|dönem|donem|tarih)"
+)
+# A limit word next to a number binds it as money even without a currency:
+# "limitim 500", "bütçem beş yüz", "en fazla 5.000", "500'ün altında".
+LIMIT_BEFORE = (
+    r"(?:limit\w*|butce\w*|tavan\w*|sinir\w*|masraf\w*|harca\w*|maksimum\w*|max|azami"
+    r"|en (?:fazla|cok))"
+)
+LIMIT_AFTER = r"(?:altinda\w*|alti|asmayan|gecmeyen|ustune\w*|kadar|limit\w*|butce\w*|tavan\w*)"
+SPOKEN_NUMBER = rf"(?:\d+(?: \d{{3}})*|(?:{MONEY_WORDS})(?: (?:{MONEY_WORDS}))*)"
+NON_MONEY_UNIT_NORMALIZED = (
+    r"(?:adet|adede|tane|lokasyon|sube|lisans|gun|hafta|ay|saat|yil|dakika|mm|x)\w*"
+)
+
+
+def has_limit_bound_number(text: str) -> bool:
+    """A number tied to a limit word in normalized text (currency-free money)."""
+    for match in re.finditer(
+        rf"\b(?:{LIMIT_BEFORE} (?:\w+ )?({SPOKEN_NUMBER})|({SPOKEN_NUMBER}) (?:\w{{1,3}} )?"
+        rf"{LIMIT_AFTER})\b(?! {NON_MONEY_UNIT_NORMALIZED}\b)",
+        text,
+    ):
+        amount = match[1] or match[2]
+        # The article "bir" (bir kılıf) is not an amount.
+        if amount not in {"bir", "tek"}:
+            return True
+    return False
 
 
 def has_unparsed_money(value: str) -> bool:
@@ -239,15 +267,24 @@ def has_unparsed_money(value: str) -> bool:
     Checks amounts left after removing parsed TL amounts; a bare currency note
     ("para birimi TRY", "kaç TL") is not a second limit.
     """
-    rest = re.sub(TL_AMOUNT, " ", value.translate(SIGNS).lower())
+    lowered = value.translate(SIGNS).lower()
+    # Dates (23.09.2026) are not amounts; a placeholder keeps removed amounts
+    # from making neighbours adjacent (BluePrint 80 [5.000 TL] altında).
+    lowered = re.sub(r"(?<![\w.,])\d{1,2}[./]\d{1,2}[./]\d{2,4}(?![\w.,]\d)", " tarih ", lowered)
+    rest = re.sub(TL_AMOUNT, " amountx ", lowered)
+    # Identifier numbers (model numarası 2026, kod 80) are not amounts either.
+    rest = re.sub(r"\b(?:model|numara\w*|kod\w*|seri\w*|no)\s*[:.]?\s*\d+", " ref ", rest)
     if re.search(r"₺\s*\d|\d\s*₺", rest):
         return True
     if re.search(r"\b(?:\d+|" + MONEY_WORDS + r")\s+(?:tl|try|lira\w*)\b", normalize(rest)):
         return True
-    # A thousand-scale bare number (bütçem 5.000) is a limit the parser cannot bind.
+    if has_limit_bound_number(normalize(rest)):
+        return True
+    # A thousand-scale bare number (bütçem 5.000, even before a full stop) is a
+    # limit the parser cannot bind.
     return bool(
         re.search(
-            r"(?<![\w.,-])(?:\d{1,3}(?:\.\d{3})+|\d{4,})(?:,\d{1,2})?(?![\w.,-])"
+            r"(?<![\w.,-])(?:\d{1,3}(?:\.\d{3})+|\d{4,})(?:,\d{1,2})?(?![\w-]|[.,]\d)"
             r"(?!\s*['’]?\s*" + NON_MONEY_UNIT + r")",
             rest,
         )
@@ -263,22 +300,30 @@ TOTAL_SCOPE = (
     r"|\bsepet(?:in|im|imin|imiz|imizin|teki)?\s+(?:tutar\w*|toplam\w*|deger\w*|\d)"
     r"|\bteklif\w*\s+(?:tutar\w*|toplam\w*|deger\w*|butce\w*)|\btutar\w*"
 )
-BUDGET_SCOPE = r"\b(?:butce\w*|harca\w*|maliyet\w*|fatura\w*|odeme\w*|par(?:am|amiz)\b)"
+# Spending words that may mean the whole purchase: bütçe, harcama, masraf, ödeyeceğim, ayırdım.
+BUDGET_SCOPE = (
+    r"\b(?:butce\w*|harca\w*|maliyet\w*|masraf\w*|gider\w*|fatura\w*|ode(?:me|ye|n)\w*"
+    r"|ayir\w*|par(?:am|amiz)\b)"
+)
 
 
 def price_limit_scope(value: str) -> str | None:
     """Classify what a money limit applies to: 'total', 'unit', 'budget' (ambiguous) or None.
 
     max_price_try is only a unit list-price ceiling (B04), so a total or ambiguous
-    budget must be clarified instead of being narrowed to a unit limit.
+    budget must be clarified instead of being narrowed to a unit limit. Any
+    unqualified total or budget wins over unit wording elsewhere in the message:
+    "birim fiyatı 9.000 TL altında; bütçem 9.000 TL" still has an open budget.
     """
     text = normalize(value)
-    if re.search(TOTAL_SCOPE, re.sub(r"\bbirim\s+\w+", " ", text)):
+    # "Birim bütçem", "birim tutarı", "fiyat tutarı" name one unit's price.
+    unqualified = re.sub(r"\bbirim\s+\w+|\bfiyat\w*\s+tutar\w*", " ", text)
+    if re.search(TOTAL_SCOPE, unqualified):
         return "total"
+    if re.search(BUDGET_SCOPE, unqualified):
+        return "budget"
     if re.search(UNIT_SCOPE, text):
         return "unit"
-    if re.search(BUDGET_SCOPE, text):
-        return "budget"
     return None
 
 

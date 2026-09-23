@@ -124,10 +124,27 @@ CASES = [
 ]
 
 
-@pytest.mark.parametrize(
-    "group,quote,text,expected,preludes", CASES, ids=[f"{c[0]}-{i:02d}" for i, c in enumerate(CASES)]
-)
-async def test_reaudit_variant(db, group, quote, text, expected, preludes):
+# Price-limit refusals must not recommend the over-limit product either (auditor's oracle).
+NO_RECOMMENDATIONS = {
+    "BlueScan Air 8.500 TL altında 1 adet ekle; bütçem 5.000 TRY.",
+    "En fazla 5.000 TRY olsun; BlueScan Air 8.500 TL altında 1 adet ekle.",
+    "BlueScan Air 8.500 TL altında 1 adet ekle; en fazla ₺5.000.",
+    "BlueScan Air 8.500 TL altında 1 adet ekle; tavan 5.000 TL.",
+}
+
+
+async def check_variant(
+    db,
+    quote,
+    text,
+    expected,
+    preludes=(),
+    *,
+    topic=None,
+    knowledge=None,
+    no_recommendations=False,
+    read=False,
+):
     app, client = await chat_client(db)
     async with app.router.lifespan_context(app), client:
         sid = await open_session(client, quote, CUSTOMERS[quote])
@@ -158,25 +175,50 @@ async def test_reaudit_variant(db, group, quote, text, expected, preludes):
             .mappings()
             .all()
         )
+    body = response.json()
+    attempted = [log["tool_name"] for log in logs if log["tool_name"] in MUTATIONS]
     applied = [log for log in logs if log["tool_name"] in MUTATIONS and log["mutation_applied"]]
-    unchanged = after == before and receipts_after == receipts_before and not applied
+    receipts = receipts_after - receipts_before
+    unchanged = after == before and receipts == 0 and not applied
     items = {p["product_id"]: p["quantity"] for p in after["items"]}
     if expected == NO_CHANGE:
-        assert unchanged, (items, response.json()["notice"])
-        assert response.json()["notice"] or text in POLICY_TOPIC
+        assert unchanged, (items, body["notice"])
+        # The planner itself refuses; a refusal must not depend on an executor guard.
+        assert not attempted, (attempted, body["notice"])
+        assert body["notice"] or topic or knowledge or read
     elif isinstance(expected, tuple):
-        assert unchanged or items == expected[1], (items, response.json()["notice"])
+        assert (unchanged and not attempted) or items == expected[1], (items, body["notice"])
     else:
-        assert items == expected, (items, response.json()["notice"])
-        assert after["version"] > before["version"] and receipts_after > receipts_before
-    if text in POLICY_TOPIC:
+        assert items == expected, (items, body["notice"])
+    if not unchanged:
+        # One receipt and one quote version per applied mutation, nothing else.
+        assert applied and receipts == len(applied) == after["version"] - before["version"]
+    if no_recommendations:
+        assert body["recommended_product_ids"] == [], body["recommended_product_ids"]
+    if topic:
         entries = {
             e["knowledge_id"]
             for log in logs
-            if log["tool_name"] == "get_knowledge_entries"
-            and log["input"]["topic"] == POLICY_TOPIC[text]
+            if log["tool_name"] == "get_knowledge_entries" and log["input"]["topic"] == topic
             for e in log["output"]["entries"]
         }
         assert entries
-        cited = {s["source_id"] for s in response.json()["sources"] if s["kind"] == "knowledge"}
+        cited = {s["source_id"] for s in body["sources"] if s["kind"] == "knowledge"}
         assert entries <= cited
+    if knowledge:
+        assert knowledge in {s["source_id"] for s in body["sources"] if s["kind"] == "knowledge"}
+
+
+@pytest.mark.parametrize(
+    "group,quote,text,expected,preludes", CASES, ids=[f"{c[0]}-{i:02d}" for i, c in enumerate(CASES)]
+)
+async def test_reaudit_variant(db, group, quote, text, expected, preludes):
+    await check_variant(
+        db,
+        quote,
+        text,
+        expected,
+        preludes,
+        topic=POLICY_TOPIC.get(text),
+        no_recommendations=text in NO_RECOMMENDATIONS,
+    )

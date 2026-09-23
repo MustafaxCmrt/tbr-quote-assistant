@@ -1,0 +1,6 @@
+UTC: 2026-09-23T12:12:57Z
+HEAD (working tree may contain pending changes): 317c5decb3af9191d68de62099bc830fa333a89f
+Command: docker compose -f compose.yaml -f reports/safety_review_resources.compose.yaml --profile test run --rm --no-deps test pytest -q tests/test_reaudit2_matrix.py -k own_price or p_ or f_limit
+......................................                                   [100%]
+38 passed, 95 deselected in 8.65s
+Exit code: 0
