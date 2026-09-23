@@ -14,6 +14,7 @@ from app.services.normalization import (
     has_price_ceiling_intent,
     has_price_intent,
     has_unauthorized_command,
+    has_unbound_number,
     has_unparsed_money,
     has_unresolved_quantity,
     normalize,
@@ -306,6 +307,14 @@ async def build_plan(conn, session, message_id, text, mode):
     scope = price_limit_scope(text) if price_scope else None
     if scope == "total" or (scope == "budget" and (mutating or (slots["quantity"] or 0) > 1)):
         notice = "Toplam bütçeyi birim fiyat sınırı gibi uygulayamam. Birim fiyat üst sınırı istiyorsan örneğin birim fiyatı 9.000 TL altında şeklinde yazar mısın? Teklifi değiştirmedim."
+        return finish()
+    # A bare number ("Air 2 ekle", "2x") is a stated quantity too; model numbers
+    # inside product names (BluePrint 80) are not. Price wording was checked above.
+    unnamed = normalized
+    for start, end, _ in reversed(product_mentions(normalized, catalog)):
+        unnamed = unnamed[:start] + " " + unnamed[end:]
+    if mutating and slots["quantity"] is None and has_unbound_number(unnamed):
+        notice = "Miktarı kesinleştiremedim. Adedi rakam ve birimle yazar mısın? Örneğin 2 adet. Teklifi değiştirmedim."
         return finish()
     # Stock absence describes the source of a supported substitution, not a negated feature.
     attribute_text = re.sub(r"\bstokta olmayan\b", "", normalized)

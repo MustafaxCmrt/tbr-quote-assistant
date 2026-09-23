@@ -206,6 +206,24 @@ def has_unresolved_quantity(value: str) -> bool:
     return False
 
 
+# Words after a number that bind it: a unit, money, a Turkish case suffix (3'e) or order.
+BOUND_NUMBER = (
+    r"adet\w*|adede|tane\w*|lokasyon\w*|sube\w*|lisans\w*|mm|cm|gb|ay\w*|gun\w*|yil\w*|saat\w*"
+    r"|hafta\w*|dakika\w*|tl|try|lira\w*|y?[ea]|[dt][ea]n?|inci|nci|uncu|ncu"
+)
+
+
+def has_unbound_number(text: str) -> bool:
+    """A bare number (2, 2x, x2) tied to no unit, money or suffix is an unread quantity.
+
+    Takes normalized text with product names/IDs removed (model numbers: BluePrint 80).
+    """
+    text = re.sub(r"\b(?:\d+ )*\d+ (?:tl|try|lira\w*)\b", " ", text)
+    return bool(
+        re.search(r"(?<![\w-])(?:x?\d+x?)(?![\w-])(?!\s+(?:" + BOUND_NUMBER + r")\b)", text)
+    )
+
+
 TL_AMOUNT = r"(?<![\w.,])([0-9][0-9.,]*)\s*tl\b"
 MONEY_WORDS = (
     "bir|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on|yirmi|otuz|kirk|elli|altmis|yetmis|seksen"
@@ -241,10 +259,11 @@ UNIT_SCOPE = r"\b(?:birim\w*|tanesi\w*|her\s+biri\w*|(?:adet|tane)\s+bas\w*|basi
 TOTAL_SCOPE = (
     r"\btoplam\w*\b(?!\s+\d+\s+(?:adet|adede|tane|lokasyon|sube|lisans)\b)"
     r"|\b(?:hepsi\w*|tamami\w*|tumu\w*|butun\w*|birlikte|ikisi\w*)\b"
-    r"|\bsepet\w*\s+(?:tutar\w*|toplam\w*|deger\w*|\d)"
+    # "Sepet tutarı / sepetin toplamı", but not the dative "sepete ... ekle".
+    r"|\bsepet(?:in|im|imin|imiz|imizin|teki)?\s+(?:tutar\w*|toplam\w*|deger\w*|\d)"
     r"|\bteklif\w*\s+(?:tutar\w*|toplam\w*|deger\w*|butce\w*)|\btutar\w*"
 )
-BUDGET_SCOPE = r"\b(?:butce\w*|harca\w*|par(?:am|amiz)\b)"
+BUDGET_SCOPE = r"\b(?:butce\w*|harca\w*|maliyet\w*|fatura\w*|odeme\w*|par(?:am|amiz)\b)"
 
 
 def price_limit_scope(value: str) -> str | None:

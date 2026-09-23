@@ -495,3 +495,37 @@ async def test_stock_out_question_about_named_product_cites_policy_and_product(d
     assert "PRD-BC-110" in data["recommended_product_ids"]
     cited = {s["source_id"] for s in data["sources"] if s["kind"] == "knowledge"}
     assert "KNE-STOCK-001" in cited
+
+
+# Self-probes beyond the re-audit matrix: same finding classes, new wording.
+HARDENING = [
+    ("Hepsine 9.000 TL ayırdım, 2 adet BlueScan Air ekle.", "Q-1002", None),
+    ("Genel toplamı 9.000 TL altında olsun, BlueScan Air 1 adet ekle.", "Q-1002", None),
+    ("9.000 TL'lik bütçeyle 2 adet BlueScan Air ekle.", "Q-1002", None),
+    ("En fazla 9.000 TL harcayacağım, 2 adet BlueScan Air ekle.", "Q-1002", None),
+    ("Maliyet 9.000 TL altında olsun, 2 adet BlueScan Air ekle.", "Q-1002", None),
+    ("BlueScan Air 8.500 TL altında 1 adet ekle; bütçem beş bin.", "Q-1002", None),
+    ("BlueScan Air 8.500 TL altında 1 adet ekle; 5 000 TL bütçem var.", "Q-1002", None),
+    ("“BlueScan Air 1 adet ekle” dersen ne olur?", "Q-1002", None),
+    ("BlueScan Air 1 adet ekle mi diyorsun?", "Q-1002", None),
+    ("BlueScan Air 2 ekle.", "Q-1002", None),
+    ("BlueScan Air 2x ekle.", "Q-1002", None),
+    ("BlueScan Air'den 3 daha ekle.", "Q-1001", None),
+    ("BlueScan Air ile GreenScan Eco 1'er adet ekle.", "Q-1002", None),
+    ("BlueScan Air 1 adet ekle, GreenScan Eco'nun fiyatı ne?", "Q-1002", None),
+    ("2 adet BlueScan Air ekle, tanesi 9.000 TL altında olsun.", "Q-1002", {"PRD-BC-110": 2}),
+    ("Sepete 9.000 TL altında BlueScan Air 1 adet ekle.", "Q-1002", {"PRD-BC-110": 1}),
+    ("BluePrint 80 yazıcı 1 adet ekle.", "Q-1002", {"PRD-PRN-320": 1}),
+    ("BluePrint 80 ekle.", "Q-1002", {"PRD-PRN-320": 1}),
+    ("BlueScan Pro'yu 9.000 TL altında GreenScan Eco ile değiştir.", "Q-1004", {"PRD-BC-140": 1}),
+]
+
+
+@pytest.mark.parametrize("text,quote,expected", HARDENING)
+async def test_hardening_variants(db, text, quote, expected):
+    data, before, after, logs, receipts, _ = await run(db, text, quote)
+    if expected is None:
+        assert_unchanged(data, before, after, logs, receipts)
+    else:
+        assert dict(items(after)) == expected, data["notice"]
+        assert after["version"] == before["version"] + 1 and len(receipts) == 1
