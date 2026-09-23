@@ -564,13 +564,22 @@ async def build_plan(conn, session, message_id, text, mode):
             )
             return finish()
         required = features(target_text) | free_features(text)
+        if named_sources:
+            # Outside the named source's own phrase every feature is the alternative's
+            # ("BluePrint 80 ürününü 80mm stoklu alternatifle").
+            required |= features(target_region(normalized, mentions, None, named_sources))
         # No explicit target: retain substitution order supplied by the current catalog.
-        result = await search(
+        # Only the item's registered substitutes are candidates, never the item itself
+        # ("80mm alternatif" must not recommend the 80mm item being replaced).
+        query = (
             target_text
             if category(target_text)
             or required
             or any(w.startswith(("prd-", "tbr-")) for w in tokens(target_text))
-            else "",
+            else ""
+        )
+        result = await search(
+            " ".join([query.strip(), *row["substitute_product_ids"]]).strip(),
             required=required,
             cat=row["category"],
         )
@@ -616,7 +625,7 @@ async def build_plan(conn, session, message_id, text, mode):
                 item.product_id,
                 quantity=0 if remove else quantity,
                 reason=text,
-                required=tokens(text) & FEATURES,
+                required=features(text),
             )
         else:
             delta = quantity - item.quantity if total else (quantity or 1)
@@ -625,7 +634,7 @@ async def build_plan(conn, session, message_id, text, mode):
                 return finish()
             knowledge("quote_idempotency")
             mutation(
-                "add_to_quote", item.product_id, quantity=delta, required=tokens(text) & FEATURES
+                "add_to_quote", item.product_id, quantity=delta, required=features(text)
             )
             if total:
                 # The delta is valid only for the snapshot used to calculate it.
@@ -661,7 +670,7 @@ async def build_plan(conn, session, message_id, text, mode):
                 "add_to_quote",
                 selected.product_id,
                 quantity=quantity or 1,
-                required=tokens(parts[1]) & FEATURES,
+                required=features(parts[1]),
             )
         else:
             notice = "Koşulları sağlayan tek anlamlı stoklu alternatif seçilemedi. Ürün kodunu belirtir misin?"
@@ -698,7 +707,7 @@ async def build_plan(conn, session, message_id, text, mode):
         if names_product(part):
             notice = "Komuttan önceki ürün için ne yapmamı istediğin belirsiz. Ürünü ve işlemi tek cümlede yazar mısın? Teklifi değiştirmedim."
             return finish()
-        shared |= tokens(part) & FEATURES
+        shared |= features(part)
     # Later clauses keep their constraints: features bind the preceding
     # product, another product needs its own add verb, notes are ignored.
     content = [parts[first]]
@@ -708,7 +717,7 @@ async def build_plan(conn, session, message_id, text, mode):
                 notice = "Komuttan sonraki ürün için ne yapmamı istediğin belirsiz. Ekleme için ürünü ve ekle komutunu ayrı yazar mısın? Teklifi değiştirmedim."
                 return finish()
             content.append(part)
-        elif tokens(part) & FEATURES:
+        elif features(part):
             content.append(part)
     segments = [s for part in content for s in re.split(r"\bve\b", part, flags=re.IGNORECASE)]
     requirements = []
@@ -732,7 +741,7 @@ async def build_plan(conn, session, message_id, text, mode):
                 return finish()
             requirements.append(" ".join(pending_features + [segment]))
             pending_features = []
-        elif tokens(segment) & FEATURES:
+        elif features(segment):
             if requirements:
                 requirements[-1] += " " + segment
             else:

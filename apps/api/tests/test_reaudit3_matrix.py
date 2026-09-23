@@ -145,6 +145,10 @@ OWN_PROBES = [
     ("own_replace_unnamed_source_adj", "Q-1001", "QR'lı okuyucuyu GreenScan Eco ile değiştir.", {"PRD-BC-140": 1}, {}),
     ("own_replace_unbound_feature", "Q-1001", "QR zorunlu okuyucuyu GreenScan Eco ile değiştir.", NO_CHANGE, {}),
     ("own_replace_unnamed_target_adj", "Q-1001", "Okuyucuyu kablosuz GreenScan Eco ile değiştir.", {"PRD-BC-140": 1}, {}),
+    ("own_size_suffix_match", "Q-1002", "RedPrint 58 1 adet ekle; 58mm zorunlu.", {"PRD-PRN-310": 1}, {}),
+    ("own_size_prefix_category", "Q-1002", "80mm zorunlu; fiş yazıcı 1 adet ekle.", {"PRD-PRN-320": 1}, {}),
+    ("own_size_and_dpi_match", "Q-1002", "BlueLabel 203 1 adet ekle ve 203dpi olsun.", {"PRD-LBL-410": 1}, {}),
+    ("own_generic_feature_after_source", "Q-1001", "BlueScan Air ürününü QR'lı stoklu alternatifle değiştir.", NO_CHANGE, {}),
 ]
 
 
