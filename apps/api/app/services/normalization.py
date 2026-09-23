@@ -108,11 +108,47 @@ APPROVAL = r"\b(?:onay|izin|izn)\w*"
 GRANTED_APPROVAL = (
     r"\b(?:benden\s+|bizden\s+|musteriden\s+)?(?:onay|izin|izn)\w*\s+"
     r"(?:alindi|verildi|var|mevcut|tam|tamdir|tamam|verdim|verdik|veriyorum|veriyoruz|aldim"
-    r"|aldik|sagladim|sagladik|alinmistir|verilmistir)\b"
-    r"|\bonay(?:ladim|ladik|landi|liyorum|liyoruz)\b"
+    r"|aldik|sagladim|sagladik|alinmistir|verilmistir|kesin|kesindir|kesinlesti|cikti|geldi)\b"
+    r"|\bonay(?:ladim|ladik|landi|liyorum|liyoruz|li|lidir)\b"
 )
-# A granted phrase inside a question or a condition is not granted.
-UNSETTLED = r"(?!\s+(?:m[iu]\w*|ise\w*|diye)\b)"
+ACTION_VERB = r"\b(?:ekle|degistir|guncelle|cikar|kaldir|sil|toplam)\w*"
+# Words that keep a stated grant from being settled: a question (onay var mı, doğru
+# mu, öyle mi, değil mi), a hedge (gibi görünüyor, galiba, sanırsan), a report
+# (diye, dedi) or a condition (ise, varsa, verildiyse, denirse).
+UNSETTLING = (
+    r"\b(?:m[iu](?:s[iu]n\w*|y\w*|d[iu]r)?|ise\w*|diye|gibi|gorun\w*|galiba|sanirim"
+    r"|saniyorum|sanki|herhalde|belki|muhtemelen|olabilir|olmali|dogru|oyle|degil\w*|emin\w*"
+    r"|duydum|den(?:iyor|di)\w*|soyle\w*|diyor\w*|dedi\w*"
+    r"|\w+(?:ir|ur|ar|er|yor|di|du|ti|tu|mis|mus|y)s[ae](?:m|n|k|niz|nuz)?)\b"
+)
+
+
+def has_pending_approval(value: str) -> bool:
+    """An approval mentioned with a command, other than a settled grant, still pends.
+
+    A grant is judged with its whole statement, from the previous command verb to
+    the next one or the sentence end: "Onay var, doğru mu?", "Onay var gibi
+    görünüyor" and "Onay var sanırsan" are not granted. A check the user still
+    asks for (teyit et, doğrula) leaves any approval pending.
+    """
+    text = normalize(value)
+    if not (re.search(ACTION_VERB, text) and re.search(APPROVAL, text)):
+        return False
+    if re.search(r"\b(?:teyit|dogrula|kontrol)\w*", text):
+        return True
+    for sentence, end in re.findall(r"([^.;!?\n]*)([.;!?\n]|$)", value):
+        words = normalize(sentence)
+        rest = words
+        for grant in reversed(list(re.finditer(GRANTED_APPROVAL, words))):
+            before = [v.end() for v in re.finditer(ACTION_VERB, words[: grant.start()])]
+            after = re.search(ACTION_VERB, words[grant.end() :])
+            start = before[-1] if before else 0
+            stop = grant.end() + after.start() if after else len(words)
+            if not (re.search(UNSETTLING, words[start:stop]) or (after is None and end == "?")):
+                rest = rest[: grant.start()] + " " + rest[grant.end() :]
+        if re.search(APPROVAL, rest):
+            return True
+    return False
 
 
 def has_command(text: str) -> bool:
@@ -169,11 +205,8 @@ def has_unauthorized_command(value: str) -> bool:
             text,
         )
         # Approval next to any form of an action verb (ekle, ekleme): only a
-        # granted one lets it run. "Bekleme onayını nasıl veririm?" is a question.
-        or (
-            re.search(r"\b(?:ekle|degistir|guncelle|cikar|kaldir|sil|toplam)\w*", text)
-            and re.search(APPROVAL, re.sub(rf"(?:{GRANTED_APPROVAL}){UNSETTLED}", " ", text))
-        )
+        # settled grant lets it run. "Bekleme onayını nasıl veririm?" is a question.
+        or has_pending_approval(outside)
         # "sormadan ekle" (add without asking) is itself the instruction.
         or re.search(
             r"\b(?:bana|benden)\s+(?:once\s+)?(?:sor|danis)(?!madan|maksizin)\w*"
