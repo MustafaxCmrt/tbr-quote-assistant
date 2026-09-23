@@ -19,7 +19,8 @@ olarak kapsam dışında bırakıldı veya bilinen trade-off'lardır.
 - Compose'daki web servisi Vite geliştirme sunucusudur; üretim derlemesi alınır ama üretim barındırması
   doğrulanmamıştır. API belgesi (`/docs`) açıktır.
 - Gizli değer taraması (`scripts/check_delivery.py`, `scripts/check_git_history.py`) bilinen anahtar
-  biçimlerini, yerel IP'yi ve kullanıcı yolunu arar; her olası gizli değer biçimini bulma garantisi yoktur.
+  biçimlerini ve yerel IP'yi arar; kullanıcı yolu yalnız güncel dosyalarda aranır. Her olası gizli değer
+  biçimini bulma garantisi yoktur.
 - Mobil uygulama Expo Go ile çalışır; EAS build ve mağaza yayını yapılmadı. Kayıtlı `npm audit` çıktısında
   10 orta seviye bildirim vardır ([rapor](reports/npm_audit.txt)). Hepsi tek bir kökten gelir: Expo'nun
   yerel proje yapılandırma araçlarının (`xcode`) kullandığı eski `uuid` sürümü. Önerilen `--force` çözümü
