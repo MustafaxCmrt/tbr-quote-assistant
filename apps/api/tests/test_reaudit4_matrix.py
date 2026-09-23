@@ -108,3 +108,46 @@ CASES = [
 @pytest.mark.parametrize("case,quote,text,expected,options", CASES, ids=[c[0] for c in CASES])
 async def test_reaudit4_variant(db, case, quote, text, expected, options):
     await check_variant(db, quote, text, expected, **options)
+
+
+# Own probes beyond the audit, per finding class, written before running them.
+BP80 = {"preludes": ("BluePrint 80 1 adet ekle.",)}
+OWN_PROBES = [
+    ("own_price_currency_words", "Q-1002", "BlueScan Air öner; fiyatı beş yüz elli lirayı geçmesin.", NO_CHANGE, {"no_recommendations": True, "read": True}),
+    ("own_price_half_million", "Q-1002", "BlueScan Air öner; fiyatı yarım milyonu geçmesin.", NO_CHANGE, {"no_recommendations": True, "read": True}),
+    ("own_price_words_compared", "Q-1002", "BlueScan Air öner; beş yüzden fazlasını ödeyemem.", NO_CHANGE, {"no_recommendations": True, "read": True}),
+    ("own_price_fee_thousands", "Q-1002", "BlueScan Air 1 adet ekle; ücreti dört bini aşmasın.", NO_CHANGE, {"no_recommendations": True}),
+    ("own_price_words_dative", "Q-1002", "BlueScan Air öner; beş yüze kadar.", NO_CHANGE, {"no_recommendations": True, "read": True}),
+    ("own_price_above_clause", "Q-1002", "BlueScan Air öner; fiyatı 500'ün üzerinde olmasın.", NO_CHANGE, {"no_recommendations": True, "read": True}),
+    ("own_price_tl_exceed_add", "Q-1002", "BlueScan Air 1 adet ekle; fiyatı 8.500 TL'yi geçmesin.", {"PRD-BC-110": 1}, {}),
+    ("own_price_tl_exceed_read", "Q-1002", "BlueScan Air öner; fiyatı 8.500 TL'yi aşmasın.", NO_CHANGE, {"recommendations": ["PRD-BC-110"], "read": True}),
+    ("own_price_tl_exceed_low", "Q-1002", "BlueScan Air 1 adet ekle; fiyatı 5.000 TL'yi geçmesin.", NO_CHANGE, {"no_recommendations": True}),
+    ("own_price_delivery_exceed", "Q-1002", "Teslim 3 günü geçmesin; BlueScan Air 1 adet ekle.", {"PRD-BC-110": 1}, {}),
+    ("own_price_enfazla_three", "Q-1002", "En fazla 3 adet BlueScan Air ekle.", {"PRD-BC-110": 3}, {}),
+    ("own_price_business_days", "Q-1002", "En çok 5 iş günü içinde teslim; GreenScan Eco 1 adet ekle.", {"PRD-BC-140": 1}, {}),
+    ("own_approval_hedge_before", "Q-1002", "Galiba onay var, BlueScan Air 1 adet ekle.", NO_CHANGE, {}),
+    ("own_approval_tag_degil", "Q-1002", "Onay var değil mi? BlueScan Air 1 adet ekle.", NO_CHANGE, {}),
+    ("own_approval_verify_after", "Q-1002", "Onay var; önce teyit et, sonra BlueScan Air 1 adet ekle.", NO_CHANGE, {}),
+    ("own_approval_reported", "Q-1002", "Müdür onay var dedi, BlueScan Air 1 adet ekle.", NO_CHANGE, {}),
+    ("own_approval_settled_question", "Q-1002", "Onay kesinleşti mi? BlueScan Air 1 adet ekle.", NO_CHANGE, {}),
+    ("own_approval_polite_request", "Q-1002", "Onay var, BlueScan Air 1 adet ekler misin?", {"PRD-BC-110": 1}, {}),
+    ("own_approval_arrived", "Q-1002", "Onay geldi, BlueScan Air 1 adet ekle.", {"PRD-BC-110": 1}, {}),
+    ("own_approval_no_comma", "Q-1002", "Müşteri onayı alındı BlueScan Air 1 adet ekle.", {"PRD-BC-110": 1}, {}),
+    ("own_replace_unbound_wireless", "Q-1001", "Kablosuz zorunlu okuyucuyu stoklu alternatifle değiştir.", NO_CHANGE, {"no_recommendations": True}),
+    ("own_replace_alternative_adj", "Q-1001", "Okuyucuyu QR'lı alternatifle değiştir.", NO_CHANGE, {"no_recommendations": True}),
+    ("own_replace_alternative_run", "Q-1001", "Okuyucuyu kablosuz stoklu alternatifle değiştir.", {"PRD-BC-140": 1}, {}),
+    ("own_replace_id_left_in_query", "Q-1001", "Kablosuz olsun; PRD-BC-110 ürününü stoklu alternatifle değiştir.", {"PRD-BC-140": 1}, {"recommendations": ["PRD-BC-140"]}),
+    ("own_replace_no_substitutes", "Q-1002", "Saha Satış Kiti ürününü stoklu alternatifle değiştir.", NO_CHANGE, {"no_recommendations": True, "preludes": ("Saha Satış Kiti 1 adet ekle.",)}),
+    ("own_replace_genitive_product", "Q-1001", "BlueScan Air'in QR'lı ürününü GreenScan Eco ile değiştir.", {"PRD-BC-140": 1}, {}),
+    ("own_replace_genitive_mismatch", "Q-1001", "BlueScan Air'in 1D modelini GreenScan Eco ile değiştir.", NO_CHANGE, {}),
+    ("own_replace_source_size_mismatch", "Q-1002", "58mm BluePrint 80 ürününü RedPrint 58 ile değiştir.", NO_CHANGE, BP80),
+    ("own_replace_unnamed_spaced_size", "Q-1002", "80 mm yazıcıyı stoklu alternatifle değiştir.", {"PRD-PRN-310": 1}, BP80),
+    ("own_update_total_size_mismatch", "Q-1002", "BluePrint 80 toplam 2 adet olsun; 58 mm zorunlu.", NO_CHANGE, BP80),
+    ("own_update_more_size_mismatch", "Q-1002", "BluePrint 80 ürününden 1 adet daha ekle; 58 mm zorunlu.", NO_CHANGE, BP80),
+    ("own_remove_size_mismatch", "Q-1002", "58 mm BluePrint 80 ürününü kaldır.", NO_CHANGE, BP80),
+]
+
+
+@pytest.mark.parametrize("case,quote,text,expected,options", OWN_PROBES, ids=[c[0] for c in OWN_PROBES])
+async def test_own_probe(db, case, quote, text, expected, options):
+    await check_variant(db, quote, text, expected, **options)

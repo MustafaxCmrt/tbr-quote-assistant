@@ -594,12 +594,15 @@ async def build_plan(conn, session, message_id, text, mode):
             )
             return finish()
         required = features(target_text) | free_features(text)
-        # The adjectives of the alternative itself ("QR'lı alternatifle") are its requirements.
+        # The adjectives of the alternative itself ("QR'lı alternatifle", "kablosuz
+        # stoklu alternatifle") are its requirements.
         alternative = re.search(r"\balternatif\w*", normalized)
         if alternative:
-            required |= features(
-                normalized[adjective_start(normalized, alternative.start()) : alternative.start()]
-            )
+            words = normalized[: alternative.start()].split()
+            run = len(words)
+            while run and (adjective(words, run - 1) or words[run - 1] in {"stoklu", "uygun"}):
+                run -= 1
+            required |= features(" ".join(words[run:]))
         if named_sources:
             # Outside the named source's own phrase every feature is the alternative's
             # ("BluePrint 80 ürününü 80mm stoklu alternatifle").
