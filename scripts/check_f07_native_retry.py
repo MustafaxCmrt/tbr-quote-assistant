@@ -1,4 +1,4 @@
-"""Read-only snapshot check of Mustafa's physical iPhone retry, not a seed test."""
+"""Read-only snapshot check of a physical iPhone retry, not a seed test."""
 import json
 from urllib.request import urlopen
 

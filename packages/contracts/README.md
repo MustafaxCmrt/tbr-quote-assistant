@@ -1,13 +1,15 @@
-# Ortak sözleşmeler — F01a
+# Ortak sözleşmeler (`@tbr/contracts`)
 
-`@tbr/contracts` şu anda yalnız saf SSE aktarım parser'ını dışa verir. Mobil aynı paketi tüketir;
-web ileride aynı parser'ı kullanabilir. Quote DTO ve gerçek chat event zarfı F05'te sabitlenecek.
+Backend'in SSE olaylarını ve teklif verisini web ile mobilin aynı şekilde okuması için saf TypeScript
+paketi. Mobil paketi doğrudan kullanır; web, kendi Docker derlemesi için `scripts/sync_web_contracts.py`
+ile üretilen kopyasını kullanır.
 
-`createSseParser()` her HTTP akışı için ayrı örnek oluşturur. `push(Uint8Array)` tamamlanan
-`{event, data, id?}` olaylarını döndürür. Artımlı UTF-8 decode, LF/CRLF/CR, yorum satırları,
-çok satırlı data ve kalıcı SSE id desteklenir. `data` ham metindir; JSON/domain doğrulaması tüketicide yapılır.
-`finish()` decoder'ı kapatır; boş satırla bitmeyen son olay atılır. Eksik/geçersiz UTF-8 hata verir.
-Parser'ın `done` gibi uygulama olaylarına özel davranışı yoktur; bitiş ve hata durumları tüketiciye aittir.
+| Dosya | İçerik |
+|---|---|
+| `src/sse.ts` | `createSseParser()`: bayt düzeyinde artımlı SSE ayrıştırıcı (UTF-8, LF/CRLF/CR satır sonları, yorum satırları, çok satırlı `data`, `id`) |
+| `src/chat.ts` | Olay tipleri (`message_start`, `tool_call_start`, `tool_call_result`, `sources`, `text_delta`, `done`, `error`); `parseChatEvent()` sürüm 1 zarfını ve içeriği doğrular; `reduceChatEvent()` akış durumunu günceller; `Quote`, `QuoteLine`, `Source` tipleri |
+| `sse_events.schema.json`, `quote_dto.schema.json` | Backend şemalarından üretilen JSON Schema (`scripts/export_stream_schemas.py`) |
+| `tool_inputs.schema.json` | Altı aracın doğrulama şeması (`scripts/export_tool_schemas.py`) |
 
-Repo kökünde `npm test`: 8 test, tüm byte sınırlarını deneyen test dahil. `npm run typecheck`
-ve `npm run lint` ortak paket ile mobil ekranı kontrol eder. Kanıtlar `reports/f01a_*.txt`.
+Ayrıştırıcı uygulama olaylarına özel davranış içermez; geçersiz UTF-8 veya geçersiz olay içeriği hata
+verir, boş satırla bitmeyen son olay atılır. Testler repo kökünde `npm test` ile çalışır.

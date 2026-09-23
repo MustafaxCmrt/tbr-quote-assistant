@@ -1,5 +1,4 @@
 # docs/
 
-- `decisions/` — bu repoya ait mimari karar kayıtları (ADR). Teslimle birlikte gider.
-- Ayrıntılı uygulama planı, faz notları ve çalışma günlüğü geliştiricinin **yerel Obsidian vault'unda** tutulur;
-  repo'ya dahil değildir.
+- [`DEMO.md`](DEMO.md): Türkçe demo videosunun akışı.
+- [`decisions/`](decisions/README.md): mimari ve iş kuralı karar kayıtları.
