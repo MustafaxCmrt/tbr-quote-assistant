@@ -1,1 +1,0 @@
-First Claude review used default model settings and was interrupted after Mustafa requested explicit Opus 5 / xhigh. Process exit0 but is_error=true; NOT a completed review. Raw output retained in local git metadata.

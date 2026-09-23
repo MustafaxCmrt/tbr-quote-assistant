@@ -1,7 +1,0 @@
-UTC: 2026-09-21T16:21:33.747975+00:00
-Base commit (working tree may contain pending changes): ecfc5dfd3320ef34a52b40a688da1def7b6a64b0
-Command: env EXPO_NO_DOTENV=1 npm exec --yes --package expo-doctor@1.20.4 -- expo-doctor apps/mobile
-Exit code: 0
-
-Running 21 checks on your project...
-21/21 checks passed. No issues detected!

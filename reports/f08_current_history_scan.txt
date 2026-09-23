@@ -1,9 +1,0 @@
-UTC: 2026-09-21T17:23:52.283692+00:00
-Base commit (working tree may contain pending changes): 1b0db69ad9f3b3f39a2c60731fc3c5ebeb04747a
-Command: python3 scripts/check_git_history.py
-Exit code: 0
-
-Scanned reachable Git objects: {'blob': 508, 'commit': 29, 'tag': 0, 'tree': 222}
-Known local values checked without disclosure: 3
-PASS recognized key patterns, current local secrets/LAN address and private paths absent from reachable history
-Scope excludes unreachable objects, unknown credential formats and remote refs not fetched locally.

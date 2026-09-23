@@ -1,9 +1,0 @@
-UTC: 2026-09-21T10:15:41.221417+00:00
-Base commit (working tree may contain pending changes): adefc3967c95446584812d569bdfa308e413ace1
-Command: npm exec --workspace @tbr/mobile -- expo install --check
-Exit code: 1
-
-The following packages should be updated for best compatibility with the installed expo version:
-  @types/react@19.2.2 - expected version: ~19.2.4
-Your project may not work correctly until you install the expected versions of the packages.
-Found outdated dependencies
