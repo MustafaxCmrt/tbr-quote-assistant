@@ -44,3 +44,36 @@ After disposable DB count: 0
 PASS non-target database list unchanged; db service and volumes never targeted
 Exit code: 0
 shm after test-db restart: shm              64M  1.1M   63M   2% /dev/shm
+
+UTC: 2026-09-23T14:10:24Z  HEAD: 83fe03027a1231c2138ac8c1680d4d69963f833c
+Reason: disposable test DBs (leftover or this round's runs); shm before: shm              64M   22M   43M  33% /dev/shm
+Command: python3 reports/final_testdb_cleanup.py
+Target service: test-db; literal disposable prefix: tbr_test_
+Before disposable DB count: 522
+Preserved DB names: ['postgres', 'tbr_test', 'template0', 'template1']
+After disposable DB count: 0
+PASS non-target database list unchanged; db service and volumes never targeted
+Exit code: 0
+shm after test-db restart: shm              64M  1.1M   63M   2% /dev/shm
+
+UTC: 2026-09-23T14:25:09Z  HEAD: 83fe03027a1231c2138ac8c1680d4d69963f833c
+Reason: disposable test DBs (leftover or this round's runs); shm before: shm              64M   30M   35M  46% /dev/shm
+Command: python3 reports/final_testdb_cleanup.py
+Target service: test-db; literal disposable prefix: tbr_test_
+Before disposable DB count: 920
+Preserved DB names: ['postgres', 'tbr_test', 'template0', 'template1']
+After disposable DB count: 0
+PASS non-target database list unchanged; db service and volumes never targeted
+Exit code: 0
+shm after test-db restart: shm              64M  1.1M   63M   2% /dev/shm
+
+UTC: 2026-09-23T14:31:18Z  HEAD: 83fe03027a1231c2138ac8c1680d4d69963f833c
+Reason: disposable test DBs (leftover or this round's runs); shm before: shm              64M   22M   43M  33% /dev/shm
+Command: python3 reports/final_testdb_cleanup.py
+Target service: test-db; literal disposable prefix: tbr_test_
+Before disposable DB count: 626
+Preserved DB names: ['postgres', 'tbr_test', 'template0', 'template1']
+After disposable DB count: 0
+PASS non-target database list unchanged; db service and volumes never targeted
+Exit code: 0
+shm after test-db restart: shm              64M  1.1M   63M   2% /dev/shm

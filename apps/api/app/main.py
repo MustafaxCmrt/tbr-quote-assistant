@@ -84,9 +84,11 @@ def create_app(engine=None) -> FastAPI:
     async def payload_too_large(request: Request, exc: PayloadTooLarge):
         return JSONResponse(status_code=413, content={"error": TOO_LARGE})
 
+    # Reach the app through the request: FastAPI caches endpoint call identities
+    # module-wide, so a closure over `app` would keep every created app alive.
     @app.get("/health/ready", tags=["Sağlık"])
-    async def ready():
-        if await is_ready(app.state.engine):
+    async def ready(request: Request):
+        if await is_ready(request.app.state.engine):
             return {"status": "ready"}
         return JSONResponse(
             status_code=503,

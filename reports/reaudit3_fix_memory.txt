@@ -1,0 +1,24 @@
+# Test belleği: tam backend koşusu 512 MB sınırında exit 137 (OOM) — kök neden ve ölçüm
+
+UTC: 2026-09-23T14:33:20Z
+Belirti: /private/tmp/claude-501/-Users-comert-Desktop-tbr-quote-assistant/4462be58-edee-49cf-a143-62042a1912da/scratchpad/final.sh ile tam koşu (892 test) %85 civarında exit 137 verdi; bellek sınırı (512 MB) artırılmadı.
+Kök neden: FastAPI 0.141.1 modül düzeyindeki bir functools.lru_cache (fastapi.dependencies.models) endpoint çağrı kimliklerini saklar.
+create_app içindeki /health/ready endpoint'i 'app' değişkenine closure ile bağlıydı; her test için oluşturulan app ve app.state.engine (derlenmiş SQL önbelleğiyle) serbest kalmıyordu.
+Bulunan yol (gc BFS, 30 test sonrası): FastAPI <- cell <- tuple <- function app.main.create_app.<locals>.ready <- fastapi.dependencies.models._CallIdentity <- tuple <- functools._lru_cache_wrapper <- module fastapi.dependencies.models
+Düzeltme: ready(request: Request) -> request.app.state.engine (davranış aynı; closure yok). Düzeltme sonrası aynı BFS: sızan app 0.
+
+Ölçüm (aynı 288 test: test_reaudit2_matrix + test_reaudit3_matrix, gc.collect sonrası VmRSS):
+Önce:
+[mem] tests=50 rss=127.3MB objs=348919
+[mem] tests=100 rss=163.7MB objs=576847
+[mem] tests=150 rss=198.6MB objs=782965
+[mem] tests=200 rss=228.5MB objs=970789
+[mem] tests=250 rss=259.3MB objs=1162284
+Sonra:
+[mem] tests=50 rss=104.6MB objs=165443
+[mem] tests=100 rss=113.4MB objs=200699
+[mem] tests=150 rss=119.6MB objs=221213
+[mem] tests=200 rss=123.1MB objs=223124
+[mem] tests=250 rss=126.8MB objs=224122
+
+Geçici tanı eklentisi reports/_memprobe.py yalnız ölçüm için kullanıldı ve silindi; commit edilmedi.
