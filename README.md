@@ -97,7 +97,8 @@ Kapsam:
 
 - **22 golden senaryo** (`data/source/golden_test_scenarios.json`). Her senaryo gerçek sohbet uç
   noktasına gider; beklenen araç çağrıları, kaynaklar ve veritabanı durumu doğrulanır
-  ([sonuç dosyası](reports/reaudit4_fix_final_golden.json)).
+  ([sonuç dosyası](reports/reaudit4_fix_final_golden.json)). Beklenen çağrılar "en az bu sırayla" yorumlanır;
+  ek okuma çağrısına izin vardır, ek yazmaya ve yasak çağrıya yoktur ([karar kaydı 0002](docs/decisions/0002-golden-beklenti-yorumu.md)).
 - Retrieval ve kaynak doğruluğu, araç seçimi, add/update/replace mutasyonları, tekrar ve idempotency,
   fiyat/stok kuralları, anahtarsız yedek mod, eşzamanlı istekler, yetki ve gövde sınırı.
   Yeniden başlatma sonrası kalıcılık ayrıca prob betikleriyle doğrulandı ([kanıt](reports/f01b_acceptance.md)).
@@ -174,6 +175,7 @@ Maliyet, güvenlik ve test edilebilirlik nedeniyle bilinçli bir tercihtir.
   açıkça seçilmesi ve istenen zorunlu özellikler.
 - İndirimlerin çakışması kaynak veride belirsizdi ve kararı adaya bırakıldı. Tercihim: indirimler
   toplanmaz, en özel tek kural uygulanır (örnek: Plus ürünlerde %6 hacim indirimi partner %7 ile toplanmaz).
+  Gerekçe ve seçenekler: [karar kaydı 0001](docs/decisions/0001-indirim-cakismasi.md).
 
 ### 6. Bilinen sınırlamalar
 
@@ -247,4 +249,5 @@ docs                Demo akışı ve karar kayıtları
 ## Belgeler
 
 [Bilinen sınırlamalar](KNOWN_LIMITATIONS.md) · [Yapay zekâ kullanımı](AI_USAGE.md) ·
-[Demo akışı](docs/DEMO.md) · [Test kanıtları](reports/README.md)
+[Karar kayıtları](docs/decisions/README.md) · [Demo akışı](docs/DEMO.md) ·
+[Test kanıtları](reports/README.md)

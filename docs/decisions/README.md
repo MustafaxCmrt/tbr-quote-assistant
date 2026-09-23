@@ -1,4 +1,9 @@
-# ADR kayıtları
+# Karar kayıtları
 
-Biçim: `NNNN-kisa-baslik.md` → Bağlam / Karar / Durum (proposed · provisional · accepted · superseded) / Sonuçlar.
-Kaynakta belirsiz iş kuralları (ör. indirim çakışması) **provisional** olarak işaretlenir ve şirket kuralı gibi sunulmaz.
+Kaynak veride belirsiz bırakılan ve adaya bırakılan kararlar. Biçim: Bağlam / Karar / Durum / Sonuçlar.
+Bu kararlar firma kuralı olarak değil, gerekçeli aday tercihleri olarak sunulur.
+
+| No | Karar |
+|---|---|
+| [0001](0001-indirim-cakismasi.md) | İndirim çakışması: indirimler toplanmaz, en özel tek kural uygulanır |
+| [0002](0002-golden-beklenti-yorumu.md) | Golden senaryolarda beklenen çağrılar "en az bu sırayla", beklenen kaynaklar "en az bu küme" |
