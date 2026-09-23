@@ -154,6 +154,13 @@ OWN_PROBES = [
     ("own_price_unit_and_spend", "Q-1002", "Tane başına 9.000 TL altında; harcamam 9.000 TL; 2 adet BlueScan Air ekle.", NO_CHANGE, {}),
     ("own_price_article_bir", "Q-1002", "1.500 TL altında bir koruyucu kılıf ekle.", {"PRD-ACC-710": 1}, {}),
     ("own_price_year_bound", "Q-1002", "2026 yılı için BlueScan Air birim fiyatı 8.500 TL altında 1 adet ekle.", {"PRD-BC-110": 1}, {}),
+    ("own_quote_backtick_suffix", "Q-1002", "`BlueScan Air'i 1 adet ekle` ne anlama gelir?", NO_CHANGE, {}),
+    ("own_quote_unclosed_guillemet", "Q-1002", "«BlueScan Air 1 adet ekle ifadesi nedir?", NO_CHANGE, {}),
+    ("own_quote_suffix_closed_name", "Q-1002", "'BlueScan Air'ı 1 adet ekle.", {"PRD-BC-110": 1}, {}),
+    ("own_quote_outside_update", "Q-1001", 'Örnekte "GreenScan Eco ekle" yazıyor; BlueScan Air miktarını 3 adede güncelle.', {"PRD-BC-110": 3}, {}),
+    ("own_approval_future", "Q-1002", "BlueScan Air 1 adet ekle; önce müdürden onay alacağım.", NO_CHANGE, {}),
+    ("own_approval_consult", "Q-1002", "BlueScan Air 1 adet ekle ama önce bana danış.", NO_CHANGE, {}),
+    ("own_approval_granted_passive", "Q-1002", "Onaylandı, BlueScan Air 1 adet ekle.", {"PRD-BC-110": 1}, {}),
 ]
 
 

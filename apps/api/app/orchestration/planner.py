@@ -11,6 +11,7 @@ from app.services.execution_context import Constraints, action_key
 from app.services.normalization import (
     COMMAND_VERB,
     has_backorder_consent,
+    has_command,
     has_price_ceiling_intent,
     has_price_intent,
     has_unauthorized_command,
@@ -165,7 +166,7 @@ def target_region(normalized, mentions, target, sources):
 async def build_plan(conn, session, message_id, text, mode):
     # A quoted command is text about a command; act only on the unquoted instruction.
     unquoted, quoted = strip_quoted_commands(text)
-    if quoted and re.search(COMMAND_VERB, normalize(unquoted)):
+    if quoted and has_command(normalize(unquoted)):
         text = unquoted
     normalized = normalize(text)
     steps = []

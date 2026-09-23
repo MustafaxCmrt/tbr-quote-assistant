@@ -84,23 +84,49 @@ COMMAND_VERB = r"\b(?:ekle(?:r|yin)?|degistir(?:ir|in)?|guncelle|cikar|kaldir|si
 QUOTED_SPANS = (
     r'"([^"]*)"|“([^”]*)”|«([^»]*)»|„([^“”]*)[“”]|‘([^’]*)’|`([^`]*)`'
     # A straight single quote opens after a boundary and closes before one, so
-    # Turkish suffix apostrophes (Air'i, TL'ye) are never taken for quotes.
-    r"|(?<![^\s(\[:;,])'([^']+)'(?![^\s.,;:!?)\]])"
+    # Turkish suffix apostrophes (Air'i, TL'ye) are never taken for quotes; one
+    # inside the quote stays inside ('BlueScan Air'i ekle' ifadesi).
+    r"|(?<![^\s(\[:;,])'((?:[^']|'(?=\w))+)'(?![^\s.,;:!?)\]])"
+)
+# An opening quote left after balanced spans are removed never closes. A straight
+# single quote followed later by another one was closed by a suffix ('Air'ı ekle).
+UNCLOSED_QUOTE = r"[\"“«„‘`]|(?<![^\s(\[:;,])'(?=[^\s'])(?![^']*')"
+# Granted approval; any other mention of approval (önce onayımı al, onay
+# vermedim, onay almadan) reserves the decision for later.
+GRANTED_APPROVAL = (
+    r"\b(?:benden\s+|bizden\s+|musteriden\s+)?onay\w*\s+"
+    r"(?:alindi|verildi|var|verdim|verdik|veriyorum|veriyoruz|aldim|aldik)\b"
+    r"|\bonay(?:ladim|ladik|landi|liyorum|liyoruz)\b"
 )
 
 
+def has_command(text: str) -> bool:
+    """A quote-changing instruction in normalized text: a verb or 'toplam N olsun'."""
+    return bool(re.search(COMMAND_VERB, text) or re.search(r"\btoplam\w*\b.*\bolsun\b", text))
+
+
 def strip_quoted_commands(value: str) -> tuple[str, bool]:
-    """Blank quoted spans that contain a command verb; quoted product names stay."""
+    """Blank quoted spans that contain a command; quoted product names stay.
+
+    An unclosed quote quotes the rest of the message.
+    """
     found = False
 
     def blank(match):
         nonlocal found
-        if re.search(COMMAND_VERB, normalize(" ".join(g for g in match.groups() if g))):
+        inner = " ".join(g for g in match.groups() if g)
+        if has_command(normalize(inner)):
             found = True
             return " "
-        return match[0]
+        # Keep the words, drop the marks: only unbalanced marks may remain.
+        return f" {inner} "
 
-    return re.sub(QUOTED_SPANS, blank, value), found
+    stripped = re.sub(QUOTED_SPANS, blank, value)
+    opening = re.search(UNCLOSED_QUOTE, stripped)
+    if opening and has_command(normalize(stripped[opening.end() :])):
+        found = True
+        stripped = stripped[: opening.start()] + " "
+    return stripped, found
 
 
 def has_unauthorized_command(value: str) -> bool:
@@ -111,7 +137,7 @@ def has_unauthorized_command(value: str) -> bool:
     """
     outside, quoted = strip_quoted_commands(value)
     text = normalize(outside)
-    if quoted and not re.search(COMMAND_VERB, text):
+    if quoted and not has_command(text):
         return True
     return bool(
         # Conditional verb forms: eklersem, eklesek, degistirirsen, silinirse...
@@ -127,12 +153,16 @@ def has_unauthorized_command(value: str) -> bool:
             r"|\bne\s+(?:demek|anlam\w*)\b",
             text,
         )
-        # Approval reserved for later; a granted one ("onay alındı") is not.
+        # Approval next to any form of an action verb (ekle, ekleme): only a
+        # granted one lets it run. "Bekleme onayını nasıl veririm?" is a question.
+        or (
+            re.search(r"\b(?:ekle|degistir|guncelle|cikar|kaldir|sil|toplam)\w*", text)
+            and re.search(r"\bonay\w*", re.sub(GRANTED_APPROVAL, " ", text))
+        )
+        # "sormadan ekle" (add without asking) is itself the instruction.
         or re.search(
-            r"\bonay\w*\s+(?:(?:iste|bekle|sor)\w*|al(?:in|iniz|madan|maksizin)?\b)"
-            # "sormadan ekle" (add without asking) is itself the instruction.
-            r"|\b(?:bana|benden)\s+(?:once\s+)?sor(?!madan|maksizin)\w*"
-            r"|\bonce\s+(?:bana\s+|benden\s+)?sor(?!madan|maksizin)\w*",
+            r"\b(?:bana|benden)\s+(?:once\s+)?(?:sor|danis)(?!madan|maksizin)\w*"
+            r"|\bonce\s+(?:bana\s+|benden\s+)?(?:sor|danis)(?!madan|maksizin)\w*",
             text,
         )
         # First-person questions (ekleyelim mi, eklesem mi); "ekler misin" is a request.
