@@ -168,6 +168,12 @@ OWN_PROBES = [
     ("own_scope_two_sentences", "Q-1002", "BlueScan Air 1 adet ekle. GreenScan Eco 1 adet ekle.", {"PRD-BC-110": 1, "PRD-BC-140": 1}, {}),
     ("own_yerine_target_feature", "Q-1001", "BlueScan Air yerine QR'lı GreenScan Eco ekle.", NO_CHANGE, {}),
     ("own_yerine_object_first", "Q-1001", "GreenScan Eco'yu BlueScan Air yerine ekle.", NO_CHANGE, {}),
+    ("own_qty_mixed_larger", "Q-1002", "BlueScan Air 3 adet ve GreenScan Eco 5 ekle.", NO_CHANGE, {}),
+    ("own_qty_percent_question", "Q-1002", "BlueScan Air ekle; %10 indirim var mı?", {"PRD-BC-110": 1}, {}),
+    ("own_qty_date_bound", "Q-1002", "01.10.2026 tarihinde teslim için BlueScan Air 2 adet ekle.", {"PRD-BC-110": 2}, {}),
+    ("own_size_58_category", "Q-1002", "58 mm fiş yazıcı ekle.", {"PRD-PRN-310": 1}, {}),
+    ("own_size_80_category", "Q-1002", "80 mm fiş yazıcı ekle.", {"PRD-PRN-320": 1}, {}),
+    ("own_size_dpi_mismatch", "Q-1002", "203 dpi BluePrint 80 ekle.", NO_CHANGE, {}),
 ]
 
 

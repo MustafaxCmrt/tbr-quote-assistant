@@ -19,8 +19,10 @@ from app.services.normalization import (
     has_unparsed_money,
     has_unresolved_quantity,
     normalize,
+    number_context,
     numeric_slots,
     price_limit_scope,
+    size_tags,
     strip_quoted_commands,
 )
 from app.services.quotes import get_quote
@@ -110,6 +112,11 @@ def reference(text, quote, catalog):
     if not scored or (len(scored) > 1 and scored[0][0] == scored[1][0]):
         return None
     return scored[0][1]
+
+
+def features(text):
+    """Explicit hard requirements: feature words and stated sizes (58 mm)."""
+    return tokens(text) & FEATURES | size_tags(text)
 
 
 def product_mentions(normalized, catalog):
@@ -253,7 +260,7 @@ async def build_plan(conn, session, message_id, text, mode):
                 max_price_try=constraints.max_price_try,
                 in_stock_only=True,
                 required_tags=sorted(
-                    required if required is not None else tokens(query) & FEATURES
+                    required if required is not None else features(query)
                 ),
             ),
             limit=50,
@@ -320,10 +327,12 @@ async def build_plan(conn, session, message_id, text, mode):
         return finish()
     # A bare number ("Air 2 ekle", "2x") is a stated quantity too; model numbers
     # inside product names (BluePrint 80) are not. Price wording was checked above.
-    unnamed = normalized
-    for start, end, _ in reversed(product_mentions(normalized, catalog)):
+    # Checked even when another product has a unit-bound quantity: one product's
+    # "1 adet" must not hide the other's unread "2" (Air 1 adet ve Eco 2 ekle).
+    unnamed = normalize(number_context(text))
+    for start, end, _ in reversed(product_mentions(unnamed, catalog)):
         unnamed = unnamed[:start] + " " + unnamed[end:]
-    if mutating and slots["quantity"] is None and has_unbound_number(unnamed):
+    if mutating and has_unbound_number(unnamed):
         notice = "Miktarı kesinleştiremedim. Adedi rakam ve birimle yazar mısın? Örneğin 2 adet. Teklifi değiştirmedim."
         return finish()
     # Stock absence describes the source of a supported substitution, not a negated feature.
@@ -691,7 +700,7 @@ async def build_plan(conn, session, message_id, text, mode):
             if selected is None:
                 notice = "Birden fazla ürün aynı ölçüde uyuyor. Ürün kodunu belirtir misin? Teklifi değiştirmedim."
                 return finish()
-            choices.append((selected, tokens(segment) & FEATURES))
+            choices.append((selected, features(segment)))
         elif result.unavailable_matches:
             knowledge("stock_rule")
             if constraints.explicit_backorder_consent and customer["allow_backorder"]:
@@ -699,14 +708,12 @@ async def build_plan(conn, session, message_id, text, mode):
                 if selected is None:
                     notice = "Birden fazla stok dışı ürün uyuyor. Ürün kodunu belirtir misin? Teklifi değiştirmedim."
                     return finish()
-                choices.append((selected, tokens(segment) & FEATURES))
+                choices.append((selected, features(segment)))
             else:
                 notice = "İstenen ürün stokta yok. Açık bekleme onayı ve uygun müşteri olmadan eklenmez; teklif değişmedi."
                 # Offer catalog alternatives as read-only evidence, never substitute silently.
                 for pid in result.unavailable_matches[0].substitute_product_ids[:3]:
-                    await search(
-                        pid, required=tokens(segment) & FEATURES, cat=catalog[pid]["category"]
-                    )
+                    await search(pid, required=features(segment), cat=catalog[pid]["category"])
                 return finish()
         else:
             notice = "İstenen koşullarda ürün bulunamadı; grup işlemi uygulanmadı."

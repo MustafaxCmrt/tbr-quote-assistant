@@ -236,22 +236,37 @@ def has_unresolved_quantity(value: str) -> bool:
     return False
 
 
-# Words after a number that bind it: a unit, money, a Turkish case suffix (3'e) or order.
+# Words after a number that bind it: a unit, money, a Turkish case suffix (3'e),
+# order, or a date/campaign context (2026 kampanyası).
 BOUND_NUMBER = (
-    r"adet\w*|adede|tane\w*|lokasyon\w*|sube\w*|lisans\w*|mm|cm|gb|ay\w*|gun\w*|yil\w*|saat\w*"
-    r"|hafta\w*|dakika\w*|tl|try|lira\w*|y?[ea]|[dt][ea]n?|inci|nci|uncu|ncu"
+    r"adet\w*|adede|tane\w*|lokasyon\w*|sube\w*|lisans\w*|mm|cm|gb|dpi|ay\w*|gun\w*|yil\w*"
+    r"|saat\w*|hafta\w*|dakika\w*|kampanya\w*|sezon\w*|donem\w*|tarih\w*|tl|try|lira\w*"
+    r"|y?[ea]|[dt][ea]n?|inci|nci|uncu|ncu"
 )
+
+
+def number_context(value: str) -> str:
+    """Rewrite percentages and dates so a bare-number check can tell them apart."""
+    value = re.sub(r"(?<![\w.,])\d{1,2}[./]\d{1,2}[./]\d{2,4}(?![\w.,]\d)", " tarih ", value)
+    return re.sub(r"%\s*(?=\d)", " yüzde ", value)
 
 
 def has_unbound_number(text: str) -> bool:
     """A bare number (2, 2x, x2) tied to no unit, money or suffix is an unread quantity.
 
-    Takes normalized text with product names/IDs removed (model numbers: BluePrint 80).
+    Takes normalized number_context() text with product names/IDs removed (model
+    numbers: BluePrint 80). Percentages and identifiers (model numarası 80) are not.
     """
     text = re.sub(r"\b(?:\d+ )*\d+ (?:tl|try|lira\w*)\b", " ", text)
+    text = re.sub(r"\b(?:yuzde|model|numara\w*|kod\w*|seri\w*|no) \d+\b", " ", text)
     return bool(
         re.search(r"(?<![\w-])(?:x?\d+x?)(?![\w-])(?!\s+(?:" + BOUND_NUMBER + r")\b)", text)
     )
+
+
+# A size in the text is a catalog tag (58mm, 203dpi): a stated size is a requirement.
+def size_tags(text: str) -> set[str]:
+    return {f"{n}{unit}" for n, unit in re.findall(r"\b(\d+) ?(mm|dpi)\b", normalize(text))}
 
 
 TL_AMOUNT = r"(?<![\w.,])([0-9][0-9.,]*)\s*tl\b"
