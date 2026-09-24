@@ -11,6 +11,8 @@ olarak gösterir; ürün ve bilgi kayıtları buradan yönetilir.
 - Dil modeli anahtarı olmadan tam çalışır: yanıtlar retrieval tabanlı ve kaynaklıdır, harici model çağrılmaz.
 - Fiyat üst limiti, stok ve bekleme (backorder) kuralları hem aramada hem de değişikliğin yazıldığı anda uygulanır.
 
+**Demo videosu:** [Google Drive](https://drive.google.com/drive/folders/1Ojz9TSQ90h1XQjL7T-n-vcCjQ2vUeMSe) (yaklaşık 8 dakika; akış: [docs/DEMO.md](docs/DEMO.md)).
+
 ## Mimari
 
 ```text
@@ -251,5 +253,5 @@ docs                Demo akışı ve karar kayıtları
 ## Belgeler
 
 [Bilinen sınırlamalar](KNOWN_LIMITATIONS.md) · [Yapay zekâ kullanımı](AI_USAGE.md) ·
-[Karar kayıtları](docs/decisions/README.md) · [Demo akışı](docs/DEMO.md) ·
+[Karar kayıtları](docs/decisions/README.md) · [Demo akışı](docs/DEMO.md) · [Demo videosu](https://drive.google.com/drive/folders/1Ojz9TSQ90h1XQjL7T-n-vcCjQ2vUeMSe) ·
 [Test kanıtları](reports/README.md)
