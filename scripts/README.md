@@ -1,13 +1,14 @@
 # scripts/
 
-Repo kökünden çalıştırılır. Veri değiştiren tek betik `init_env.py`'dir (yalnız eksik `.env` değerlerini ekler).
+Repo kökünden çalıştırılır. Betikler kurulum, doğrulama, sözleşme üretimi ve test çıktılarının kaydı için
+kullanılır. Bazıları dosya üretir veya API'ye yazma isteği gönderir; tamamı salt okunur değildir.
 
 | Betik | Görev |
 |---|---|
 | `init_env.py` | Compose için `.env` dosyasını güçlü rastgele parolalarla üretir; mevcut değerleri değiştirmez, parolaları yazdırmaz |
 | `check_delivery.py` | Teslim kontrolü: orijinal dataset baytları değişmedi mi; depoya girecek dosyalarda özel anahtar, sağlayıcı anahtarı, yerel IP veya kullanıcı yolu var mı |
 | `check_git_history.py` | Git geçmişinde gizli değer taraması (eşleşen değeri yazdırmaz) |
-| `check_admin_runtime.py` | Çalışan stack'te yazma uçlarının anahtar istediğini, web proxy'sinin anahtarı sunucuda eklediğini ve anahtarın tarayıcıya sızmadığını doğrular |
+| `check_admin_runtime.py` | Çalışan stack'te yazma uçlarının anahtar istediğini, web proxy'sinin anahtarı sunucuda eklediğini ve anahtarın tarayıcıya sızmadığını doğrular; bunun için mevcut stok değerini aynen yazan bir PATCH isteği gönderir |
 | `smoke_compose.py` | API ve web proxy'si üzerinden sağlık kontrolü |
 | `smoke_reads.py` | Okuma araçlarına gerçek HTTP istekleri |
 | `smoke_chat.py` | Teklifi değiştirmeyen gerçek sohbet isteği |

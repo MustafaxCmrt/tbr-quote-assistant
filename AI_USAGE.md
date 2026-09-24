@@ -1,8 +1,8 @@
 # Yapay zekâ kullanımı
 
-Bu projeyi yapay zekâ kod ajanlarıyla geliştirdim. Kodun büyük bölümünü ajanlar yazdı. Benim işim çalışma
-düzenini kurmak, işi ajanlar arasında bölmek, kararları vermek ve sonucu kendim doğrulamaktı. Bu belge kimin
-neyi yaptığını ayrı ayrı anlatır.
+Bu projeyi yapay zekâ kod ajanlarıyla geliştirdim. Kodun büyük bölümünü ajanlar yazdı. Teslim ettiğim
+sistemin teknik sorumluluğu bende: mimari tercihler, teklif değişikliklerinin güvenli yapılması ve kararların
+gerekçesi. Sonucu kendim doğruladım. Bu belge kimin neyi yaptığını ayrı ayrı anlatır.
 
 ## Kullandığım araçlar
 
@@ -20,8 +20,22 @@ Yapay zekâyı ürünün içinde değil, geliştirme sürecinde kullandım.
 
 ## Kurduğum çalışma düzeni
 
-Kendimi bu projede bir şef gibi konumlandırdım. Bir ajan işi yaparken diğeri onu denetledi; ben işi dağıttım,
-raporları taşıdım, sonucu takip ettim ve karar verdim.
+Kodu ajanlar yazdı; aşağıdaki teknik tercihlerden ve sistemin bunlara uygun çalışmasından ben sorumluyum:
+
+- **Mimari.** Tek FastAPI servisi ve tek PostgreSQL veritabanı. Web ve mobil kendi teklif durumunu tutmaz,
+  aynı teklifi sunucudan okur; bu yüzden iki istemci aynı kaydı gösterir.
+- **Transaction.** Her teklif değişikliği tek bir veritabanı transaction'ında yapılır. Teklif satırı önce
+  `SELECT … FOR UPDATE` ile kilitlenir; aynı teklife aynı anda gelen istekler sırayla işlenir. Hata olursa
+  değişikliğin tamamı geri alınır; teklif sürümü yalnız başarılı yazmada bir artar.
+- **Idempotency.** Her yazma çağrısı; teklif, mesaj, mesaj içindeki çağrı sırası ve araç adından üretilen bir
+  anahtarla `mutation_receipts` tablosuna sonucuyla birlikte kaydedilir. Aynı istek tekrar gelirse kayıtlı sonuç
+  döner, teklif ikinci kez değişmez. Aynı anahtar farklı içerikle gelirse istek reddedilir.
+- **Fiyat ve stok kontrolleri.** Kullanıcının verdiği fiyat sınırı, stok, asgari sipariş miktarı ve bekleme
+  (backorder) kuralı aramada uygulanır, değişikliğin yazıldığı anda yeniden kontrol edilir. Stokta olmayan ürün
+  yalnız müşteri beklemeye izinliyse ve kullanıcı açıkça onay verdiyse eklenir.
+
+Bir ajan işi yaparken diğeri onu denetledi. İşi ben dağıttım, denetim raporlarını okuyup hangi bulgunun
+uygulanacağına karar verdim ve sonucu kendim denedim.
 
 ```text
   Yazan ajan ──── kod ve test ────►  Denetleyen ajan
@@ -46,7 +60,8 @@ kaldığı yerden devam etti.
 - Çalıştırılmayan test "geçti" diye raporlanmaz; her sonuç komut ve çıkış koduyla yazılır.
 - Firmanın dataset'i ve golden senaryo dosyası değiştirilmez. Kodda senaryo numarasına veya golden mesajına göre
   özel davranış yazmak yasaktır; sistem genel kurallarla çalışmalıdır.
-- Testler gerçek PostgreSQL'de koşar. Beklentiyi gevşetmek, fixture değiştirmek ya da testi atlamak yasaktır.
+- Veritabanı kullanan testler gerçek PostgreSQL'de koşar; sahte veritabanı kullanılmaz. Beklentiyi gevşetmek,
+  fixture değiştirmek ya da testi atlamak yasaktır.
 - İsteğim plandaki bir karardan sapıyorsa ajan önce "planda X deniyor, emin misin?" diye uyarır.
 - İki ajan aynı dosyada aynı anda çalışmaz.
 - Push, veri silme, depoyu herkese açma ve dış servislere harcama yalnız benim açık onayımla yapılır.
@@ -93,8 +108,9 @@ kaynak panelini açıp kapatma, klavye ve uzun yanıtta okuma konumu. Denerken b
 - Web yeniden derlendikten sonra telefon "sunucuya ulaşılamadı" dedi: API yerel ağa kapalı olarak yeniden
   başlamıştı. Düzeltildi ve README'ye uyarı eklendi.
 
-**Otomatik testler.** Ajanlar testleri çalıştırdı, sonuçları ben okudum. Son durumda 1015 backend testi
-(22 golden senaryo dahil) gerçek PostgreSQL'de geçiyor. Web ve mobilin ortak mantığı için 25 istemci testi var.
+**Otomatik testler.** Ajanlar testleri çalıştırdı, sonuçları ben okudum. Son kayıtlı koşuda, 22 golden senaryo
+dâhil 1015 backend testi başarılı oldu. Entegrasyon ve golden senaryo testleri gerçek PostgreSQL üzerinde
+çalıştırıldı. Web ve mobilin ortak mantığı için 25 istemci testi var.
 Kanıtlar ve yeniden üretme komutları: [reports/README.md](reports/README.md).
 
 **Bağımsız denetimler.** Her büyük aşamadan sonra kodu diğer ajana denetlettim. Video öncesinde ayrıca özel bir
