@@ -1,7 +1,8 @@
 # Demo akışı
 
-Demo videosu yaklaşık 4 dakikadır ve aşağıdaki adımları sırayla izler. Adımlardaki cümleler temiz bir
-kurulumda (seed verisi), tek veritabanında bu sırayla gerçek API üzerinden çalıştırılarak doğrulandı; beklenen sonuçlar tablodadır.
+Demo videosu yaklaşık 8 dakikadır. Aşağıdaki tablo tekrar denemek için hazırlanmış prova planıdır;
+tablodaki süreler video zaman damgaları değildir. Adımlardaki cümleler temiz bir kurulumda (seed verisi),
+tek veritabanında bu sırayla gerçek API üzerinden çalıştırılarak doğrulandı; beklenen sonuçlar tablodadır.
 Aynı adımları kendi kurulumunuzda deneyebilirsiniz.
 
 ## Başlangıç
